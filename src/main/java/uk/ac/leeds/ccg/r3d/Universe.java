@@ -49,33 +49,35 @@ public class Universe {
             triangles = new ArrayList<>();
             tetrahedra = new ArrayList<>();
             V3D_Environment e = new V3D_Environment();
-            Math_BigRational halfwidth = Math_BigRational.valueOf(camera.width).divide(2);
-            Math_BigRational halfheight = Math_BigRational.valueOf(camera.height).divide(2);
-//        // Big Yellow Triangle
-//        triangles.add(new Triangle(new V3D_Triangle(
-//                new V3D_Point(e, halfwidth.negate(), halfheight.negate(), Math_BigRational.TEN),
-//                new V3D_Point(e, Math_BigRational.ZERO, halfheight, Math_BigRational.TEN),
-//                new V3D_Point(e, halfwidth, halfheight.negate(), Math_BigRational.TEN)), Color.YELLOW));
-//        // Smaller Red Triangle
-//        triangles.add(new Triangle(new V3D_Triangle(
-//                new V3D_Point(e, halfwidth.negate().divide(2), halfheight.negate().divide(2), Math_BigRational.valueOf(5)),
-//                new V3D_Point(e, Math_BigRational.ZERO, halfheight.divide(2), Math_BigRational.valueOf(5)),
-//                new V3D_Point(e, halfwidth.divide(2), halfheight.divide(2).negate(), Math_BigRational.valueOf(5))), Color.RED));
-//        Math_BigRational quarterwidth = Math_BigRational.valueOf(camera.width).divide(4);
-//        Math_BigRational quarterheight = Math_BigRational.valueOf(camera.height).divide(4);
-//        // Tetrahedra
-//        V3D_Tetrahedron t = new V3D_Tetrahedron( 
-//                new V3D_Point(e, quarterwidth.negate(), Math_BigRational.ZERO, Math_BigRational.valueOf(3)),
-//                new V3D_Point(e, Math_BigRational.ZERO, quarterheight.negate(), Math_BigRational.valueOf(3)),
-//                new V3D_Point(e, Math_BigRational.ZERO, quarterheight, Math_BigRational.valueOf(3)),
-//                new V3D_Point(e, Math_BigRational.TEN, Math_BigRational.ZERO, quarterheight));
-//        tetrahedra.add(new Tetrahedron(t, Color.WHITE));
-            ArrayList<V3D_Triangle> teaPot = STL_Reader.readBinary(
+            Math_BigRational halfwidth = camera.pixelWidth.multiply(camera.width).divide(2);
+            Math_BigRational halfheight = camera.pixelHeight.multiply(camera.height).divide(2);
+//            // Big Yellow Triangle
+//            triangles.add(new Triangle(new V3D_Triangle(
+//                    new V3D_Point(e, halfwidth.negate(), halfheight.negate(), Math_BigRational.TEN),
+//                    new V3D_Point(e, Math_BigRational.ZERO, halfheight, Math_BigRational.TEN),
+//                    new V3D_Point(e, halfwidth, halfheight.negate(), Math_BigRational.TEN)), Color.YELLOW));
+//            // Smaller Red Triangle
+//            triangles.add(new Triangle(new V3D_Triangle(
+//                    new V3D_Point(e, halfwidth.negate().divide(2), halfheight.negate().divide(2), Math_BigRational.valueOf(5)),
+//                    new V3D_Point(e, Math_BigRational.ZERO, halfheight.divide(2), Math_BigRational.valueOf(5)),
+//                    new V3D_Point(e, halfwidth.divide(2), halfheight.divide(2).negate(), Math_BigRational.valueOf(5))), Color.RED));
+//            Math_BigRational quarterwidth = halfwidth.divide(2);
+//            Math_BigRational quarterheight = halfheight.divide(2);
+//            // Tetrahedra
+//            V3D_Tetrahedron t = new V3D_Tetrahedron(
+//                    new V3D_Point(e, quarterwidth.negate(), Math_BigRational.ZERO, Math_BigRational.valueOf(3)),
+//                    new V3D_Point(e, Math_BigRational.ZERO, quarterheight.negate(), Math_BigRational.valueOf(3)),
+//                    new V3D_Point(e, Math_BigRational.ZERO, quarterheight, Math_BigRational.valueOf(3)),
+//                    new V3D_Point(e, Math_BigRational.TEN, Math_BigRational.ZERO, quarterheight));
+//            tetrahedra.add(new Tetrahedron(t, Color.WHITE));
+            // Read in a Utah teapot.
+            STL_Reader data = new STL_Reader();
+            data.readBinary(
                     Paths.get("C:", "Users", "agdtu", "src", "agdt", "java",
                             "generic", "ccg-render3d", "data",
                             "Utah_teapot_(solid).stl"));
-            for (var t: teaPot) {
-                triangles.add(new Triangle(t, Color.YELLOW));
+            for (var triangle : data.triangles) {
+                triangles.add(new Triangle(triangle, Color.YELLOW));
             }
         } catch (IOException ex) {
             Logger.getLogger(Universe.class.getName()).log(Level.SEVERE, null, ex);

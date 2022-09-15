@@ -69,7 +69,8 @@ public class Display extends Canvas implements Runnable {
      */
     public Display() {
         this.frame = new JFrame();
-        this.size = new Dimension(200, 150);
+        //this.size = new Dimension(200, 150);
+        this.size = new Dimension(100, 75);
         this.setPreferredSize(size);
         this.oom = -3;
         V3D_Environment e = new V3D_Environment(this.oom, new Math_BigInteger());
@@ -79,10 +80,15 @@ public class Display extends Canvas implements Runnable {
         V3D_Point pt = new V3D_Point(e, ptx, pty, ptz);
         Math_BigRational halfwidth = Math_BigRational.valueOf(this.size.width).divide(2);
         Math_BigRational halfheight = Math_BigRational.valueOf(this.size.height).divide(2);
-        Math_BigRational xmin = ptx.subtract(halfwidth);
-        Math_BigRational xmax = ptx.add(halfwidth);
-        Math_BigRational ymin = pty.subtract(halfheight);
-        Math_BigRational ymax = pty.add(halfheight);
+//        Math_BigRational xmin = ptx.subtract(halfwidth);
+//        Math_BigRational xmax = ptx.add(halfwidth);
+//        Math_BigRational ymin = pty.subtract(halfheight);
+//        Math_BigRational ymax = pty.add(halfheight);
+        Math_BigRational xmin = ptx.subtract(10);
+        Math_BigRational xmax = ptx.add(10);
+        Math_BigRational P7_5 = Math_BigRational.valueOf(15).divide(2);
+        Math_BigRational ymin = pty.subtract(P7_5);
+        Math_BigRational ymax = pty.add(P7_5);
         Math_BigRational depth = Math_BigRational.ZERO;
         V3D_Rectangle screen = new V3D_Rectangle(
                 new V3D_Point(e, xmin, ymin, depth),

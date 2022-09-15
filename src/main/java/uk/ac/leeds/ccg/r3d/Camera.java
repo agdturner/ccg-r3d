@@ -24,6 +24,7 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Geometry;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Line;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Rectangle;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Tetrahedron;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 
@@ -64,6 +65,11 @@ public class Camera extends V3D_Point {
     public V3D_Line[][] lines;
 
     /**
+     * The lines from the camera focal point through each pixel.
+     */
+    public V3D_Point[][] pixelCentres;
+
+    /**
      * For storing the width of a pixel.
      */
     Math_BigRational pixelWidth;
@@ -95,13 +101,15 @@ public class Camera extends V3D_Point {
                 p.getDistanceSquared(q, oom), oom)
                 .getSqrt(oom).divide(height);
         lines = new V3D_Line[height][width];
+        pixelCentres = new V3D_Point[height][width];
         Math_BigRational z = p.getZ(oom);
         Math_BigRational y = p.getY(oom).add(pixelHeight.divide(2));
         Math_BigRational x0 = p.getX(oom).add(pixelWidth.divide(2));
         for (int row = 0; row < height; row++) {
             Math_BigRational x = x0;
             for (int col = 0; col < width; col++) {
-                lines[row][col] = new V3D_Line(pt, new V3D_Point(pt.e, x, y, z));
+                pixelCentres[row][col] = new V3D_Point(pt.e, x, y, z);
+                lines[row][col] = new V3D_Line(pt, pixelCentres[row][col]);
                 x = x.add(pixelWidth);
             }
             y = y.add(pixelHeight);
@@ -145,7 +153,11 @@ public class Camera extends V3D_Point {
         int j = 0;
         Tetrahedron tetrahedron = null;
         // Find which triangle is closest to each pixel 
+        System.out.println("Find which triangle is closest to each pixel");
         for (int i = 0; i < ts.length; i++) {
+            if (i % 100 == 0) {
+                System.out.println("Triangle " + i);
+            }
             V3D_Triangle t;
             if (i < ntriangles) {
                 Triangle triangle = universe.triangles.get(i);
@@ -167,19 +179,34 @@ public class Camera extends V3D_Point {
                     }
                 }
             }
-            for (int r = 0; r < height; r++) {
-                for (int c = 0; c < width; c++) {
-                    if (t.isIntersectedBy(lines[r][c], oom)) {
-                        V3D_Geometry ti = t.getIntersection(lines[r][c], oom);
-                        if (ti instanceof V3D_Point tip) {
-                            Math_BigRational d2 = tip.getDistanceSquared(this, oom);
-                            if (mind2[r][c] == null) {
-                                mind2[r][c] = d2;
-                                index[r][c] = i + 1;
-                            } else {
-                                if (d2.compareTo(mind2[r][c]) == -1) {
-                                    mind2[r][c] = d2;
-                                    index[r][c] = i + 1;
+            V3D_Tetrahedron tetrahedron2 = new V3D_Tetrahedron(this, t);
+            V3D_Geometry g2 = tetrahedron2.getIntersection(screen, oom);
+            if (g2 != null) {
+                if (g2 instanceof V3D_Triangle intersect) {
+                    /**
+                     * This means that the triangle from which we constructed
+                     * the tetrahedron is in the field of view of the camera.
+                     * The geometry to the triangle could be used to narrow down
+                     * what pixels to consider...
+                     */
+                    System.out.println(intersect);
+                    for (int r = 0; r < height; r++) {
+                        for (int c = 0; c < width; c++) {
+                            if (tetrahedron2.isIntersectedBy(pixelCentres[r][c], oom)) {
+                                if (t.isIntersectedBy(lines[r][c], oom)) {
+                                    V3D_Geometry ti = t.getIntersection(lines[r][c], oom);
+                                    if (ti instanceof V3D_Point tip) {
+                                        Math_BigRational d2 = tip.getDistanceSquared(this, oom);
+                                        if (mind2[r][c] == null) {
+                                            mind2[r][c] = d2;
+                                            index[r][c] = i + 1;
+                                        } else {
+                                            if (d2.compareTo(mind2[r][c]) == -1) {
+                                                mind2[r][c] = d2;
+                                                index[r][c] = i + 1;
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -188,6 +215,7 @@ public class Camera extends V3D_Point {
             }
         }
         // Render each pixel
+        System.out.println("Render each pixel");
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
                 int i = index[r][c];
