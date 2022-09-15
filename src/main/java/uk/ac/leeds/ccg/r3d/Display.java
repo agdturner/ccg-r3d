@@ -69,7 +69,7 @@ public class Display extends Canvas implements Runnable {
      */
     public Display() {
         this.frame = new JFrame();
-        this.size = new Dimension(80, 60);
+        this.size = new Dimension(200, 150);
         this.setPreferredSize(size);
         this.oom = -3;
         V3D_Environment e = new V3D_Environment(this.oom, new Math_BigInteger());
