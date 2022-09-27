@@ -21,6 +21,8 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferStrategy;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 import uk.ac.leeds.ccg.math.arithmetic.Math_BigInteger;
@@ -31,6 +33,8 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Rectangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 
 public class Display extends Canvas implements Runnable {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * Thread for the display.
@@ -67,7 +71,7 @@ public class Display extends Canvas implements Runnable {
     /**
      * Create a new instance.
      */
-    public Display() {
+    public Display() throws Exception {
         this.frame = new JFrame();
         //this.size = new Dimension(200, 150);
         this.size = new Dimension(100, 75);
@@ -98,19 +102,25 @@ public class Display extends Canvas implements Runnable {
         Camera camera = new Camera(pt, screen,
                  this.size.width, this.size.height, this.oom);
         this.universe = new Universe(camera);
+        //this.universe.init0();
+        this.universe.initUtah();
     }
 
     public static void main(String[] args) {
-        Display display = new Display();
-        display.frame.setTitle(TITLE);
-        display.frame.add(display);
-        display.frame.pack();
-        display.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // Location should be the centre of the screen using null. 
-        display.frame.setLocationRelativeTo(null);
-        display.frame.setResizable(false);
-        display.frame.setVisible(true);
-        display.start();
+        try {
+            Display display = new Display();
+            display.frame.setTitle(TITLE);
+            display.frame.add(display);
+            display.frame.pack();
+            display.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            // Location should be the centre of the screen using null.
+            display.frame.setLocationRelativeTo(null);
+            display.frame.setResizable(false);
+            display.frame.setVisible(true);
+            display.start();
+        } catch (Exception ex) {
+            Logger.getLogger(Display.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public synchronized void start() {
@@ -180,38 +190,42 @@ public class Display extends Canvas implements Runnable {
      * Used to render things to the screen.
      */
     private void render() {
-        BufferStrategy bs = this.getBufferStrategy();
-        /**
-         * If there is no BufferStrategy, then create it.
-         */
-        if (bs == null) {
-            this.createBufferStrategy(3);
-            return;
+        try {
+            BufferStrategy bs = this.getBufferStrategy();
+            /**
+             * If there is no BufferStrategy, then create it.
+             */
+            if (bs == null) {
+                this.createBufferStrategy(3);
+                return;
+            }
+            /**
+             * Graphics to draw things is created from the BufferStrategy.
+             */
+            Graphics g = bs.getDrawGraphics();
+            
+            /**
+             * Set the background to be black.
+             */
+            g.setColor(Color.BLACK);
+            int w = size.width + frame.getInsets().left + frame.getInsets().right;
+            int h = size.height + frame.getInsets().top + frame.getInsets().bottom;
+            g.fillRect(0, 0, w, h);
+            
+            // Draw all the things.
+            this.universe.camera.render(this.universe, new V3D_Vector(-1, -1, -1), oom);
+            
+            bs.show();
+            
+            // Write to image
+            Image image = this.createImage(w, h);
+            g.drawImage(image, w, h, this);
+            g.dispose();
+            
+            image_number++;
+        } catch (Exception ex) {
+            Logger.getLogger(Display.class.getName()).log(Level.SEVERE, null, ex);
         }
-        /**
-         * Graphics to draw things is created from the BufferStrategy.
-         */
-        Graphics g = bs.getDrawGraphics();
-
-        /**
-         * Set the background to be black.
-         */
-        g.setColor(Color.BLACK);
-        int w = size.width + frame.getInsets().left + frame.getInsets().right;
-        int h = size.height + frame.getInsets().top + frame.getInsets().bottom;
-        g.fillRect(0, 0, w, h);
-
-        // Draw all the things.
-        this.universe.camera.render(g, this.universe, new V3D_Vector(-1, -1, -1), oom);
-
-        bs.show();
-
-        // Write to image
-        Image image = this.createImage(w, h);
-        g.drawImage(image, w, h, this);
-        g.dispose();
-
-        image_number++;
     }
 
     private void update() {

@@ -18,7 +18,7 @@ package uk.ac.leeds.ccg.r3d.entities;
 import java.awt.Color;
 import uk.ac.leeds.ccg.math.number.Math_BigRational;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Tetrahedron;
-import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
+//import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 
 /**
@@ -29,30 +29,26 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 public class Tetrahedron {
 
     private static final Math_BigRational AmbientLight = Math_BigRational.ONE.divide(Math_BigRational.valueOf(20));
-    public V3D_Tetrahedron tetrahedron;
-    public V3D_Triangle[] triangles;
-    public Color[] baseColors;
-    public Color[] lightingColors;
+    //public V3D_Tetrahedron tetrahedron;
+    public Triangle[] triangles;
 
     public Tetrahedron(V3D_Tetrahedron t, Color baseColor) {
-        tetrahedron = t;
-        triangles = new V3D_Triangle[4];
-        triangles[0] = t.getPqr();
-        triangles[1] = t.getPsq();
-        triangles[2] = t.getQsr();
-        triangles[3] = t.getSpr();
-        baseColors = new Color[4];
-        lightingColors = new Color[4];
+        //tetrahedron = t;
+        triangles = new Triangle[4];
+        triangles[0].triangle = t.getPqr();
+        triangles[1].triangle = t.getPsq();
+        triangles[2].triangle = t.getQsr();
+        triangles[3].triangle = t.getSpr();
         for (int i = 0; i < 4; i++) {
-            baseColors[i] = baseColor;
-            lightingColors[i] = baseColor;
+            triangles[i].baseColor = baseColor;
+            triangles[i].lightingColor = baseColor;
         }
     }
 
     public void setLighting(V3D_Vector lightVector) {
         for (int i = 0; i < 4; i++) {
-            V3D_Vector n = triangles[i].getN(triangles[0].e.oom);
-            Math_BigRational dot = n.getDotProduct(lightVector, triangles[i].e.oom);
+            V3D_Vector n = triangles[i].triangle.p.getN(triangles[0].triangle.e.oom);
+            Math_BigRational dot = n.getDotProduct(lightVector, triangles[i].triangle.e.oom);
             Math_BigRational dot2 = dot.multiply(dot);
             if (dot.compareTo(Math_BigRational.ZERO) == -1) {
                 dot2 = dot2.negate();
@@ -64,9 +60,9 @@ public class Tetrahedron {
     }
 
     private void updateLightingColor(int i, double lightRatio) {
-        int red = (int) (this.baseColors[i].getRed() * lightRatio);
-        int green = (int) (this.baseColors[i].getGreen() * lightRatio);
-        int blue = (int) (this.baseColors[i].getBlue() * lightRatio);
-        this.lightingColors[i] = new Color(red, green, blue);
+        int red = (int) (triangles[i].baseColor.getRed() * lightRatio);
+        int green = (int) (triangles[i].baseColor.getGreen() * lightRatio);
+        int blue = (int) (triangles[i].baseColor.getBlue() * lightRatio);
+        triangles[i].lightingColor = new Color(red, green, blue);
     }
 }

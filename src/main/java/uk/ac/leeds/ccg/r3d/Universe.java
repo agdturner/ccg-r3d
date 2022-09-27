@@ -38,38 +38,27 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Tetrahedron;
  */
 public class Universe {
 
+    V3D_Environment e;
+
+    Math_BigRational width;
+    Math_BigRational height;
+
     public ArrayList<Triangle> triangles;
     public ArrayList<Tetrahedron> tetrahedra;
 
     public Camera camera;
 
     public Universe(Camera camera) {
+        this.camera = camera;
+        triangles = new ArrayList<>();
+        tetrahedra = new ArrayList<>();
+        e = new V3D_Environment();
+        width = camera.pixelWidth.multiply(camera.width);
+        height = camera.pixelHeight.multiply(camera.height);
+    }
+
+    public void initUtah() {
         try {
-            this.camera = camera;
-            triangles = new ArrayList<>();
-            tetrahedra = new ArrayList<>();
-            V3D_Environment e = new V3D_Environment();
-            Math_BigRational halfwidth = camera.pixelWidth.multiply(camera.width).divide(2);
-            Math_BigRational halfheight = camera.pixelHeight.multiply(camera.height).divide(2);
-//            // Big Yellow Triangle
-//            triangles.add(new Triangle(new V3D_Triangle(
-//                    new V3D_Point(e, halfwidth.negate(), halfheight.negate(), Math_BigRational.TEN),
-//                    new V3D_Point(e, Math_BigRational.ZERO, halfheight, Math_BigRational.TEN),
-//                    new V3D_Point(e, halfwidth, halfheight.negate(), Math_BigRational.TEN)), Color.YELLOW));
-//            // Smaller Red Triangle
-//            triangles.add(new Triangle(new V3D_Triangle(
-//                    new V3D_Point(e, halfwidth.negate().divide(2), halfheight.negate().divide(2), Math_BigRational.valueOf(5)),
-//                    new V3D_Point(e, Math_BigRational.ZERO, halfheight.divide(2), Math_BigRational.valueOf(5)),
-//                    new V3D_Point(e, halfwidth.divide(2), halfheight.divide(2).negate(), Math_BigRational.valueOf(5))), Color.RED));
-//            Math_BigRational quarterwidth = halfwidth.divide(2);
-//            Math_BigRational quarterheight = halfheight.divide(2);
-//            // Tetrahedra
-//            V3D_Tetrahedron t = new V3D_Tetrahedron(
-//                    new V3D_Point(e, quarterwidth.negate(), Math_BigRational.ZERO, Math_BigRational.valueOf(3)),
-//                    new V3D_Point(e, Math_BigRational.ZERO, quarterheight.negate(), Math_BigRational.valueOf(3)),
-//                    new V3D_Point(e, Math_BigRational.ZERO, quarterheight, Math_BigRational.valueOf(3)),
-//                    new V3D_Point(e, Math_BigRational.TEN, Math_BigRational.ZERO, quarterheight));
-//            tetrahedra.add(new Tetrahedron(t, Color.WHITE));
             // Read in a Utah teapot.
             STL_Reader data = new STL_Reader();
             data.readBinary(
@@ -83,6 +72,45 @@ public class Universe {
             Logger.getLogger(Universe.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+    }
+
+    public void init0() {
+        Math_BigRational halfwidth = width.divide(2);
+        Math_BigRational halfheight = height.divide(2);
+        // Little Yellow Triangle
+        triangles.add(new Triangle(new V3D_Triangle(
+                new V3D_Point(e, halfwidth.negate(), halfheight.negate(), Math_BigRational.TEN),
+                new V3D_Point(e, halfwidth.negate(), halfheight.negate().add(4), Math_BigRational.TEN),
+                new V3D_Point(e, halfwidth.negate().add(4), halfheight.negate().add(4), Math_BigRational.TEN)), Color.YELLOW));
+        // Big Yellow Triangle
+        triangles.add(new Triangle(new V3D_Triangle(
+                new V3D_Point(e, halfwidth.negate(), halfheight.negate(), Math_BigRational.TEN),
+                new V3D_Point(e, halfwidth.negate(), halfheight, Math_BigRational.TEN),
+                new V3D_Point(e, halfwidth, halfheight, Math_BigRational.TEN)), Color.YELLOW));
+        // Big Red Triangle
+        triangles.add(new Triangle(new V3D_Triangle(
+                new V3D_Point(e, halfwidth.negate(), halfheight.negate(), Math_BigRational.TEN),
+                new V3D_Point(e, halfwidth, halfheight, Math_BigRational.TEN),
+                new V3D_Point(e, halfwidth, halfheight.negate(), Math_BigRational.TEN)), Color.RED));
+    }
+
+    public void init1() {
+        Math_BigRational halfwidth = width.divide(2);
+        Math_BigRational halfheight = height.divide(2);
+        // Smaller Red Triangle
+        triangles.add(new Triangle(new V3D_Triangle(
+                new V3D_Point(e, halfwidth.negate().divide(2), halfheight.negate().divide(2), Math_BigRational.valueOf(5)),
+                new V3D_Point(e, Math_BigRational.ZERO, halfheight.divide(2), Math_BigRational.valueOf(5)),
+                new V3D_Point(e, halfwidth.divide(2), halfheight.divide(2).negate(), Math_BigRational.valueOf(5))), Color.RED));
+        Math_BigRational quarterwidth = halfwidth.divide(2);
+        Math_BigRational quarterheight = halfheight.divide(2);
+        // Tetrahedra
+        V3D_Tetrahedron t = new V3D_Tetrahedron(
+                new V3D_Point(e, quarterwidth.negate(), Math_BigRational.ZERO, Math_BigRational.valueOf(3)),
+                new V3D_Point(e, Math_BigRational.ZERO, quarterheight.negate(), Math_BigRational.valueOf(3)),
+                new V3D_Point(e, Math_BigRational.ZERO, quarterheight, Math_BigRational.valueOf(3)),
+                new V3D_Point(e, Math_BigRational.TEN, Math_BigRational.ZERO, quarterheight));
+        tetrahedra.add(new Tetrahedron(t, Color.WHITE));
     }
 
     public void update() {

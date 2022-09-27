@@ -25,6 +25,11 @@ module uk.ac.leeds.ccg.r3d {
     requires transitive ch.obermuhlner.math.big;
 
     /**
+     * ccg-grids
+     */
+    requires transitive uk.ac.leeds.ccg.grids;
+
+    /**
      * ccg-generic
      */
     requires transitive uk.ac.leeds.ccg.generic;

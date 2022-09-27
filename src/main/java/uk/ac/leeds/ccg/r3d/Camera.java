@@ -15,7 +15,20 @@
  */
 package uk.ac.leeds.ccg.r3d;
 
-import java.awt.Graphics;
+import java.awt.Color;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import uk.ac.leeds.ccg.generic.util.Generic_Collections;
+import uk.ac.leeds.ccg.grids.core.Grids_Environment;
+import uk.ac.leeds.ccg.grids.d2.Grids_2D_ID_long;
+import uk.ac.leeds.ccg.grids.d2.chunk.i.Grids_ChunkIntFactory;
+import uk.ac.leeds.ccg.grids.d2.chunk.i.Grids_ChunkIntFactoryMap;
+import uk.ac.leeds.ccg.grids.d2.chunk.i.Grids_ChunkIntFactorySinglet;
+import uk.ac.leeds.ccg.grids.d2.grid.Grids_Dimensions;
 import uk.ac.leeds.ccg.math.number.Math_BigRational;
 import uk.ac.leeds.ccg.math.number.Math_BigRationalSqrt;
 import uk.ac.leeds.ccg.r3d.entities.Tetrahedron;
@@ -27,6 +40,9 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Rectangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Tetrahedron;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
+import uk.ac.leeds.ccg.grids.d2.grid.i.Grids_GridInt;
+import uk.ac.leeds.ccg.grids.d2.grid.i.Grids_GridIntFactory;
+import uk.ac.leeds.ccg.io.IO_Cache;
 
 /**
  * Camera instances are situated in the 3D Universe. They are a point behind the
@@ -80,18 +96,24 @@ public class Camera extends V3D_Point {
     Math_BigRational pixelHeight;
 
     /**
+     * For storing the index of the closest triangle.
+     */
+    Grids_GridInt index;
+
+    /**
      * Create a new instance.
      *
      * @param p The camera observer location.
      * @param screen The screen.
      */
-    public Camera(V3D_Point pt, V3D_Rectangle screen, int width, int height, int oom) {
+    public Camera(V3D_Point pt, V3D_Rectangle screen, int width, int height, int oom) throws Exception {
         super(pt);
         this.screen = screen;
         this.width = width;
         this.height = height;
-        V3D_Point p = screen.getP();
-        V3D_Point q = screen.getQ();
+        V3D_Triangle pqr = screen.getPQR();
+        V3D_Point p = pqr.p.getP();
+        V3D_Point q = pqr.p.getQ();
         //V3D_Point r = screen.getR();
         V3D_Point s = screen.getS();
         pixelWidth = new Math_BigRationalSqrt(
@@ -114,6 +136,15 @@ public class Camera extends V3D_Point {
             }
             y = y.add(pixelHeight);
         }
+        // Initialise g and index.
+        Grids_ChunkIntFactorySinglet gcif = new Grids_ChunkIntFactorySinglet(0);
+        Grids_ChunkIntFactory dgcif = new Grids_ChunkIntFactoryMap();
+        Path path = Paths.get("C:", "Users", "agdtu", "grids");
+        Grids_GridIntFactory gif = new Grids_GridIntFactory(
+                new Grids_Environment(), new IO_Cache(path, "v3d"), gcif, dgcif,
+                height, width);
+        Grids_Dimensions dim = new Grids_Dimensions(height, width);
+        index = gif.create(height, width, dim);
         System.out.println("Initialised Camera");
     }
 
@@ -138,74 +169,85 @@ public class Camera extends V3D_Point {
      *
      * @param oom
      */
-    void render(Graphics g, Universe universe, V3D_Vector lightingVector, int oom) {
-        int[][] index = new int[height][width];
+    int[] render(Universe universe, V3D_Vector lightingVector, int oom)
+            throws Exception {
+        // mind2 will store the square of the minimum distance to any triangle.
         Math_BigRational[][] mind2 = new Math_BigRational[height][width];
-
+        // Collect all the triangles from the triangles and tetrahedra.
         int ntriangles = universe.triangles.size();
-        V3D_Triangle[] ts = new V3D_Triangle[ntriangles + (4 * universe.tetrahedra.size())];
+        Triangle[] ts = new Triangle[ntriangles + (4 * universe.tetrahedra.size())];
         for (int i = 0; i < ntriangles; i++) {
-            ts[i] = universe.triangles.get(i).triangle;
+            ts[i] = universe.triangles.get(i);
         }
         for (int i = 0; i < universe.tetrahedra.size(); i++) {
             System.arraycopy(universe.tetrahedra.get(i).triangles, 0, ts, i + ntriangles, 4);
         }
-        int j = 0;
-        Tetrahedron tetrahedron = null;
-        // Find which triangle is closest to each pixel 
-        System.out.println("Find which triangle is closest to each pixel");
+        /**
+         * Calculate the minimum distance between each and any triangle and the
+         * screen. (N.B. Calculating the maximum distance of any object in the
+         * field of view is tricky!)
+         */
+        System.out.println("Calculate minimum distance between each and any"
+                + " triangle and the screen.");
+        Math_BigRational[] mind2t = new Math_BigRational[ts.length];
+        mind2t[0] = screen.getDistanceSquared(ts[0].triangle, oom);
+        Math_BigRational minimumDistT = mind2t[0];
+        for (int i = 1; i < ts.length; i++) {
+            if (i % 100 == 0) {
+                System.out.println("Triangle " + i + " out of " + ts.length);
+            }
+            mind2t[i] = screen.getDistanceSquared(ts[i].triangle, oom);
+            if (mind2t[i].compareTo(minimumDistT) == -1) {
+                minimumDistT = mind2t[i];
+            }
+        }
+        System.out.println("Minimum distance squared between any triangle and"
+                + " the screen = " + minimumDistT.toString());
+        /*
+         * Calculate which pixels are intersected by each triangle.
+         */
+        System.out.println("Calculate which pixels are intersected by each "
+                + "triangle.");
+        HashMap<Grids_2D_ID_long, Set<Integer>> tpix = new HashMap<>();
         for (int i = 0; i < ts.length; i++) {
             if (i % 100 == 0) {
-                System.out.println("Triangle " + i);
+                System.out.println("Triangle " + i + " out of " + ts.length);
             }
-            V3D_Triangle t;
-            if (i < ntriangles) {
-                Triangle triangle = universe.triangles.get(i);
-                triangle.setLighting(lightingVector);
-                t = triangle.triangle;
-            } else {
-                //System.out.println(i - ntriangles);
-                if (j == 0) {
-                    tetrahedron = universe.tetrahedra.get(i - ntriangles - j);
-                    tetrahedron.setLighting(lightingVector);
-                    t = tetrahedron.triangles[j];
-                    j++;
-                } else {
-                    t = tetrahedron.triangles[j];
-                    if (j == 3) {
-                        j = 0;
-                    } else {
-                        j++;
-                    }
-                }
+            Set<Grids_2D_ID_long> ids = getRCs(ts[i].triangle);
+            for (var id : ids) {
+                Generic_Collections.addToMap(tpix, id, i);
             }
-            V3D_Tetrahedron tetrahedron2 = new V3D_Tetrahedron(this, t);
-            V3D_Geometry g2 = tetrahedron2.getIntersection(screen, oom);
-            if (g2 != null) {
-                if (g2 instanceof V3D_Triangle intersect) {
-                    /**
-                     * This means that the triangle from which we constructed
-                     * the tetrahedron is in the field of view of the camera.
-                     * The geometry to the triangle could be used to narrow down
-                     * what pixels to consider...
-                     */
-                    System.out.println(intersect);
-                    for (int r = 0; r < height; r++) {
-                        for (int c = 0; c < width; c++) {
-                            if (tetrahedron2.isIntersectedBy(pixelCentres[r][c], oom)) {
-                                if (t.isIntersectedBy(lines[r][c], oom)) {
-                                    V3D_Geometry ti = t.getIntersection(lines[r][c], oom);
-                                    if (ti instanceof V3D_Point tip) {
-                                        Math_BigRational d2 = tip.getDistanceSquared(this, oom);
-                                        if (mind2[r][c] == null) {
-                                            mind2[r][c] = d2;
-                                            index[r][c] = i + 1;
-                                        } else {
-                                            if (d2.compareTo(mind2[r][c]) == -1) {
-                                                mind2[r][c] = d2;
-                                                index[r][c] = i + 1;
-                                            }
-                                        }
+        }
+        /* 
+         * Find the closest triangle to each pixel.
+         */
+        System.out.println("Find the closest triangle to each pixel.");
+        for (int row = 0; row < height; row++) {
+            if (row % 10 == 0) {
+                System.out.println("row " + row + " out of " + height);
+            }
+            int r = height - row;
+            for (int c = 0; c < width; c++) {
+                Grids_2D_ID_long id = index.getCellID(r, c);
+                if (tpix.containsKey(id)) {
+                    Set<Integer> its = tpix.get(id);
+                    for (var i : its) {
+                        V3D_Triangle t = ts[i].triangle;
+                        if (mind2[row][c] == null) {
+                            V3D_Geometry ti = t.getIntersection(lines[row][c], oom);
+                            if (ti instanceof V3D_Point tip) {
+                                Math_BigRational d2 = tip.getDistanceSquared(this, oom);
+                                mind2[row][c] = d2;
+                                index.setCell(r, c, i);
+                            }
+                        } else {
+                            if (mind2t[i].compareTo(mind2[row][c]) == -1) {
+                                V3D_Geometry ti = t.getIntersection(lines[row][c], oom);
+                                if (ti instanceof V3D_Point tip) {
+                                    Math_BigRational d2 = tip.getDistanceSquared(this, oom);
+                                    if (d2.compareTo(mind2[row][c]) == -1) {
+                                        mind2[row][c] = d2;
+                                        index.setCell(r, c, i);
                                     }
                                 }
                             }
@@ -216,25 +258,86 @@ public class Camera extends V3D_Point {
         }
         // Render each pixel
         System.out.println("Render each pixel");
-        for (int r = 0; r < height; r++) {
+        int[] pix = new int[height * width];
+        for (int row = 0; row < height; row++) {
+            int r = height - row;
             for (int c = 0; c < width; c++) {
-                int i = index[r][c];
-                if (i != 0) {
-                    if ((i - 1) < ntriangles) {
-                        Triangle t = universe.triangles.get(i - 1);
-                        //g.setColor(t.baseColor);
-                        g.setColor(t.lightingColor);
-                        g.fillRect(c, r, 1, 1);
-                    } else {
-                        j = (i - 1 - ntriangles) % 4;
-                        Tetrahedron t = universe.tetrahedra.get(i - 1 - ntriangles - j);
-                        g.setColor(t.baseColors[j]);
-                        //g.setColor(t.lightingColors[j]);
-                        g.fillRect(c, r, 1, 1);
-                    }
+                int in = (row * width) + c;
+                int i = index.getCell(r, c);
+                if (i != index.getNoDataValue()) {
+                    pix[in] = ts[i].lightingColor.getRGB();
+                } else {
+                    pix[in] = Color.BLACK.getRGB();
                 }
             }
         }
-        System.out.println("Rendered");
+        return pix;
+    }
+
+    protected Set<Grids_2D_ID_long> getRCs(V3D_Triangle t) {
+        int oom = screen.e.oom;
+        Set<Grids_2D_ID_long> r = new HashSet<>();
+        V3D_Line l;
+        l = new V3D_Line(t.p.getP(), this);
+        Grids_2D_ID_long prc = getRC(l);
+        l = new V3D_Line(t.p.getQ(), this);
+        Grids_2D_ID_long qrc = getRC(l);
+        l = new V3D_Line(t.p.getR(), this);
+        Grids_2D_ID_long rrc = getRC(l);
+        long minRowIndex = Math.min(Math.min(prc.getRow(), qrc.getRow()), rrc.getRow());
+        long maxRowIndex = Math.max(Math.max(prc.getRow(), qrc.getRow()), rrc.getRow());
+        long minColIndex = Math.min(Math.min(prc.getCol(), qrc.getCol()), rrc.getCol());
+        long maxColIndex = Math.max(Math.max(prc.getCol(), qrc.getCol()), rrc.getCol());
+        for (int row = (int) minRowIndex; row <= maxRowIndex; row++) {
+            int rowf = (int) index.getNRows() - row;
+            for (int col = (int) minColIndex; col <= maxColIndex; col++) {
+                V3D_Geometry i = t.getIntersection(this.lines[rowf][col], oom);
+                if (i != null) {
+                    r.add(new Grids_2D_ID_long(row, col));
+                }
+            }
+        }
+        return r;
+    }
+
+    /**
+     *
+     * @param l A line.
+     * @param g
+     * @return The ID of the screen cell that l intersects.
+     */
+    protected Grids_2D_ID_long getRC(V3D_Line l) {
+        long r = index.getNRows() - getScreenRow(l);
+        long c = getScreenCol(l);
+        return index.getCellID(r, c);
+    }
+
+    /**
+     * Calculate and return the row index of the screen that l passes through.
+     *
+     * @param l A line that intersects with the screen.
+     * @return The row index of the screen that l passes through.
+     */
+    protected int getScreenRow(V3D_Line l) {
+        int oom = screen.e.oom;
+        V3D_Point p = (V3D_Point) screen.getIntersection(l, oom);
+        V3D_Point px = screen.getRSP().p.getQR().l.getPointOfIntersection(p, oom);
+        Math_BigRational d = new Math_BigRationalSqrt(px.getDistanceSquared(p, oom), oom).getSqrt(oom);
+        return d.divide(pixelHeight).intValue();
+    }
+
+    /**
+     * Calculate and return the column index of the screen that l passes
+     * through.
+     *
+     * @param l A line that intersects with the screen.
+     * @return The column index of the screen that l passes through.
+     */
+    protected int getScreenCol(V3D_Line l) {
+        int oom = screen.e.oom;
+        V3D_Point p = (V3D_Point) screen.getIntersection(l, oom);
+        V3D_Point py = screen.getPQR().p.getPQ().l.getPointOfIntersection(p, oom);
+        Math_BigRational d = new Math_BigRationalSqrt(py.getDistanceSquared(p, oom), oom).getSqrt(oom);
+        return d.divide(pixelWidth).intValue();
     }
 }
