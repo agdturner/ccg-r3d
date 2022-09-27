@@ -65,23 +65,47 @@ public class Universe {
                     Paths.get("C:", "Users", "agdtu", "src", "agdt", "java",
                             "generic", "ccg-render3d", "data",
                             "Utah_teapot_(solid).stl"));
-            for (var triangle : data.triangles) {
-                triangles.add(new Triangle(triangle, Color.YELLOW));
+            V3D_Point p = data.triangles.get(0).p.getP();
+            Math_BigRational xmin = p.getX(e.oom);
+            Math_BigRational xmax = p.getX(e.oom);
+            Math_BigRational ymin = p.getY(e.oom);
+            Math_BigRational ymax = p.getY(e.oom);
+            Math_BigRational zmin = p.getZ(e.oom);
+            Math_BigRational zmax = p.getZ(e.oom);
+            for (V3D_Triangle t : data.triangles) {
+                triangles.add(new Triangle(t, Color.YELLOW));
+                for (var pt : t.getPoints()) {
+                    Math_BigRational x = pt.getX(e.oom);
+                    Math_BigRational y = pt.getY(e.oom);
+                    Math_BigRational z = pt.getZ(e.oom);
+                    xmin = xmin.min(x);
+                    xmax = xmax.max(x);
+                    ymin = ymin.min(y);
+                    ymax = ymax.max(y);
+                    zmin = zmin.min(z);
+                    zmax = zmax.max(z);
+                }
             }
+            System.out.println("xmin " + xmin);
+            System.out.println("xmax " + xmax);
+            System.out.println("ymin " + ymin);
+            System.out.println("ymax " + ymax);
+            System.out.println("zmin " + zmin);
+            System.out.println("zmax " + zmax);
+//xmin - 8.164
+//xmax 9.412
+//ymin - 5.37
+//ymax 5.557
+//zmin 0
+//zmax  8.572
         } catch (IOException ex) {
             Logger.getLogger(Universe.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 
     public void init0() {
         Math_BigRational halfwidth = width.divide(2);
         Math_BigRational halfheight = height.divide(2);
-        // Little Yellow Triangle
-        triangles.add(new Triangle(new V3D_Triangle(
-                new V3D_Point(e, halfwidth.negate(), halfheight.negate(), Math_BigRational.TEN),
-                new V3D_Point(e, halfwidth.negate(), halfheight.negate().add(4), Math_BigRational.TEN),
-                new V3D_Point(e, halfwidth.negate().add(4), halfheight.negate().add(4), Math_BigRational.TEN)), Color.YELLOW));
         // Big Yellow Triangle
         triangles.add(new Triangle(new V3D_Triangle(
                 new V3D_Point(e, halfwidth.negate(), halfheight.negate(), Math_BigRational.TEN),
@@ -97,11 +121,16 @@ public class Universe {
     public void init1() {
         Math_BigRational halfwidth = width.divide(2);
         Math_BigRational halfheight = height.divide(2);
-        // Smaller Red Triangle
-        triangles.add(new Triangle(new V3D_Triangle(
-                new V3D_Point(e, halfwidth.negate().divide(2), halfheight.negate().divide(2), Math_BigRational.valueOf(5)),
-                new V3D_Point(e, Math_BigRational.ZERO, halfheight.divide(2), Math_BigRational.valueOf(5)),
-                new V3D_Point(e, halfwidth.divide(2), halfheight.divide(2).negate(), Math_BigRational.valueOf(5))), Color.RED));
+//        // Little Yellow Triangle
+//        triangles.add(new Triangle(new V3D_Triangle(
+//                new V3D_Point(e, halfwidth.negate(), halfheight.negate(), Math_BigRational.TEN),
+//                new V3D_Point(e, halfwidth.negate(), halfheight.negate().add(4), Math_BigRational.TEN),
+//                new V3D_Point(e, halfwidth.negate().add(4), halfheight.negate().add(4), Math_BigRational.TEN)), Color.YELLOW));
+//        // Little Red Triangle
+//        triangles.add(new Triangle(new V3D_Triangle(
+//                new V3D_Point(e, halfwidth.negate().divide(2), halfheight.negate().divide(2), Math_BigRational.valueOf(5)),
+//                new V3D_Point(e, Math_BigRational.ZERO, halfheight.divide(2), Math_BigRational.valueOf(5)),
+//                new V3D_Point(e, halfwidth.divide(2), halfheight.divide(2).negate(), Math_BigRational.valueOf(5))), Color.RED));
         Math_BigRational quarterwidth = halfwidth.divide(2);
         Math_BigRational quarterheight = halfheight.divide(2);
         // Tetrahedra

@@ -40,7 +40,7 @@ public class Triangle {
     }
 
     public void setLighting(V3D_Vector lightVector) {
-        V3D_Vector n = triangle.p.getN(triangle.e.oom);
+        V3D_Vector n = triangle.p.getN(triangle.e.oom).getUnitVector(triangle.e.oom);
         Math_BigRational dot = n.getDotProduct(lightVector, triangle.e.oom);
         Math_BigRational dot2 = dot.multiply(dot);
         if (dot.compareTo(Math_BigRational.ZERO) == -1) {

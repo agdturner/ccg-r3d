@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import uk.ac.leeds.ccg.generic.util.Generic_Collections;
 import uk.ac.leeds.ccg.grids.core.Grids_Environment;
 import uk.ac.leeds.ccg.grids.d2.Grids_2D_ID_long;
@@ -99,6 +101,7 @@ public class Camera extends V3D_Point {
      * For storing the index of the closest triangle.
      */
     Grids_GridInt index;
+    //int[][] index;
 
     /**
      * Create a new instance.
@@ -145,6 +148,7 @@ public class Camera extends V3D_Point {
                 height, width);
         Grids_Dimensions dim = new Grids_Dimensions(height, width);
         index = gif.create(height, width, dim);
+        //index = new int[height][width];
         System.out.println("Initialised Camera");
     }
 
@@ -169,7 +173,7 @@ public class Camera extends V3D_Point {
      *
      * @param oom
      */
-    int[] render(Universe universe, V3D_Vector lightingVector, int oom)
+    int[] render(Universe universe, V3D_Vector lighting, int oom)
             throws Exception {
         // mind2 will store the square of the minimum distance to any triangle.
         Math_BigRational[][] mind2 = new Math_BigRational[height][width];
@@ -184,19 +188,23 @@ public class Camera extends V3D_Point {
         }
         /**
          * Calculate the minimum distance between each and any triangle and the
-         * screen. (N.B. Calculating the maximum distance of any object in the
-         * field of view is tricky!)
+         * screen and set the lighting.
          */
-        System.out.println("Calculate minimum distance between each and any"
-                + " triangle and the screen.");
+        System.out.println("Calculate the minimum distance between each and any"
+                + " triangle and the screen and order triangles in terms of"
+                + " their minimum distance to the screen.");
+        //TreeMap<Math_BigRational, Set<Integer>> ots = new TreeMap<>();
         Math_BigRational[] mind2t = new Math_BigRational[ts.length];
         mind2t[0] = screen.getDistanceSquared(ts[0].triangle, oom);
+        //Generic_Collections.addToMap(ots, mind2t[0], 0);
         Math_BigRational minimumDistT = mind2t[0];
         for (int i = 1; i < ts.length; i++) {
             if (i % 100 == 0) {
                 System.out.println("Triangle " + i + " out of " + ts.length);
             }
+            ts[i].setLighting(lighting);
             mind2t[i] = screen.getDistanceSquared(ts[i].triangle, oom);
+            //Generic_Collections.addToMap(ots, mind2t[i], i);
             if (mind2t[i].compareTo(minimumDistT) == -1) {
                 minimumDistT = mind2t[i];
             }
@@ -209,45 +217,51 @@ public class Camera extends V3D_Point {
         System.out.println("Calculate which pixels are intersected by each "
                 + "triangle.");
         HashMap<Grids_2D_ID_long, Set<Integer>> tpix = new HashMap<>();
+        int j = 0;
         for (int i = 0; i < ts.length; i++) {
-            if (i % 100 == 0) {
-                System.out.println("Triangle " + i + " out of " + ts.length);
+            //for (var k : ots.keySet()) {
+            //    for (var i : ots.get(k)) {
+            if (j % 100 == 0) {
+                System.out.println("Triangle " + j + " out of " + ts.length);
             }
             Set<Grids_2D_ID_long> ids = getRCs(ts[i].triangle);
             for (var id : ids) {
                 Generic_Collections.addToMap(tpix, id, i);
             }
+            j++;
+            //}
         }
         /* 
-         * Find the closest triangle to each pixel.
+         * Find the closest triangle to each pixel and a list of triangle 
+         * indexes that are to be rendered.
          */
         System.out.println("Find the closest triangle to each pixel.");
         for (int row = 0; row < height; row++) {
             if (row % 10 == 0) {
                 System.out.println("row " + row + " out of " + height);
             }
-            int r = height - row;
+            int r = height - row - 1;
             for (int c = 0; c < width; c++) {
                 Grids_2D_ID_long id = index.getCellID(r, c);
                 if (tpix.containsKey(id)) {
                     Set<Integer> its = tpix.get(id);
-                    for (var i : its) {
-                        V3D_Triangle t = ts[i].triangle;
+                    for (var in : its) {
+                        V3D_Triangle t = ts[in].triangle;
                         if (mind2[row][c] == null) {
                             V3D_Geometry ti = t.getIntersection(lines[row][c], oom);
                             if (ti instanceof V3D_Point tip) {
                                 Math_BigRational d2 = tip.getDistanceSquared(this, oom);
                                 mind2[row][c] = d2;
-                                index.setCell(r, c, i);
+                                index.setCell(r, c, in + 1);
                             }
                         } else {
-                            if (mind2t[i].compareTo(mind2[row][c]) == -1) {
+                            if (mind2t[in].compareTo(mind2[row][c]) == -1) {
                                 V3D_Geometry ti = t.getIntersection(lines[row][c], oom);
                                 if (ti instanceof V3D_Point tip) {
                                     Math_BigRational d2 = tip.getDistanceSquared(this, oom);
                                     if (d2.compareTo(mind2[row][c]) == -1) {
                                         mind2[row][c] = d2;
-                                        index.setCell(r, c, i);
+                                        index.setCell(r, c, in + 1);
                                     }
                                 }
                             }
@@ -260,14 +274,14 @@ public class Camera extends V3D_Point {
         System.out.println("Render each pixel");
         int[] pix = new int[height * width];
         for (int row = 0; row < height; row++) {
-            int r = height - row;
+            int r = height - row - 1;
             for (int c = 0; c < width; c++) {
                 int in = (row * width) + c;
-                int i = index.getCell(r, c);
-                if (i != index.getNoDataValue()) {
-                    pix[in] = ts[i].lightingColor.getRGB();
-                } else {
+                int ind = index.getCell(r, c);
+                if (ind == 0) {
                     pix[in] = Color.BLACK.getRGB();
+                } else {
+                    pix[in] = ts[ind - 1].lightingColor.getRGB();
                 }
             }
         }
@@ -289,7 +303,7 @@ public class Camera extends V3D_Point {
         long minColIndex = Math.min(Math.min(prc.getCol(), qrc.getCol()), rrc.getCol());
         long maxColIndex = Math.max(Math.max(prc.getCol(), qrc.getCol()), rrc.getCol());
         for (int row = (int) minRowIndex; row <= maxRowIndex; row++) {
-            int rowf = (int) index.getNRows() - row;
+            int rowf = (int) index.getNRows() - row - 1;
             for (int col = (int) minColIndex; col <= maxColIndex; col++) {
                 V3D_Geometry i = t.getIntersection(this.lines[rowf][col], oom);
                 if (i != null) {

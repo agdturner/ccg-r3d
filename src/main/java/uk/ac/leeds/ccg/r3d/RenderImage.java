@@ -67,18 +67,22 @@ public class RenderImage {
         Math_BigRational pty = Math_BigRational.ZERO;
         Math_BigRational ptz = Math_BigRational.valueOf(this.size.height).negate();
         V3D_Point pt = new V3D_Point(e, ptx, pty, ptz);
+        
 //        Math_BigRational halfwidth = Math_BigRational.valueOf(this.size.width).divide(2);
 //        Math_BigRational halfheight = Math_BigRational.valueOf(this.size.height).divide(2);
 //        Math_BigRational xmin = ptx.subtract(halfwidth);
 //        Math_BigRational xmax = ptx.add(halfwidth);
 //        Math_BigRational ymin = pty.subtract(halfheight);
 //        Math_BigRational ymax = pty.add(halfheight);
+//        Math_BigRational depth = Math_BigRational.ZERO;
+        
         Math_BigRational xmin = ptx.subtract(10);
         Math_BigRational xmax = ptx.add(10);
         Math_BigRational P7_5 = Math_BigRational.valueOf(15).divide(2);
         Math_BigRational ymin = pty.subtract(P7_5);
         Math_BigRational ymax = pty.add(P7_5);
-        Math_BigRational depth = Math_BigRational.ZERO;
+        Math_BigRational depth = Math_BigRational.TEN.negate();
+
         V3D_Rectangle screen = new V3D_Rectangle(
                 new V3D_Point(e, xmin, ymin, depth),
                 new V3D_Point(e, xmin, ymax, depth),
@@ -88,6 +92,7 @@ public class RenderImage {
                 this.size.width, this.size.height, this.oom);
         this.universe = new Universe(camera);
         //this.universe.init0();
+        //this.universe.init1();
         this.universe.initUtah();
     }
 
@@ -111,7 +116,8 @@ public class RenderImage {
 //        g.fillRect(0, 0, w, h);
 
         // Draw all the things.
-        int[] pix = this.universe.camera.render(this.universe, new V3D_Vector(-1, -1, -1), oom);
+        V3D_Vector lighting = new V3D_Vector(-1, -1, -1).getUnitVector(oom);
+        int[] pix = this.universe.camera.render(this.universe, lighting, oom);
 
 //        for (int i = 0; i < pix.length; i ++) {
 //            if (pix[i] != 0) {

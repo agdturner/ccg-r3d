@@ -35,14 +35,10 @@ public class Tetrahedron {
     public Tetrahedron(V3D_Tetrahedron t, Color baseColor) {
         //tetrahedron = t;
         triangles = new Triangle[4];
-        triangles[0].triangle = t.getPqr();
-        triangles[1].triangle = t.getPsq();
-        triangles[2].triangle = t.getQsr();
-        triangles[3].triangle = t.getSpr();
-        for (int i = 0; i < 4; i++) {
-            triangles[i].baseColor = baseColor;
-            triangles[i].lightingColor = baseColor;
-        }
+        triangles[0] = new Triangle(t.getPqr(), baseColor);
+        triangles[1] = new Triangle(t.getPsq(), baseColor);
+        triangles[2] = new Triangle(t.getQsr(), baseColor);
+        triangles[3] = new Triangle(t.getSpr(), baseColor);
     }
 
     public void setLighting(V3D_Vector lightVector) {
