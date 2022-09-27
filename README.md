@@ -9,4 +9,6 @@ A first attempt to render the Utah Teapot.
 
 There are some black pixels which is probably to do with intersection issues rather than rendering issues.
 
-Running [../]
+Running [src/main/java/uk/ac/leeds/ccg/r3d/RenderImage.java] should produce this image in a few minutes.
+
+There are about 9000 triangles considered in the [data/](input data).
