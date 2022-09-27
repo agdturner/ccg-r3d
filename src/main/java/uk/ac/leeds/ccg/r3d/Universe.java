@@ -121,11 +121,7 @@ public class Universe {
     public void init1() {
         Math_BigRational halfwidth = width.divide(2);
         Math_BigRational halfheight = height.divide(2);
-//        // Little Yellow Triangle
-//        triangles.add(new Triangle(new V3D_Triangle(
-//                new V3D_Point(e, halfwidth.negate(), halfheight.negate(), Math_BigRational.TEN),
-//                new V3D_Point(e, halfwidth.negate(), halfheight.negate().add(4), Math_BigRational.TEN),
-//                new V3D_Point(e, halfwidth.negate().add(4), halfheight.negate().add(4), Math_BigRational.TEN)), Color.YELLOW));
+        // initCameraTest()
 //        // Little Red Triangle
 //        triangles.add(new Triangle(new V3D_Triangle(
 //                new V3D_Point(e, halfwidth.negate().divide(2), halfheight.negate().divide(2), Math_BigRational.valueOf(5)),
@@ -142,6 +138,17 @@ public class Universe {
         tetrahedra.add(new Tetrahedron(t, Color.WHITE));
     }
 
+    
+    public void initCameraTest() {
+        Math_BigRational halfwidth = width.divide(2);
+        Math_BigRational halfheight = height.divide(2);
+        // Little Yellow Triangle
+        triangles.add(new Triangle(new V3D_Triangle(
+                new V3D_Point(e, halfwidth.negate(), halfheight.negate(), Math_BigRational.TEN),
+                new V3D_Point(e, halfwidth.negate(), halfheight.negate().add(4), Math_BigRational.TEN),
+                new V3D_Point(e, halfwidth.negate().add(4), halfheight.negate().add(4), Math_BigRational.TEN)), Color.YELLOW));
+    }
+    
     public void update() {
     }
 }

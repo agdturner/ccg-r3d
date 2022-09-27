@@ -95,16 +95,22 @@ public class CameraTest {
             Logger.getLogger(CameraTest.class.getName()).log(Level.SEVERE, null, ex);
         }
         Universe universe = new Universe(instance);
-        universe.init0();
+        universe.initCameraTest();
         V3D_Triangle t = universe.triangles.get(0).triangle;
         Set<Grids_2D_ID_long> expResult = new HashSet<>();
+        expResult.add(new Grids_2D_ID_long(67, 6));
+        expResult.add(new Grids_2D_ID_long(67, 7));
+        expResult.add(new Grids_2D_ID_long(67, 8));
         expResult.add(new Grids_2D_ID_long(68, 6));
         expResult.add(new Grids_2D_ID_long(68, 7));
-        expResult.add(new Grids_2D_ID_long(68, 8));
         expResult.add(new Grids_2D_ID_long(69, 6));
-        expResult.add(new Grids_2D_ID_long(69, 7));
-        expResult.add(new Grids_2D_ID_long(70, 6));
         Set<Grids_2D_ID_long> result = instance.getRCs(t);
+        for (Grids_2D_ID_long i: expResult) {
+            assertTrue(result.contains(i));
+        }
+        for (Grids_2D_ID_long i: result) {
+            assertTrue(expResult.contains(i));
+        }
 //        for (int i = 0; i < expResult.size(); i ++) {
 //            assertEquals(expResult.get(i), result.get(i));
 //        }
