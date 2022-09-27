@@ -143,7 +143,7 @@ public class RenderImage {
         //Image image = this.createImage(w, h);
         //g.drawImage(image, w, h, panel);
         //g.dispose();
-        IO.imageToFile(image, "png", Paths.get("C:/Temp", "test.png"));
+        IO.imageToFile(image, "png", Paths.get("data", "test.png"));
         System.out.println("Rendered");
     }
 }
