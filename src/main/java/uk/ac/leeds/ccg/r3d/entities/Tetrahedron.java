@@ -43,8 +43,8 @@ public class Tetrahedron {
 
     public void setLighting(V3D_Vector lightVector) {
         for (int i = 0; i < 4; i++) {
-            V3D_Vector n = triangles[i].triangle.p.getN(triangles[0].triangle.e.oom);
-            Math_BigRational dot = n.getDotProduct(lightVector, triangles[i].triangle.e.oom);
+            V3D_Vector n = triangles[i].triangle.p.getN(triangles[0].triangle.e.oom, triangles[0].triangle.e.rm);
+            Math_BigRational dot = n.getDotProduct(lightVector, triangles[i].triangle.e.oom, triangles[0].triangle.e.rm);
             Math_BigRational dot2 = dot.multiply(dot);
             if (dot.compareTo(Math_BigRational.ZERO) == -1) {
                 dot2 = dot2.negate();
