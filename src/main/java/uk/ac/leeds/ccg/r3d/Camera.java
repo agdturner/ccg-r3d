@@ -16,7 +16,6 @@
 package uk.ac.leeds.ccg.r3d;
 
 import java.awt.Color;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -104,7 +103,6 @@ public class Camera extends V3D_Point {
 //     * The pixels of the camera.
 //     */
 //    public V3D_Rectangle[][] pixels;
-
     /**
      * For storing the length and width of a pixel (which is square).
      */
@@ -130,7 +128,7 @@ public class Camera extends V3D_Point {
         Math_BigRational veXMax = ve.getXMax(oom);
         Math_BigRational veYMin = ve.getYMin(oom);
         Math_BigRational veYMax = ve.getYMax(oom);
-        //Math_BigRational veZMin = ve.getZMin(oom);
+        Math_BigRational veZMin = ve.getZMin(oom);
         Math_BigRational dx = veXMax.subtract(veXMin);
         Math_BigRational dy = veYMax.subtract(veYMin);
 //        V3D_Point centroid = new V3D_Point(ve.getCentroid(oom, rm));
@@ -156,7 +154,8 @@ public class Camera extends V3D_Point {
         Math_BigRational shd2 = screenHeight.divide(2);
         Math_BigRational nswd2 = swd2.negate();
         Math_BigRational nshd2 = shd2.negate();
-        Math_BigRational screenZ = Math_BigRational.ZERO;
+        //Math_BigRational screenZ = Math_BigRational.ZERO;
+        Math_BigRational screenZ = veZMin.subtract(dx.max(dy).divide(10));
 
         this.screen = new V3D_Rectangle(
                 new V3D_Point(e, nswd2, nshd2, screenZ),
@@ -176,6 +175,102 @@ public class Camera extends V3D_Point {
                 new Grids_Environment(), new IO_Cache(path, "v3d"), gcif, dgcif,
                 height, width);
         Grids_Dimensions dim = new Grids_Dimensions(nswd2, swd2, nshd2, shd2, pixelSize);
+        index = gif.create(height, width, dim);
+        //index = new int[ncols][nrows];
+        for (int row = 0; row < height; row++) {
+            Math_BigRational y = index.getCellY(row);
+            for (int col = 0; col < width; col++) {
+                Math_BigRational x = index.getCellX(col);
+                //pixelCentres[row][col] = new V3D_Point(pt.e, x, y, z);
+                //Math_BigRational[] cellBounds = index.getCellBounds((long) row, (long) col);
+//                pixels[row][col] = new V3D_Rectangle(
+//                        new V3D_Point(e, cellBounds[0], cellBounds[1], screenZ),
+//                        new V3D_Point(e, cellBounds[0], cellBounds[3], screenZ),
+//                        new V3D_Point(e, cellBounds[2], cellBounds[3], screenZ),
+//                        new V3D_Point(e, cellBounds[2], cellBounds[1], screenZ), oom, rm);
+                rays[row][col] = new V3D_Ray(pt, new V3D_Point(pt.e, x, y, screenZ), oom, rm);
+                //rays[row][col] = new V3D_Ray(pt, new V3D_Point(pt.e, x, y, z));
+            }
+        }
+        System.out.println("Initialised Camera");
+    }
+    
+    /**
+     * Create a new instance.
+     *
+     * @param p The camera observer location.
+     * @param screen The screen.
+     */
+    public Camera(V3D_Point pt, V3D_Envelope ve, int width, int height, int oom,
+            RoundingMode rm, Math_BigRational i,
+            Math_BigRational j, Math_BigRational k) throws Exception {
+        super(pt);
+        // Initialise the screen
+        Math_BigRational veXMin = ve.getXMin(oom);
+        Math_BigRational veXMax = ve.getXMax(oom);
+        Math_BigRational veYMin = ve.getYMin(oom);
+        Math_BigRational veYMax = ve.getYMax(oom);
+        Math_BigRational veZMin = ve.getZMin(oom);
+        Math_BigRational dx = veXMax.subtract(veXMin);
+        Math_BigRational dy = veYMax.subtract(veYMin);
+//        V3D_Point centroid = new V3D_Point(ve.getCentroid(oom, rm));
+//        V3D_Vector n = new V3D_Vector(this, centroid, oom, rm);
+//        V3D_Plane p = new V3D_Plane(centroid, n, oom, rm);
+//        V3D_Rectangle r = (V3D_Rectangle) ve.getIntersection(p, oom, rm);
+//        screenWidth = r.getPQR().p.getPQ().getLength(oom, rm).getSqrt(oom, rm);
+//        screenHeight = r.getPQR().p.getQR().getLength(oom, rm).getSqrt(oom, rm);
+        Math_BigRational hwr = dx.divide(dy);
+        Math_BigRational hwr2 = Math_BigRational.valueOf(width).divide(Math_BigRational.valueOf(height));
+        if (hwr.compareTo(hwr2) == 1) {
+            // When scaled, the data dimension is bigger width wise than the screen
+            screenWidth = dx;
+            pixelSize = screenWidth.divide(width);
+            screenHeight = pixelSize.multiply(height);
+        } else {
+            // Data is bigger height wise than the screen
+            screenHeight = dy;
+            pixelSize = screenHeight.divide(height);
+            screenWidth = pixelSize.multiply(width);
+        }
+        Math_BigRational swd2 = screenWidth.divide(2);
+        Math_BigRational shd2 = screenHeight.divide(2);
+        Math_BigRational nswd2 = swd2.negate();
+        Math_BigRational nshd2 = shd2.negate();
+        //Math_BigRational screenZ = Math_BigRational.ZERO;
+        Math_BigRational screenZ = veZMin.subtract(dx.max(dy).divide(10));
+
+        this.screen = new V3D_Rectangle(
+                new V3D_Point(e, nswd2, nshd2, screenZ),
+                new V3D_Point(e, nswd2, shd2, screenZ),
+                new V3D_Point(e, swd2, shd2, screenZ),
+                new V3D_Point(e, swd2, nshd2, screenZ), oom, rm);
+        
+        this.screen.rotate(V3D_Vector.I, i, oom, rm);
+        this.screen.rotate(V3D_Vector.J, j, oom, rm);
+        this.screen.rotate(V3D_Vector.K, k, oom, rm);
+        
+        V3D_Triangle pqr = this.screen.getPQR();
+        V3D_Triangle rsp = this.screen.getRSP();
+        
+        this.nrows = height;
+        this.ncols = width;
+        rays = new V3D_Ray[height][width];
+        //pixelCentres = new V3D_Point[height][width];
+        //pixels = new V3D_Rectangle[height][width];
+        // Initialise index.
+        Grids_ChunkIntFactorySinglet gcif = new Grids_ChunkIntFactorySinglet(0);
+        Grids_ChunkIntFactory dgcif = new Grids_ChunkIntFactoryMap();
+        Path path = Paths.get("data", "grids");
+        Grids_GridIntFactory gif = new Grids_GridIntFactory(
+                new Grids_Environment(), new IO_Cache(path, "v3d"), gcif, dgcif,
+                height, width);
+        //Grids_Dimensions dim = new Grids_Dimensions(nswd2, swd2, nshd2, shd2, pixelSize);
+        Grids_Dimensions dim = new Grids_Dimensions(
+                pqr.p.getP().getX(oom, rm),
+                pqr.p.getR().getX(oom, rm),
+                pqr.p.getP().getY(oom, rm),
+                pqr.p.getQ().getY(oom, rm),
+                pixelSize);
         index = gif.create(height, width, dim);
         //index = new int[ncols][nrows];
         for (int row = 0; row < height; row++) {
@@ -455,8 +550,12 @@ public class Camera extends V3D_Point {
                 //System.out.println("" + row + " " + col);
                 //index.getCellBounds(row, col);
                 //if (tetra.isIntersectedBy(this.pixels[row][col], oom, rm)) {
-                if (t.isIntersectedBy(rays[row][col], oom, rm)) {
-                    r.add(new Grids_2D_ID_long((long) row, (long) col));
+                try {
+                    if (t.isIntersectedBy(rays[row][col], oom, rm)) {
+                        r.add(new Grids_2D_ID_long((long) row, (long) col));
+                    }
+                } catch (RuntimeException e) {
+                    System.out.println("Resolution too coarse to render triangle.");
                 }
             }
         }
@@ -484,10 +583,10 @@ public class Camera extends V3D_Point {
         V3D_Point p = (V3D_Point) screen.p.getIntersection(ray, oom, rm);
 //        V3D_Point p2 = ray.l.getQ(oom, rm);
 //        ray.l.getP();
-        
+
         V3D_Point px = screen.getRSP().p.getQR().l.getPointOfIntersection(p, oom, rm);
         Math_BigRational d = new Math_BigRationalSqrt(px.getDistanceSquared(p, oom, rm), oom, rm).getSqrt(oom, rm);
-        
+
         //Math_BigRational d = ((V3D_LineSegment) screen.p.getQR().l.getLineOfIntersection(p, oom, rm)).getLength(oom, rm).getSqrt(oom, rm);
 //        V3D_Point px = screen.p.getQR().l.getPointOfIntersection(p, oom, rm);
         //V3D_Point px = screen.p.getPQ().l.getPointOfIntersection(p, oom, rm);
@@ -509,7 +608,7 @@ public class Camera extends V3D_Point {
         V3D_Point p = (V3D_Point) screen.p.getIntersection(ray, oom, rm);
 //        V3D_Point p2 = ray.l.getQ(oom, rm);
 //        ray.l.getP();
-        
+
         V3D_Point py = screen.getPQR().p.getPQ().l.getPointOfIntersection(p, oom, rm);
         Math_BigRational d = new Math_BigRationalSqrt(py.getDistanceSquared(p, oom, rm), oom, rm).getSqrt(oom, rm);
         //V3D_Point py = screen.p.getQR().l.getPointOfIntersection(p, oom, rm);
