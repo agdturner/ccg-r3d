@@ -118,8 +118,10 @@ public class RenderImage {
             }
             if (!test) {
                 int oom = -8;
-                int w = 100;
-                int h = 75;
+//                int w = 100;
+//                int h = 75;
+                int w = 500;
+                int h = 75 * 5;
                 Path dir = Paths.get("data");
                 String filename = "Utah_teapot_(solid)";
                 //Path dir = Paths.get("data", "geographos");
@@ -129,7 +131,48 @@ public class RenderImage {
                 Dimension size = new Dimension(w, h);
                 RenderImage r = new RenderImage(input, output, size, oom, rm);
                 r.run();
+                
+                
             }
+            if (!test) {
+                int oom = -8;
+                int w = 500;
+                int h = 75 * 5;
+                Path dir = Paths.get("data", "geographos");
+                String filename = "1620geographos";
+                Path input = Paths.get(dir.toString(), filename + ".stl");
+                Path output = Paths.get(dir.toString(), filename + "_" + w + "x" + h + "_" + oom + ".png");
+                Dimension size = new Dimension(w, h);
+                RenderImage r = new RenderImage(input, output, size, oom, rm);
+                r.run();
+            }
+            
+//            if (!test) {
+//                int oom = -8;
+//                int w = 500;
+//                int h = 75 * 5;
+//                Path dir = Paths.get("data", "Hurricane_Katrina");
+//                String filename = "Katrina";
+//                Path input = Paths.get(dir.toString(), filename + ".stl");
+//                Path output = Paths.get(dir.toString(), filename + "_" + w + "x" + h + "_" + oom + ".png");
+//                Dimension size = new Dimension(w, h);
+//                RenderImage r = new RenderImage(input, output, size, oom, rm);
+//                r.run();
+//            }
+//            
+//            if (!test) {
+//                int oom = -8;
+//                int w = 500;
+//                int h = 75 * 5;
+//                Path dir = Paths.get("data", "JWST");
+//                String filename = "STScI-01G2ZHTH2GGGR66SJ228TZNPKH";
+//                Path input = Paths.get(dir.toString(), filename + ".stl");
+//                Path output = Paths.get(dir.toString(), filename + "_" + w + "x" + h + "_" + oom + ".png");
+//                Dimension size = new Dimension(w, h);
+//                RenderImage r = new RenderImage(input, output, size, oom, rm);
+//                r.run();
+//            }
+                
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
