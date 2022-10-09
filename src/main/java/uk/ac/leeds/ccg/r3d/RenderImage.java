@@ -18,30 +18,31 @@ package uk.ac.leeds.ccg.r3d;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Panel;
-import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import uk.ac.leeds.ccg.math.arithmetic.Math_BigDecimal;
 
 import uk.ac.leeds.ccg.math.arithmetic.Math_BigInteger;
 import uk.ac.leeds.ccg.math.number.Math_BigRational;
+import uk.ac.leeds.ccg.math.number.Math_BigRationalSqrt;
 import uk.ac.leeds.ccg.r3d.io.IO;
 import uk.ac.leeds.ccg.v3d.core.V3D_Environment;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Envelope;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
-import uk.ac.leeds.ccg.v3d.geometry.V3D_Rectangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 
 public class RenderImage {
-
-    private static final long serialVersionUID = 1L;
 
     /**
      * V3D_Environment.
      */
     V3D_Environment e;
+
+    int oom;
+    
+    RoundingMode rm;
 
     /**
      * The width and height.
@@ -54,91 +55,69 @@ public class RenderImage {
     public Universe universe;
 
     /**
-     * Order of Magnitude for the precision.
-     */
-    public int oom;
-
-    /**
      * Path to output file.
      */
     Path output;
 
     /**
-     * For storing the state running or not.
-     */
-    private static boolean running = false;
-
-    /**
      * Create a new instance.
      */
-    public RenderImage(Path output, Dimension size, int oom) throws Exception {
+    public RenderImage(Path output, Dimension size, int oom, RoundingMode rm) throws Exception {
         this.output = output;
         this.size = size;
+        this.e = new V3D_Environment(new Math_BigInteger(), new Math_BigDecimal());
         this.oom = oom;
-        this.e = new V3D_Environment(new Math_BigInteger(), oom, RoundingMode.HALF_UP);
-//        Math_BigRational ptx = Math_BigRational.ZERO;
-//        Math_BigRational pty = Math_BigRational.ZERO;
-//        Math_BigRational ptz = Math_BigRational.valueOf(this.size.height).negate();
-//        V3D_Point pt = new V3D_Point(e, ptx, pty, ptz);
-//
-////        Math_BigRational halfwidth = Math_BigRational.valueOf(this.size.width).divide(2);
-////        Math_BigRational halfheight = Math_BigRational.valueOf(this.size.height).divide(2);
-////        Math_BigRational xmin = ptx.subtract(halfwidth);
-////        Math_BigRational xmax = ptx.add(halfwidth);
-////        Math_BigRational ymin = pty.subtract(halfheight);
-////        Math_BigRational ymax = pty.add(halfheight);
-////        Math_BigRational depth = Math_BigRational.ZERO;
-//        Math_BigRational xmin = ptx.subtract(10);
-//        Math_BigRational xmax = ptx.add(10);
-//        Math_BigRational P7_5 = Math_BigRational.valueOf(15).divide(2);
-//        Math_BigRational ymin = pty.subtract(P7_5);
-//        Math_BigRational ymax = pty.add(P7_5);
-//        Math_BigRational depth = Math_BigRational.TEN.negate();
-//
-//        V3D_Rectangle screen = new V3D_Rectangle(
-//                new V3D_Point(e, xmin, ymin, depth),
-//                new V3D_Point(e, xmin, ymax, depth),
-//                new V3D_Point(e, xmax, ymax, depth),
-//                new V3D_Point(e, xmax, ymin, depth));
+        this.rm = rm;
         this.universe = new Universe();
-        V3D_Envelope ve = this.universe.init0(
+        V3D_Envelope ve = this.universe.init1(
                 Math_BigRational.valueOf(this.size.width),
-                Math_BigRational.valueOf(this.size.height));
-        V3D_Point pt = getDefaultCameraPt(ve, oom, e);
+                Math_BigRational.valueOf(this.size.height), oom, rm);
+        V3D_Point pt = getDefaultCameraPt(ve, oom, rm, e);
+//        this.universe = new Universe();
+//        V3D_Envelope ve = this.universe.init0(
+//                Math_BigRational.valueOf(this.size.width),
+//                Math_BigRational.valueOf(this.size.height), oom, rm);
+//        V3D_Point pt = getDefaultCameraPt(ve, oom, e);
         this.universe.setCamera(new Camera(pt, ve,
-                this.size.width, this.size.height, this.oom));
-        
+                this.size.width, this.size.height, oom, rm));
+
     }
 
     /**
      * Create a new instance.
      */
-    public RenderImage(Path input, Path output, Dimension size, int oom) throws Exception {
+    public RenderImage(Path input, Path output, Dimension size, int oom,
+            RoundingMode rm) throws Exception {
         this.output = output;
         this.size = size;
+        this.e = new V3D_Environment(new Math_BigInteger(), new Math_BigDecimal());
         this.oom = oom;
-        this.e = new V3D_Environment(new Math_BigInteger(), oom, RoundingMode.HALF_UP);
+        this.rm = rm;
         this.universe = new Universe();
-        V3D_Envelope ve = this.universe.init(input);
-        V3D_Point pt = getDefaultCameraPt(ve, oom, e);
+        V3D_Envelope ve = this.universe.init(input, oom, rm);
+        System.out.println(ve.toString());
+        V3D_Point pt = getDefaultCameraPt(ve, oom, rm, e);
+        System.out.println(pt.toStringSimple(""));
         this.universe.setCamera(new Camera(pt, ve,
-                this.size.width, this.size.height, this.oom));
+                this.size.width, this.size.height, oom, rm));
     }
 
     public static void main(String[] args) {
         try {
             //boolean test = true;
             boolean test = false;
+            RoundingMode rm = RoundingMode.HALF_UP;
             if (test) {//Test 
+                int oom = -6;
                 int w = 100;
                 int h = 75;
                 Path output = Paths.get("data", "test.png");
                 Dimension size = new Dimension(w, h);
-                int oom = -3;
-                RenderImage r = new RenderImage(output, size, oom);
+                RenderImage r = new RenderImage(output, size, oom, rm);
                 r.run();
             }
             if (!test) {
+                int oom = -8;
                 int w = 100;
                 int h = 75;
                 Path dir = Paths.get("data");
@@ -148,8 +127,7 @@ public class RenderImage {
                 Path input = Paths.get(dir.toString(), filename + ".stl");
                 Path output = Paths.get(dir.toString(), filename + "_" + w + "x" + h + ".png");
                 Dimension size = new Dimension(w, h);
-                int oom = -3;
-                RenderImage r = new RenderImage(input, output, size, oom);
+                RenderImage r = new RenderImage(input, output, size, oom, rm);
                 r.run();
             }
         } catch (Exception ex) {
@@ -160,8 +138,10 @@ public class RenderImage {
     public void run() throws Exception {
         //BufferedImage bi = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
         // Draw all the things.
-        V3D_Vector lighting = new V3D_Vector(-1, -1, -1).getUnitVector(oom, e.rm);
-        int[] pix = this.universe.camera.render(this.universe, lighting, oom);
+        Math_BigRational P1 = Math_BigRational.ONE;
+        Math_BigRational N1 = Math_BigRational.ONE.negate();
+        V3D_Vector lighting = new V3D_Vector(N1, N1, N1, Math_BigRationalSqrt.ONE).getUnitVector(oom, rm);
+        int[] pix = this.universe.camera.render(this.universe, lighting, oom, rm);
         /**
          * Convert pix to an image and write to a file.
          */
@@ -173,18 +153,19 @@ public class RenderImage {
     }
 
     public static V3D_Point getDefaultCameraPt(V3D_Envelope ve, int oom, 
-            V3D_Environment e) {
-        Math_BigRational veXMin = ve.getXMin(oom);
-        Math_BigRational veXMax = ve.getXMax(oom);
-        Math_BigRational veYMin = ve.getYMin(oom);
-        Math_BigRational veYMax = ve.getYMax(oom);
-        Math_BigRational veZMin = ve.getZMin(oom);
+            RoundingMode rm, V3D_Environment e) {
+        Math_BigRational veXMin = ve.getXMin(oom, rm);
+        Math_BigRational veXMax = ve.getXMax(oom, rm);
+        Math_BigRational veYMin = ve.getYMin(oom, rm);
+        Math_BigRational veYMax = ve.getYMax(oom, rm);
+        Math_BigRational veZMin = ve.getZMin(oom, rm);
         //Math_BigRational veZMax = ve.getZMax(oom);
-        Math_BigRational xr = veXMax.subtract(veXMin);
-        Math_BigRational yr = veYMax.subtract(veYMin);
+        Math_BigRational dx = veXMax.subtract(veXMin);
+        Math_BigRational dy = veYMax.subtract(veYMin);
         // pzd is the biggest of xr and yr subtracted from the min z of ve.
-        Math_BigRational pzd = veZMin.subtract(xr.max(yr));
-        V3D_Point pt = new V3D_Point(e, veXMin.add(xr.divide(2)), veYMin.add(yr.divide(2)), pzd);
+        Math_BigRational pzd = veZMin.subtract(dx.max(dy));
+        V3D_Point pt = new V3D_Point(e, veXMin.add(dx.divide(2)), veYMin.add(dy.divide(2)), pzd);
+        //V3D_Point pt = new V3D_Point(e, Math_BigRational.ZERO, Math_BigRational.ZERO, pzd);
         return pt;
     }
 

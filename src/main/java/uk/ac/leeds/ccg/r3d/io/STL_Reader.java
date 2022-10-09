@@ -45,8 +45,7 @@ public class STL_Reader {
     }
     
     public static void main(String[] args) {
-        Path p = Paths.get("C:", "Users", "agdtu", "src", "agdt", "java",
-                "generic", "ccg-render3d", "data", "Utah_teapot_(solid).stl");
+        Path p = Paths.get("data", "Utah_teapot_(solid).stl");
         try {
             STL_Reader s = new STL_Reader();
             s.readBinary(p);

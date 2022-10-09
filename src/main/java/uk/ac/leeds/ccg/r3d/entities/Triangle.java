@@ -16,6 +16,7 @@
 package uk.ac.leeds.ccg.r3d.entities;
 
 import java.awt.Color;
+import java.math.RoundingMode;
 import uk.ac.leeds.ccg.math.number.Math_BigRational;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
@@ -39,9 +40,9 @@ public class Triangle {
         this.lightingColor = baseColor;
     }
 
-    public void setLighting(V3D_Vector lightVector) {
-        V3D_Vector n = triangle.p.getN(triangle.e.oom, triangle.e.rm).getUnitVector(triangle.e.oom, triangle.e.rm);
-        Math_BigRational dot = n.getDotProduct(lightVector, triangle.e.oom, triangle.e.rm);
+    public void setLighting(V3D_Vector lightVector, int oom, RoundingMode rm) {
+        V3D_Vector n = triangle.p.getN(oom, rm).getUnitVector(oom, rm);
+        Math_BigRational dot = n.getDotProduct(lightVector, oom, rm);
         Math_BigRational dot2 = dot.multiply(dot);
         if (dot.compareTo(Math_BigRational.ZERO) == -1) {
             dot2 = dot2.negate();

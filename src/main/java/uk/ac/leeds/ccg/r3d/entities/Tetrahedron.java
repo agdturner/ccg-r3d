@@ -16,10 +16,7 @@
 package uk.ac.leeds.ccg.r3d.entities;
 
 import java.awt.Color;
-import uk.ac.leeds.ccg.math.number.Math_BigRational;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Tetrahedron;
-//import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
-import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 
 /**
  * For visualising a tetrahedron.
@@ -28,8 +25,6 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
  */
 public class Tetrahedron {
 
-    private static final Math_BigRational AmbientLight = Math_BigRational.ONE.divide(Math_BigRational.valueOf(20));
-    //public V3D_Tetrahedron tetrahedron;
     public Triangle[] triangles;
 
     public Tetrahedron(V3D_Tetrahedron t, Color baseColor) {
@@ -39,26 +34,5 @@ public class Tetrahedron {
         triangles[1] = new Triangle(t.getPsq(), baseColor);
         triangles[2] = new Triangle(t.getQsr(), baseColor);
         triangles[3] = new Triangle(t.getSpr(), baseColor);
-    }
-
-    public void setLighting(V3D_Vector lightVector) {
-        for (int i = 0; i < 4; i++) {
-            V3D_Vector n = triangles[i].triangle.p.getN(triangles[0].triangle.e.oom, triangles[0].triangle.e.rm);
-            Math_BigRational dot = n.getDotProduct(lightVector, triangles[i].triangle.e.oom, triangles[0].triangle.e.rm);
-            Math_BigRational dot2 = dot.multiply(dot);
-            if (dot.compareTo(Math_BigRational.ZERO) == -1) {
-                dot2 = dot2.negate();
-            }
-            dot2 = (dot2.add(Math_BigRational.ONE)).divide(Math_BigRational.TWO.multiply(Math_BigRational.ONE.subtract(AmbientLight)));
-            double lightRatio = Math.min(1.0d, Math.max(0.0d, AmbientLight.add(dot2).doubleValue()));
-            this.updateLightingColor(i, lightRatio);
-        }
-    }
-
-    private void updateLightingColor(int i, double lightRatio) {
-        int red = (int) (triangles[i].baseColor.getRed() * lightRatio);
-        int green = (int) (triangles[i].baseColor.getGreen() * lightRatio);
-        int blue = (int) (triangles[i].baseColor.getBlue() * lightRatio);
-        triangles[i].lightingColor = new Color(red, green, blue);
     }
 }
