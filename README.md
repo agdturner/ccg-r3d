@@ -4,7 +4,7 @@ A Java library for rendering 3D spatial data. This is built on top of [ccg-v3d](
 Success at rendering the [Utah Teapot](https://en.wikipedia.org/wiki/Utah_teapot):
 
 <img alt="A yellow rendering of the Utah Teapot" src="data/Utah_teapot_(solid)_500x375_-8.png" />
-Running [RenderImage.java](https://github.com/agdturner/ccg-r3d/src/main/java/uk/ac/leeds/ccg/r3d/RenderImage.java) produced this image in a few minutes on a basic desktop machine.
+Running [RenderImage.java](https://github.com/agdturner/ccg-r3d/tree/main/src/main/java/uk/ac/leeds/ccg/r3d/RenderImage.java) produced this image in a few minutes on a basic desktop machine.
 
 
 This is the classic ["Hello World!"](https://en.wikipedia.org/wiki/%22Hello,_World!%22_program) for computer graphics. ([Wikipedia List_of_common_3D_test_models](https://en.wikipedia.org/wiki/List_of_common_3D_test_models))
