@@ -13,6 +13,6 @@ There are about 9000 triangles considered in the input data: [Utah_teapot_(solid
 
 Here is a rendering of [Geographos](https://en.wikipedia.org/wiki/1620_Geographos):
 
-<img alt="A yellow rendering of Geographos" src="data/Geographos/1620geographos_500x375_-8.png" />
+<img alt="A yellow rendering of Geographos" src="data/geographos/1620geographos_500x375_-8.png" />
 
 The plan is to use this library to help explain [ccg-v3d]((https://github.com/agdturner/ccg-v3d)) - the underlying 3D Euclidean geometry library, and also to generate basic rendering of objects. The longer term goal is to support the development and integration of Environmental Digital Twins.
