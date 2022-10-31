@@ -78,8 +78,8 @@ public class RenderImage {
 
     public static void main(String[] args) {
         try {
-            boolean run0 = true;
-            //boolean run0 = false;
+            //boolean run0 = true;
+            boolean run0 = false;
             //boolean run1 = true;
             boolean run1 = false;
             boolean runUtah = true;
@@ -180,7 +180,7 @@ public class RenderImage {
                  */
                 oom = -12;
                 int n = 1;
-                n = 10;
+                n = 5;
                 int w = 100 * n;
                 int h = 75 * n;
                 String name = "Utah_teapot_(solid)";
