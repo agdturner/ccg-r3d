@@ -23,39 +23,67 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 
 /**
  * For visualising a triangle.
- * 
+ *
  * @author Andy Turner
  */
 public class Triangle {
 
-    private static final Math_BigRational AmbientLight = Math_BigRational.ONE.divide(Math_BigRational.valueOf(20));
-    public V3D_Triangle triangle;
-    public Color baseColor;
-    public Color lightingColor;
+    /**
+     * AmbientLight is so that non black surfaces are not completely black even
+     * if they are orientated opposite to the lighting vector.
+     */
+    private static final Math_BigRational AmbientLight = 
+            Math_BigRational.ONE.divide(Math_BigRational.valueOf(20));
     
+    /**
+     * The triangle geometry
+     */
+    public V3D_Triangle triangle;
 
-    public Triangle(V3D_Triangle t, Color baseColor) {
-        this.triangle = t;
+    /**
+     * The base colour of the triangle.
+     */
+    public Color baseColor;
+
+    /**
+     * The colour of the triangle given some lighting conditions.
+     */
+    public Color lightingColor;
+
+    /**
+     * Create a new instance
+     * @param triangle What {@link #triangle} is set to.
+     * @param baseColor What {@link #baseColor} is set to.
+     */
+    public Triangle(V3D_Triangle triangle, Color baseColor) {
+        this.triangle = triangle;
         this.baseColor = baseColor;
         this.lightingColor = baseColor;
     }
 
+    /**
+     * Used to update {@link #lightingColor} based on the input lightVector. A
+     * triangle facing the vector will be bright. One facing away will be 
+     * darker. This helps give a 3D like effect to rendering.
+     * @param lightVector The direction that light is coming from.
+     * @param oom The Order of Magnitude for the precision.
+     * @param rm The RoundingMode for any rounding.
+     */
     public void setLighting(V3D_Vector lightVector, int oom, RoundingMode rm) {
-        V3D_Vector n = triangle.p.getN(oom, rm).getUnitVector(oom, rm);
+        V3D_Vector n = triangle.pl.n.getUnitVector(oom, rm);
         Math_BigRational dot = n.getDotProduct(lightVector, oom, rm);
         Math_BigRational dot2 = dot.multiply(dot);
         if (dot.compareTo(Math_BigRational.ZERO) == -1) {
             dot2 = dot2.negate();
         }
-        dot2 = (dot2.add(Math_BigRational.ONE)).divide(Math_BigRational.TWO.multiply(Math_BigRational.ONE.subtract(AmbientLight)));
-        double lightRatio = Math.min(1.0d, Math.max(0.0d, AmbientLight.add(dot2).doubleValue()));
-        this.updateLightingColor(lightRatio);
-    }
-
-    private void updateLightingColor(double lightRatio) {
-        int red = (int) (this.baseColor.getRed() * lightRatio);
-        int green = (int) (this.baseColor.getGreen() * lightRatio);
-        int blue = (int) (this.baseColor.getBlue() * lightRatio);
-        this.lightingColor = new Color(red, green, blue);
+        dot2 = (dot2.add(Math_BigRational.ONE)).divide(
+                Math_BigRational.TWO.multiply(
+                        Math_BigRational.ONE.subtract(AmbientLight)));
+        double lightRatio = Math.min(1.0d, Math.max(0.0d,
+                AmbientLight.add(dot2).doubleValue()));
+        int red = (int) (baseColor.getRed() * lightRatio);
+        int green = (int) (baseColor.getGreen() * lightRatio);
+        int blue = (int) (baseColor.getBlue() * lightRatio);
+        lightingColor = new Color(red, green, blue);
     }
 }

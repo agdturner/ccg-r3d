@@ -18,6 +18,7 @@ package uk.ac.leeds.ccg.r3d.io;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -46,9 +47,11 @@ public class STL_Reader {
     
     public static void main(String[] args) {
         Path p = Paths.get("data", "Utah_teapot_(solid).stl");
+        int oom = -3;
+        RoundingMode rm = RoundingMode.HALF_UP;
         try {
             STL_Reader s = new STL_Reader();
-            s.readBinary(p);
+            s.readBinary(p, V3D_Vector.ZERO, oom, rm);
             //System.out.println(ts.get(0));
             System.out.println("minx=" + s.stats.minx);
             System.out.println("maxx=" + s.stats.maxx);
@@ -68,9 +71,13 @@ public class STL_Reader {
      * endian. Report the min and max of the x, y, and z values.
      *
      * @param p The file to read.
+     * @param offset The common offset.
+     * @param oom
+     * @param rm
      * @return An ArrayList of triangles read from the file.
+     * @throws IOException 
      */
-    public void readBinary(Path p) throws IOException {
+    public void readBinary(Path p, V3D_Vector offset, int oom, RoundingMode rm) throws IOException {
         V3D_Environment e = new V3D_Environment();
         DataInputStream dis = new DataInputStream(new FileInputStream(p.toFile()));
         // Skip 80 bytes
@@ -99,7 +106,7 @@ public class STL_Reader {
         z = readFloat(dis);
         stats.update(x, y, z);
         V3D_Vector rv = new V3D_Vector(x, y, z);
-        triangles.add(new V3D_Triangle(e, pv, qv, rv));
+        triangles.add(new V3D_Triangle(offset, pv, qv, rv, oom, rm));
         // The attribute is not currently used.
         short attribute = Short.reverseBytes(dis.readShort());
         while (dis.available() > 0) {
@@ -122,7 +129,7 @@ public class STL_Reader {
             stats.update(x, y, z);
             // The attribute is not currently used.
             attribute = Short.reverseBytes(dis.readShort());
-            triangles.add(new V3D_Triangle(e, pv, qv, rv));
+            triangles.add(new V3D_Triangle(pv, qv, rv, oom, rm));
         }
     }
 

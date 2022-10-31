@@ -21,6 +21,7 @@ import java.awt.Panel;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import javax.imageio.ImageIO;
 
@@ -37,6 +38,8 @@ public class IO {
     public IO(){}
     
     /**
+     * For writing out images.
+     * 
      * @param image The image to write out.
      * @param format The format e.g. "jpeg", "png", ...
      * @param p The path of the file to write to.
@@ -50,6 +53,7 @@ public class IO {
         RenderedImage ri = (RenderedImage) bi;
         g2d.dispose();
         try {
+            Files.createDirectories(p.getParent());
             ImageIO.write(ri, format, p.toFile());
         } catch (IOException e) {
             System.out.println("Format not recognised: " + format);

@@ -16,6 +16,7 @@
 package uk.ac.leeds.ccg.r3d.entities;
 
 import java.awt.Color;
+import java.math.RoundingMode;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Tetrahedron;
 
 /**
@@ -25,14 +26,25 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Tetrahedron;
  */
 public class Tetrahedron {
 
+    /**
+     * The triangles that comprise the edge surface of the tetrahedron.
+     */
     public Triangle[] triangles;
 
-    public Tetrahedron(V3D_Tetrahedron t, Color baseColor) {
-        //tetrahedron = t;
+    /**
+     * Creates a new instance.
+     * @param tetrahedron The geometry of the tetrahedron.
+     * @param baseColor What the base colour of each triangle is set to.
+     * @param lightVector The direction that light is coming from.
+     * @param oom The Order of Magnitude for the precision.
+     * @param rm The RoundingMode for any rounding.
+     */
+    public Tetrahedron(V3D_Tetrahedron tetrahedron, Color baseColor, int oom, 
+            RoundingMode rm) {
         triangles = new Triangle[4];
-        triangles[0] = new Triangle(t.getPqr(), baseColor);
-        triangles[1] = new Triangle(t.getPsq(), baseColor);
-        triangles[2] = new Triangle(t.getQsr(), baseColor);
-        triangles[3] = new Triangle(t.getSpr(), baseColor);
+        triangles[0] = new Triangle(tetrahedron.getPqr(oom, rm), baseColor);
+        triangles[1] = new Triangle(tetrahedron.getPsq(oom, rm), baseColor);
+        triangles[2] = new Triangle(tetrahedron.getQsr(oom, rm), baseColor);
+        triangles[3] = new Triangle(tetrahedron.getSpr(oom, rm), baseColor);
     }
 }

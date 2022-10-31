@@ -56,4 +56,6 @@ module uk.ac.leeds.ccg.r3d {
      * Exports.
      */
     exports uk.ac.leeds.ccg.r3d;
+    exports uk.ac.leeds.ccg.r3d.entities;
+    exports uk.ac.leeds.ccg.r3d.io;
 }
