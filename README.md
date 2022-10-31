@@ -12,7 +12,7 @@ Rendering of [Geographos](https://en.wikipedia.org/wiki/1620_Geographos) using a
 
 <img alt="A yellow rendering of Geographos" src="data/output/geographos/oom=-8/1620geographos_500x500_i=3.603341_j=-3.463922_k=3.488848_oom=-8.png" />
 
-At this resolution there are triangular artefacts visible. These are likely a result of the data creation process, but they may also reflect issues with the rendering or underlying geometry code.
+At this resolution there are triangular artefacts visible and there are also a couple of bright pixels which probably should be dark. The triangular shadows are perhaps in part a result of the data creation process, but they like the bright pixels may also reflect issues with the rendering process or underlying geometry code.
 
 The images of the Geographos and the Utah Teapot were produced by running [RenderImage.java](https://github.com/agdturner/ccg-r3d/tree/main/src/main/java/uk/ac/leeds/ccg/r3d/RenderImage.java). With some small edits to the source code it should be possible to reproduce them. The rendering of larger images takes longer. Also with greater precision settings the rendering takes longer. It is my intension to showcase more reproducible results in due course. These images for the time being serve to show that progress is being made...
 
