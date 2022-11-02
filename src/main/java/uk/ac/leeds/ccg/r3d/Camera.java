@@ -184,7 +184,8 @@ public class Camera extends V3D_Point {
         /**
          * Calculate the minimum distance between each triangle and the camera
          * focal point, order the triangles by the distance, and set the
-         * lighting.
+         * lighting. This currently assumes that all of all the triangles are in
+         * the picture.
          */
         System.out.println("Calculate the minimum distance between each"
                 + " triangle and the camera focal point, order the triangles by"
@@ -288,14 +289,14 @@ public class Camera extends V3D_Point {
                 Math_BigRational mind2 = mind2s.get(id);
                 if (mind2 == null) {
                     try {
-                        V3D_Geometry ti = getRay(id, oom, rm).getIntersection(t, oom, rm);
+                        V3D_Geometry ti = t.getIntersection(getRay(id, oom, rm), oom, rm);
                         if (ti != null) {
-                            // Do not render triangles that align with the ray.
                             if (ti instanceof V3D_Point tip) {
                                 Math_BigRational d2 = tip.getDistanceSquared(this, oom, rm);
                                 mind2s.put(id, d2);
                                 closestIndex.put(id, tIndex);
                             }
+                            // Do not render triangles that align with the ray.
                         }
                     } catch (RuntimeException ex) {
                         System.out.println("Resolution too coarse to render "
@@ -304,14 +305,14 @@ public class Camera extends V3D_Point {
                 } else {
                     if (mind2t[tIndex].compareTo(mind2) != 1) {
                         try {
-                            V3D_Geometry ti = getRay(id, oom, rm).getIntersection(t, oom, rm);
+                            V3D_Geometry ti = t.getIntersection(getRay(id, oom, rm), oom, rm);
                             if (ti != null) {
-                                // Do not render triangles that align with the ray.
                                 if (ti instanceof V3D_Point tip) {
                                     Math_BigRational d2 = tip.getDistanceSquared(this, oom, rm);
                                     mind2s.put(id, d2);
                                     closestIndex.put(id, tIndex);
                                 }
+                                // Do not render triangles that align with the ray.
                             }
                         } catch (RuntimeException ex) {
                             System.out.println("Resolution too coarse to render "

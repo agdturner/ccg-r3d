@@ -88,17 +88,16 @@ public class RenderImage {
             boolean runGeographos = false;
             //boolean runKatrina = true;
             boolean runKatrina = false;
-
             Path inDataDir = Paths.get("data", "input");
             Path outDataDir = Paths.get("data", "output");
-
             RoundingMode rm = RoundingMode.HALF_UP;
-            if (run0) {//Test 
+            if (run0) {
                 //int oom = -2;
-                //int oom = -4;
-                int oom = -6;
-                int w = 100;
-                int h = 75;
+                int oom = -4;
+                int n = 1;
+                //n = 5;
+                int w = 100 * n;
+                int h = 100 * n;
                 // Init universe
                 Universe universe = new Universe(V3D_Vector.ZERO, oom, rm);
                 // Detail the camera
@@ -113,16 +112,20 @@ public class RenderImage {
                             if (!(i == 0 && j == 0 && k == 0)) {
                                 V3D_Vector direction = new V3D_Vector(i, j, k).getUnitVector(oom, rm);
                                 V3D_Point pt = getCameraPt(centroid, direction,
-                                        radius.multiply(10), oom, rm);
+                                        radius.multiply(2), oom, rm);
                                 // Render the image
                                 RenderImage r = new RenderImage(universe, pt, size, oom, rm);
-                                r.output = Paths.get(outDataDir.toString(), "test", "oom=" + oom,
+                                V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
+                                String ls = "lighting(i=" + lighting.getDX(oom, rm).round(-4, rm).getStringValue().trim()
+                                        + "j=" + lighting.getDY(oom, rm).round(-4, rm).getStringValue().trim()
+                                        + "k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim();
+                                r.output = Paths.get(outDataDir.toString(), "test", "oom=" + oom, ls,
                                         "test_" + r.size.width + "x" + r.size.height
-                                        + "_i=" + pt.getX(oom, rm).round(-4, rm).getStringValue().trim()
+                                        + "pt(i=" + pt.getX(oom, rm).round(-4, rm).getStringValue().trim()
                                         + "_j=" + pt.getY(oom, rm).round(-4, rm).getStringValue().trim()
                                         + "_k=" + pt.getZ(oom, rm).round(-4, rm).getStringValue().trim()
-                                        + "_oom=" + oom + ".png");
-                                r.run();
+                                        + ")_" + ls + "_oom=" + oom + ".png");
+                                r.run(lighting);
                             }
                         }
                     }
@@ -130,9 +133,9 @@ public class RenderImage {
             }
 
             if (run1) {
-                int oom = -11;
+                int oom = -6;
                 int n = 1;
-                //n = 5;
+                n = 5;
                 int w = 100 * n;
                 int h = 100 * n;
                 //int w = 100 * n;
@@ -157,14 +160,18 @@ public class RenderImage {
                                         radius.multiply(2), oom, rm);
                                 // Render the image
                                 RenderImage r = new RenderImage(universe, pt, size, oom, rm);
-                                r.output = Paths.get(outDataDir.toString(), name, "files", "oom=" + oom,
+                                V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
+                                String ls = "lighting(i=" + lighting.getDX(oom, rm).round(-4, rm).getStringValue().trim()
+                                        + "j=" + lighting.getDY(oom, rm).round(-4, rm).getStringValue().trim()
+                                        + "k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim();
+                                r.output = Paths.get(outDataDir.toString(), name, "files", "oom=" + oom, ls,
                                         filename
                                         + "_" + r.size.width + "x" + r.size.height
-                                        + "_i=" + pt.getX(oom, rm).round(-4, rm).getStringValue().trim()
-                                        + "_j=" + pt.getY(oom, rm).round(-4, rm).getStringValue().trim()
-                                        + "_k=" + pt.getZ(oom, rm).round(-4, rm).getStringValue().trim()
-                                        + "_oom=" + oom + ".png");
-                                r.run();
+                                        + "pt(i=" + pt.getX(oom, rm).round(-4, rm).getStringValue().trim()
+                                        + "j=" + pt.getY(oom, rm).round(-4, rm).getStringValue().trim()
+                                        + "k=" + pt.getZ(oom, rm).round(-4, rm).getStringValue().trim()
+                                        + ")_" + ls + "_oom=" + oom + ".png");
+                                r.run(lighting);
                             }
                         }
                     }
@@ -178,7 +185,7 @@ public class RenderImage {
                  * yMin=-5.36976051, yMax=5.55727768, zMin=2E-8,
                  * zMax=8.57152748)
                  */
-                oom = -12;
+                oom = -8;
                 int n = 1;
                 n = 5;
                 int w = 100 * n;
@@ -198,19 +205,23 @@ public class RenderImage {
 //                        for (int k = -1; k <= 1; k++) {
 //                            if (!(i == 0 && j == 0 && k == 0)) {
 //                                V3D_Vector direction = new V3D_Vector(i, j, k).getUnitVector(oom, rm);
-                V3D_Vector direction = new V3D_Vector(1, 0, 0).getUnitVector(oom, rm);
+                V3D_Vector direction = new V3D_Vector(-1, 1, 0).getUnitVector(oom, rm);
                 V3D_Point pt = getCameraPt(centroid, direction,
                         radius.multiply(4).divide(2), oom, rm);
                 // Render the image
                 RenderImage r = new RenderImage(universe, pt, size, oom, rm);
-                r.output = Paths.get(outDataDir.toString(), name, "files", "oom=" + oom,
+                V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
+                String ls = "lighting(i=" + lighting.getDX(oom, rm).round(-4, rm).getStringValue().trim()
+                        + "j=" + lighting.getDY(oom, rm).round(-4, rm).getStringValue().trim()
+                        + "k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim();
+                r.output = Paths.get(outDataDir.toString(), name, "oom=" + oom, ls,
                         name
                         + "_" + r.size.width + "x" + r.size.height
-                        + "_i=" + pt.getX(oom, rm).round(-4, rm).getStringValue().trim()
+                        + "pt(i=" + pt.getX(oom, rm).round(-4, rm).getStringValue().trim()
                         + "_j=" + pt.getY(oom, rm).round(-4, rm).getStringValue().trim()
                         + "_k=" + pt.getZ(oom, rm).round(-4, rm).getStringValue().trim()
-                        + "_oom=" + oom + ".png");
-                r.run();
+                        + ")_" + ls + "_oom=" + oom + ".png");
+                r.run(lighting);
 //                            }
 //                        }
 //                    }
@@ -246,14 +257,18 @@ public class RenderImage {
                                         radius.multiply(2), oom, rm);
                                 // Render the image
                                 RenderImage r = new RenderImage(universe, pt, size, oom, rm);
-                                r.output = Paths.get(outDataDir.toString(), name, "files", "oom=" + oom,
+                                V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
+                                String ls = "lighting(i=" + lighting.getDX(oom, rm).round(-4, rm).getStringValue().trim()
+                                        + "j=" + lighting.getDY(oom, rm).round(-4, rm).getStringValue().trim()
+                                        + "k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim();
+                                r.output = Paths.get(outDataDir.toString(), name, "files", "oom=" + oom, ls,
                                         filename
                                         + "_" + r.size.width + "x" + r.size.height
-                                        + "_i=" + pt.getX(oom, rm).round(-4, rm).getStringValue().trim()
+                                        + "pt(i=" + pt.getX(oom, rm).round(-4, rm).getStringValue().trim()
                                         + "_j=" + pt.getY(oom, rm).round(-4, rm).getStringValue().trim()
                                         + "_k=" + pt.getZ(oom, rm).round(-4, rm).getStringValue().trim()
-                                        + "_oom=" + oom + ".png");
-                                r.run();
+                                        + ")_" + ls + "_oom=" + oom + ".png");
+                                r.run(lighting);
                             }
                         }
                     }
@@ -286,14 +301,18 @@ public class RenderImage {
                         radius.multiply(2), oom, rm);
                 // Render the image
                 RenderImage r = new RenderImage(universe, pt, size, oom, rm);
-                r.output = Paths.get(outDataDir.toString(), name, "files", "oom=" + oom,
+                V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
+                String ls = "lighting(i=" + lighting.getDX(oom, rm).round(-4, rm).getStringValue().trim()
+                        + "j=" + lighting.getDY(oom, rm).round(-4, rm).getStringValue().trim()
+                        + "k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim();
+                r.output = Paths.get(outDataDir.toString(), name, "files", "oom=" + oom, ls,
                         filename
                         + "_" + r.size.width + "x" + r.size.height
-                        + "_i=" + pt.getX(oom, rm).round(-4, rm).getStringValue().trim()
+                        + "pt(i=" + pt.getX(oom, rm).round(-4, rm).getStringValue().trim()
                         + "_j=" + pt.getY(oom, rm).round(-4, rm).getStringValue().trim()
                         + "_k=" + pt.getZ(oom, rm).round(-4, rm).getStringValue().trim()
-                        + "_oom=" + oom + ".png");
-                r.run();
+                        + ")_" + ls + "_oom=" + oom + ".png");
+                r.run(lighting);
 //                            }
 //                        }
 //                    }
@@ -309,13 +328,7 @@ public class RenderImage {
      *
      * @throws Exception
      */
-    public void run() throws Exception {
-        Math_BigRational P1 = Math_BigRational.ONE;
-        Math_BigRational N1 = Math_BigRational.ONE.negate();
-//        V3D_Vector lighting = new V3D_Vector(P1, N1, N1,
-//                Math_BigRationalSqrt.ONE).getUnitVector(oom, rm);
-        V3D_Vector lighting = new V3D_Vector(N1, N1, N1,
-                Math_BigRationalSqrt.ONE).getUnitVector(oom, rm);
+    public void run(V3D_Vector lighting) throws Exception {
         int[] pix = this.universe.camera.render(this.universe, lighting, oom,
                 rm);
         /**

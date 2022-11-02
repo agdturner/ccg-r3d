@@ -77,22 +77,54 @@ public class Universe {
          * Create a AABox centred at 0,0,0 
          */
         V3D_Point[] points = new V3D_Point[8];
-        V3D_Point lbf = new V3D_Point(offset, new V3D_Vector(-1,-1,-1));
-        V3D_Point lba = new V3D_Point(offset, new V3D_Vector(-1,-1,1));
-        V3D_Point ltf = new V3D_Point(offset, new V3D_Vector(-1,1,-1));
-        V3D_Point lta = new V3D_Point(offset, new V3D_Vector(-1,1,1));
-        V3D_Point rbf = new V3D_Point(offset, new V3D_Vector(1,-1,-1));
-        V3D_Point rba = new V3D_Point(offset, new V3D_Vector(1,-1,1));
-        V3D_Point rtf = new V3D_Point(offset, new V3D_Vector(1,1,-1));
-        V3D_Point rta = new V3D_Point(offset, new V3D_Vector(1,1,1));
-        tetrahedra.add(new Tetrahedron(new V3D_Tetrahedron(lbf, ltf, lta, rtf,
-                oom, rm), Color.WHITE, oom, rm));
-        tetrahedra.add(new Tetrahedron(new V3D_Tetrahedron(lta, lba, lbf, rba,
-                oom, rm), Color.RED, oom, rm));
-        tetrahedra.add(new Tetrahedron(new V3D_Tetrahedron(lta, rta, rba, rtf,
-                oom, rm), Color.YELLOW, oom, rm));
-        tetrahedra.add(new Tetrahedron(new V3D_Tetrahedron(lbf, rbf, rtf, rba,
-                oom, rm), new Color(Color.GREEN.getRGB()), oom, rm));
+//        V3D_Point lbf = new V3D_Point(offset, new V3D_Vector(-1,-1,-1));
+//        V3D_Point lba = new V3D_Point(offset, new V3D_Vector(-1,-1,1));
+//        V3D_Point ltf = new V3D_Point(offset, new V3D_Vector(-1,1,-1));
+//        V3D_Point lta = new V3D_Point(offset, new V3D_Vector(-1,1,1));
+//        V3D_Point rbf = new V3D_Point(offset, new V3D_Vector(1,-1,-1));
+//        V3D_Point rba = new V3D_Point(offset, new V3D_Vector(1,-1,1));
+//        V3D_Point rtf = new V3D_Point(offset, new V3D_Vector(1,1,-1));
+//        V3D_Point rta = new V3D_Point(offset, new V3D_Vector(1,1,1));
+        V3D_Point lbf = new V3D_Point(offset, new V3D_Vector(-2,-2,-2));
+        V3D_Point lba = new V3D_Point(offset, new V3D_Vector(-2,-2,2));
+        V3D_Point ltf = new V3D_Point(offset, new V3D_Vector(-2,2,-2));
+        V3D_Point lta = new V3D_Point(offset, new V3D_Vector(-2,2,2));
+        V3D_Point rbf = new V3D_Point(offset, new V3D_Vector(2,-2,-2));
+        V3D_Point rba = new V3D_Point(offset, new V3D_Vector(2,-2,2));
+        V3D_Point rtf = new V3D_Point(offset, new V3D_Vector(2,2,-2));
+        V3D_Point rta = new V3D_Point(offset, new V3D_Vector(2,2,2));
+//        tetrahedra.add(new Tetrahedron(new V3D_Tetrahedron(lbf, ltf, lta, rtf,
+//                oom, rm), Color.BLUE, oom, rm));
+//        tetrahedra.add(new Tetrahedron(new V3D_Tetrahedron(lta, lba, lbf, rba,
+//                oom, rm), Color.RED, oom, rm));
+//        tetrahedra.add(new Tetrahedron(new V3D_Tetrahedron(lta, rta, rba, rtf,
+//                oom, rm), Color.YELLOW, oom, rm));
+//        tetrahedra.add(new Tetrahedron(new V3D_Tetrahedron(lbf, rbf, rtf, rba,
+//                oom, rm), new Color(Color.GREEN.getRGB()), oom, rm));
+        triangles.add(new Triangle(new V3D_Triangle(lbf, ltf, rtf, oom, rm), Color.WHITE));
+        triangles.add(new Triangle(new V3D_Triangle(lbf, rbf, rtf, oom, rm), Color.WHITE));
+        triangles.add(new Triangle(new V3D_Triangle(lbf, ltf, lta, oom, rm), Color.WHITE));
+        triangles.add(new Triangle(new V3D_Triangle(lbf, lba, lta, oom, rm), Color.WHITE));
+        triangles.add(new Triangle(new V3D_Triangle(lba, lta, rta, oom, rm), Color.WHITE));
+        triangles.add(new Triangle(new V3D_Triangle(lba, rba, rta, oom, rm), Color.WHITE));
+        triangles.add(new Triangle(new V3D_Triangle(rbf, rtf, rta, oom, rm), Color.WHITE));
+        triangles.add(new Triangle(new V3D_Triangle(rbf, rta, rba, oom, rm), Color.WHITE));
+        triangles.add(new Triangle(new V3D_Triangle(ltf, lta, rta, oom, rm), Color.WHITE));
+        triangles.add(new Triangle(new V3D_Triangle(rtf, ltf, rta, oom, rm), Color.WHITE));
+        triangles.add(new Triangle(new V3D_Triangle(lbf, rbf, rba, oom, rm), Color.WHITE));
+        triangles.add(new Triangle(new V3D_Triangle(lbf, lba, rba, oom, rm), Color.WHITE));
+//        triangles.add(new Triangle(new V3D_Triangle(lbf, ltf, rtf, oom, rm), Color.BLUE));
+//        triangles.add(new Triangle(new V3D_Triangle(lbf, rbf, rtf, oom, rm), Color.BLUE));
+//        triangles.add(new Triangle(new V3D_Triangle(lbf, ltf, lta, oom, rm), Color.RED));
+//        triangles.add(new Triangle(new V3D_Triangle(lbf, lba, lta, oom, rm), Color.RED));
+//        triangles.add(new Triangle(new V3D_Triangle(lba, lta, rta, oom, rm), Color.YELLOW));
+//        triangles.add(new Triangle(new V3D_Triangle(lba, rba, rta, oom, rm), Color.YELLOW));
+//        triangles.add(new Triangle(new V3D_Triangle(rbf, rtf, rta, oom, rm), Color.GREEN));
+//        triangles.add(new Triangle(new V3D_Triangle(rbf, rta, rba, oom, rm), Color.GREEN));
+//        triangles.add(new Triangle(new V3D_Triangle(ltf, lta, rta, oom, rm), Color.ORANGE));
+//        triangles.add(new Triangle(new V3D_Triangle(rtf, ltf, rta, oom, rm), Color.ORANGE));
+//        triangles.add(new Triangle(new V3D_Triangle(lbf, rbf, rba, oom, rm), Color.PINK));
+//        triangles.add(new Triangle(new V3D_Triangle(lbf, lba, rba, oom, rm), Color.PINK));
         points[0] = lbf;
         points[1] = lba;
         points[2] = ltf;
