@@ -40,15 +40,8 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <ccg-grids.version>2.1-SNAPSHOT</ccg-grids.version>
-        <ccg-io.version>1.1.0</ccg-io.version>
-        <ccg-math.version>2.1</ccg-math.version>
-        <ccg-v3d.version>0.16-SNAPSHOT</ccg-v3d.version>
-        <big-math.version>2.3.0</big-math.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <maven.version>3.0.1</maven.version>
-        <junit.version>5.7.0</junit.version>
     </properties>
     
     <dependencies>
@@ -80,7 +73,7 @@
         <dependency>
             <groupId>io.github.agdturner</groupId>
             <artifactId>ccg-v3d</artifactId>
-            <version>0.16-SNAPSHOT</version>
+            <version>0.16</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

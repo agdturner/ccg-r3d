@@ -23,7 +23,6 @@ import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import uk.ac.leeds.ccg.math.number.Math_BigRational;
-import uk.ac.leeds.ccg.math.number.Math_BigRationalSqrt;
 import uk.ac.leeds.ccg.r3d.io.IO;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
@@ -78,8 +77,8 @@ public class RenderImage {
 
     public static void main(String[] args) {
         try {
-            //boolean run0 = true;
-            boolean run0 = false;
+            boolean run0 = true;
+            //boolean run0 = false;
             //boolean run1 = true;
             boolean run1 = false;
             boolean runUtah = true;
