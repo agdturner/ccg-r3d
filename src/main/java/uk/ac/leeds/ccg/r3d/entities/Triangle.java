@@ -41,6 +41,21 @@ public class Triangle {
     public V3D_Triangle triangle;
 
     /**
+     * The normal as read in from for example an STL file. The normal can be 
+     * computed from the geometry, but there is some uncertainty as to the 
+     * direction of the normal and this can resolve it. This might be especially
+     * important if the properties of each side of the triangle are different. 
+     * For example the colour of one side may be different to another.  
+     */
+    public V3D_Vector normal;
+    
+    /**
+     * An attribute as read in from for example an STL file. This could 
+     * represent the colour or texture or another property of the triangle.  
+     */
+    public short attribute;
+    
+    /**
      * The base colour of the triangle.
      */
     public Color baseColor;
@@ -49,6 +64,19 @@ public class Triangle {
      * The colour of the triangle given some lighting conditions.
      */
     public Color lightingColor;
+
+    /**
+     * Create a new instance.
+     * 
+     * @param triangle What {@link #triangle} is set to.
+     * @param normal What {@link #normal} is set to.
+     * @param attribute What {@link #attribute} is set to.
+     */
+    public Triangle(V3D_Triangle triangle, V3D_Vector normal, short attribute) {
+        this.triangle = triangle;
+        this.normal = normal;
+        this.attribute = attribute;
+    }
 
     /**
      * Create a new instance
@@ -70,7 +98,7 @@ public class Triangle {
      * @param rm The RoundingMode for any rounding.
      */
     public void setLighting(V3D_Vector lightVector, int oom, RoundingMode rm) {
-        V3D_Vector n = triangle.pl.n.getUnitVector(oom, rm);
+        V3D_Vector n = triangle.getPl(oom, rm).n.getUnitVector(oom, rm);
         Math_BigRational dot = n.getDotProduct(lightVector, oom, rm);
         Math_BigRational dot2 = dot.multiply(dot);
         if (dot.compareTo(Math_BigRational.ZERO) == -1) {

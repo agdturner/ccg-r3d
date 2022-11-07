@@ -24,10 +24,8 @@ import uk.ac.leeds.ccg.math.number.Math_BigRational;
 import uk.ac.leeds.ccg.r3d.entities.Tetrahedron;
 import uk.ac.leeds.ccg.r3d.entities.Triangle;
 import uk.ac.leeds.ccg.r3d.io.STL_Reader;
-import uk.ac.leeds.ccg.v3d.core.V3D_Environment;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Envelope;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
-import uk.ac.leeds.ccg.v3d.geometry.V3D_Tetrahedron;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 
@@ -36,11 +34,6 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
  * @author Andy Turner
  */
 public class Universe {
-
-    /**
-     * A reference to the environment. 
-     */
-    V3D_Environment e;
 
     /**
      * Envelope
@@ -70,13 +63,14 @@ public class Universe {
      * @param rm The RoundingMode for any rounding.
      */
     public Universe(V3D_Vector offset, int oom, RoundingMode rm) {
-        e = new V3D_Environment();
         triangles = new ArrayList<>();
         tetrahedra = new ArrayList<>();
         /**
          * Create a AABox centred at 0,0,0 
          */
         V3D_Point[] points = new V3D_Point[8];
+        V3D_Point centroid = V3D_Point.ORIGIN;
+        long multiplier = 100;
 //        V3D_Point lbf = new V3D_Point(offset, new V3D_Vector(-1,-1,-1));
 //        V3D_Point lba = new V3D_Point(offset, new V3D_Vector(-1,-1,1));
 //        V3D_Point ltf = new V3D_Point(offset, new V3D_Vector(-1,1,-1));
@@ -85,14 +79,14 @@ public class Universe {
 //        V3D_Point rba = new V3D_Point(offset, new V3D_Vector(1,-1,1));
 //        V3D_Point rtf = new V3D_Point(offset, new V3D_Vector(1,1,-1));
 //        V3D_Point rta = new V3D_Point(offset, new V3D_Vector(1,1,1));
-        V3D_Point lbf = new V3D_Point(offset, new V3D_Vector(-2,-2,-2));
-        V3D_Point lba = new V3D_Point(offset, new V3D_Vector(-2,-2,2));
-        V3D_Point ltf = new V3D_Point(offset, new V3D_Vector(-2,2,-2));
-        V3D_Point lta = new V3D_Point(offset, new V3D_Vector(-2,2,2));
-        V3D_Point rbf = new V3D_Point(offset, new V3D_Vector(2,-2,-2));
-        V3D_Point rba = new V3D_Point(offset, new V3D_Vector(2,-2,2));
-        V3D_Point rtf = new V3D_Point(offset, new V3D_Vector(2,2,-2));
-        V3D_Point rta = new V3D_Point(offset, new V3D_Vector(2,2,2));
+        V3D_Point lbf = new V3D_Point(offset, new V3D_Vector(-1 * multiplier,-1 * multiplier,-1 * multiplier));
+        V3D_Point lba = new V3D_Point(offset, new V3D_Vector(-1 * multiplier,-1 * multiplier,1 * multiplier));
+        V3D_Point ltf = new V3D_Point(offset, new V3D_Vector(-1 * multiplier,1 * multiplier,-1 * multiplier));
+        V3D_Point lta = new V3D_Point(offset, new V3D_Vector(-1 * multiplier,1 * multiplier,1 * multiplier));
+        V3D_Point rbf = new V3D_Point(offset, new V3D_Vector(1 * multiplier,-1 * multiplier,-1 * multiplier));
+        V3D_Point rba = new V3D_Point(offset, new V3D_Vector(1 * multiplier,-1 * multiplier,1 * multiplier));
+        V3D_Point rtf = new V3D_Point(offset, new V3D_Vector(1 * multiplier,1 * multiplier,-1 * multiplier));
+        V3D_Point rta = new V3D_Point(offset, new V3D_Vector(1 * multiplier,1 * multiplier,1 * multiplier));
 //        tetrahedra.add(new Tetrahedron(new V3D_Tetrahedron(lbf, ltf, lta, rtf,
 //                oom, rm), Color.BLUE, oom, rm));
 //        tetrahedra.add(new Tetrahedron(new V3D_Tetrahedron(lta, lba, lbf, rba,
@@ -113,18 +107,18 @@ public class Universe {
 //        triangles.add(new Triangle(new V3D_Triangle(rtf, ltf, rta, oom, rm), Color.WHITE));
 //        triangles.add(new Triangle(new V3D_Triangle(lbf, rbf, rba, oom, rm), Color.WHITE));
 //        triangles.add(new Triangle(new V3D_Triangle(lbf, lba, rba, oom, rm), Color.WHITE));
-        triangles.add(new Triangle(new V3D_Triangle(lbf, ltf, rtf, oom, rm), Color.BLUE));
-        triangles.add(new Triangle(new V3D_Triangle(lbf, rbf, rtf, oom, rm), Color.BLUE));
-        triangles.add(new Triangle(new V3D_Triangle(lbf, ltf, lta, oom, rm), Color.RED));
-        triangles.add(new Triangle(new V3D_Triangle(lbf, lba, lta, oom, rm), Color.RED));
-        triangles.add(new Triangle(new V3D_Triangle(lba, lta, rta, oom, rm), Color.YELLOW));
-        triangles.add(new Triangle(new V3D_Triangle(lba, rba, rta, oom, rm), Color.YELLOW));
-        triangles.add(new Triangle(new V3D_Triangle(rbf, rtf, rta, oom, rm), Color.GREEN));
-        triangles.add(new Triangle(new V3D_Triangle(rbf, rta, rba, oom, rm), Color.GREEN));
-        triangles.add(new Triangle(new V3D_Triangle(ltf, lta, rta, oom, rm), Color.ORANGE));
-        triangles.add(new Triangle(new V3D_Triangle(rtf, ltf, rta, oom, rm), Color.ORANGE));
-        triangles.add(new Triangle(new V3D_Triangle(lbf, rbf, rba, oom, rm), Color.PINK));
-        triangles.add(new Triangle(new V3D_Triangle(lbf, lba, rba, oom, rm), Color.PINK));
+        triangles.add(new Triangle(new V3D_Triangle(centroid, lbf, ltf, rtf, oom, rm), Color.BLUE));
+        triangles.add(new Triangle(new V3D_Triangle(centroid, lbf, rbf, rtf, oom, rm), Color.BLUE));
+        triangles.add(new Triangle(new V3D_Triangle(centroid, lbf, ltf, lta, oom, rm), Color.RED));
+        triangles.add(new Triangle(new V3D_Triangle(centroid, lbf, lba, lta, oom, rm), Color.RED));
+        triangles.add(new Triangle(new V3D_Triangle(centroid, lba, lta, rta, oom, rm), Color.YELLOW));
+        triangles.add(new Triangle(new V3D_Triangle(centroid, lba, rba, rta, oom, rm), Color.YELLOW));
+        triangles.add(new Triangle(new V3D_Triangle(centroid, rbf, rtf, rta, oom, rm), Color.GREEN));
+        triangles.add(new Triangle(new V3D_Triangle(centroid, rbf, rta, rba, oom, rm), Color.GREEN));
+        triangles.add(new Triangle(new V3D_Triangle(centroid, ltf, lta, rta, oom, rm), Color.ORANGE));
+        triangles.add(new Triangle(new V3D_Triangle(centroid, rtf, ltf, rta, oom, rm), Color.ORANGE));
+        triangles.add(new Triangle(new V3D_Triangle(centroid, lbf, rbf, rba, oom, rm), Color.PINK));
+        triangles.add(new Triangle(new V3D_Triangle(centroid, lbf, lba, rba, oom, rm), Color.PINK));
         points[0] = lbf;
         points[1] = lba;
         points[2] = ltf;
@@ -144,23 +138,24 @@ public class Universe {
      * @param oom The Order of Magnitude for the precision.
      * @param rm The RoundingMode for any rounding.
      */
-    public Universe(Path path, V3D_Vector offset, int oom, RoundingMode rm) 
-            throws IOException {
-        e = new V3D_Environment();
+    public Universe(Path path, V3D_Vector offset, Color color, int oom, 
+            RoundingMode rm) throws IOException {
         triangles = new ArrayList<>();
         tetrahedra = new ArrayList<>();
         STL_Reader data = new STL_Reader();
         data.readBinary(path, offset, oom, rm);
-        V3D_Point p = data.triangles.get(0).pl.getP();
+        V3D_Point p = data.triangles.get(0).triangle.getPl(oom, rm).getP();
         Math_BigRational xmin = p.getX(oom, rm);
         Math_BigRational xmax = p.getX(oom, rm);
         Math_BigRational ymin = p.getY(oom, rm);
         Math_BigRational ymax = p.getY(oom, rm);
         Math_BigRational zmin = p.getZ(oom, rm);
         Math_BigRational zmax = p.getZ(oom, rm);
-        for (V3D_Triangle t : data.triangles) {
-            triangles.add(new Triangle(t, Color.YELLOW));
-            for (var pt : t.getPoints(oom, rm)) {
+        for (Triangle t : data.triangles) {
+            t.baseColor = color;
+            t.lightingColor = color;
+            triangles.add(t);
+            for (var pt : t.triangle.getPoints(oom, rm)) {
                 Math_BigRational x = pt.getX(oom, rm);
                 Math_BigRational y = pt.getY(oom, rm);
                 Math_BigRational z = pt.getZ(oom, rm);

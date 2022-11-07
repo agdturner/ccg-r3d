@@ -24,7 +24,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import uk.ac.leeds.ccg.v3d.core.V3D_Environment;
+import uk.ac.leeds.ccg.r3d.entities.Triangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 
@@ -35,7 +35,7 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
  */
 public class STL_Reader {
 
-    public ArrayList<V3D_Triangle> triangles;
+    public ArrayList<Triangle> triangles;
     public Stats stats;
             
     /**
@@ -65,10 +65,10 @@ public class STL_Reader {
     }
 
     /**
-     * Read the
-     * <a href="https://en.wikipedia.org/wiki/STL_(file_format)#Binary_STL">binary
-     * STL file</a> at the given Path. Everything is assumed to be little
-     * endian. Report the min and max of the x, y, and z values.
+     * Read the binary STL file at the given Path following the available file
+     * specification: https://en.wikipedia.org/wiki/STL_(file_format)#Binary_STL
+     * Everything is assumed to be little endian. Report the min and max of the
+     * x, y, and z values.
      *
      * @param p The file to read.
      * @param offset The common offset.
@@ -77,15 +77,16 @@ public class STL_Reader {
      * @return An ArrayList of triangles read from the file.
      * @throws IOException 
      */
-    public void readBinary(Path p, V3D_Vector offset, int oom, RoundingMode rm) throws IOException {
-        V3D_Environment e = new V3D_Environment();
-        DataInputStream dis = new DataInputStream(new FileInputStream(p.toFile()));
+    public void readBinary(Path p, V3D_Vector offset, int oom, RoundingMode rm)
+            throws IOException {
+        DataInputStream dis = new DataInputStream(new FileInputStream(
+                p.toFile()));
         // Skip 80 bytes
         dis.read(new byte[80]);
         int nTriangles = Integer.reverseBytes(dis.readInt());
         System.out.println("Reading " + nTriangles + " triangles.");
         // read triangles
-        float x, y, z, minx, maxx, miny, maxy, minz, maxz;
+        float x, y, z;
         // Read the first triangle
         x = readFloat(dis);
         y = readFloat(dis);
@@ -106,11 +107,11 @@ public class STL_Reader {
         z = readFloat(dis);
         stats.update(x, y, z);
         V3D_Vector rv = new V3D_Vector(x, y, z);
-        triangles.add(new V3D_Triangle(offset, pv, qv, rv, oom, rm));
-        // The attribute is not currently used.
         short attribute = Short.reverseBytes(dis.readShort());
+        triangles.add(new Triangle(
+                new V3D_Triangle(offset, pv, qv, rv, oom, rm)
+                , n, attribute));
         while (dis.available() > 0) {
-            // The normal to the triangle is not currently used.
             n = new V3D_Vector(readFloat(dis), readFloat(dis), readFloat(dis));
             x = readFloat(dis);
             y = readFloat(dis);
@@ -127,9 +128,10 @@ public class STL_Reader {
             z = readFloat(dis);
             rv = new V3D_Vector(x, y, z);
             stats.update(x, y, z);
-            // The attribute is not currently used.
             attribute = Short.reverseBytes(dis.readShort());
-            triangles.add(new V3D_Triangle(pv, qv, rv, oom, rm));
+            triangles.add(new Triangle(
+                    new V3D_Triangle(offset, pv, qv, rv, oom, rm),
+                    n, attribute));
         }
     }
 
