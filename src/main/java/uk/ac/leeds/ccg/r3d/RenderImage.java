@@ -215,8 +215,8 @@ public class RenderImage {
                 //V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
                 V3D_Vector lighting = new V3D_Vector(1, 2, 3).getUnitVector(oom, rm);
                 String ls = "lighting(i=" + lighting.getDX(oom, rm).round(-4, rm).getStringValue().trim()
-                        + "j=" + lighting.getDY(oom, rm).round(-4, rm).getStringValue().trim()
-                        + "k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim() + ")";
+                        + "_j=" + lighting.getDY(oom, rm).round(-4, rm).getStringValue().trim()
+                        + "_k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim() + ")";
                 r.output = Paths.get(outDataDir.toString(), name, "oom=" + oom, ls,
                         name
                         + "_" + r.size.width + "x" + r.size.height
