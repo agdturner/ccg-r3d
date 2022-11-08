@@ -82,10 +82,10 @@ public class RenderImage {
             boolean run0 = false;
             //boolean run1 = true;
             boolean run1 = false;
-            //boolean runUtah = true;
-            boolean runUtah = false;
-            boolean runGeographos = true;
-            //boolean runGeographos = false;
+            boolean runUtah = true;
+            //boolean runUtah = false;
+            //boolean runGeographos = true;
+            boolean runGeographos = false;
             //boolean runKatrina = true;
             boolean runKatrina = false;
             Path inDataDir = Paths.get("data", "input");
@@ -135,9 +135,9 @@ public class RenderImage {
             }
 
             if (run1) {
-                int oom = -8;
+                int oom = -7;
                 int n = 1;
-                n = 5;
+                //n = 5;
                 int w = 100 * n;
                 int h = 100 * n;
                 //int w = 100 * n;
@@ -187,7 +187,7 @@ public class RenderImage {
                  * yMin=-5.36976051, yMax=5.55727768, zMin=2E-8,
                  * zMax=8.57152748)
                  */
-                oom = -8;
+                oom = -10;
                 int n = 1;
                 n = 5;
                 int w = 100 * n;
@@ -202,12 +202,12 @@ public class RenderImage {
                 V3D_Point centroid = universe.envelope.getCentroid(oom, rm);
                 Math_BigRational radius = universe.envelope.getPoints(oom, rm)[0]
                                 .getDistance(centroid, oom, rm);
-                for (int i = -1; i <= 1; i++) {
-                    for (int j = -1; j <= 1; j++) {
-                        for (int k = -1; k <= 1; k++) {
-                            if (!(i == 0 && j == 0 && k == 0)) {
-                                V3D_Vector direction = new V3D_Vector(i, j, k).getUnitVector(oom, rm);
-                //V3D_Vector direction = new V3D_Vector(-1, 1, 0).getUnitVector(oom, rm);
+//                for (int i = -1; i <= 1; i++) {
+//                    for (int j = -1; j <= 1; j++) {
+//                        for (int k = -1; k <= 1; k++) {
+//                            if (!(i == 0 && j == 0 && k == 0)) {
+//                                V3D_Vector direction = new V3D_Vector(i, j, k).getUnitVector(oom, rm);
+                V3D_Vector direction = new V3D_Vector(-1, 1, 1).getUnitVector(oom, rm);
                 V3D_Point pt = getCameraPt(centroid, direction,
                         radius.multiply(4).divide(2), oom, rm);
                 // Render the image
@@ -225,10 +225,10 @@ public class RenderImage {
                         + "_k=" + pt.getZ(oom, rm).round(-4, rm).getStringValue().trim()
                         + ")_" + ls + "_oom=" + oom + ".png");
                 r.run(lighting);
-                            }
-                        }
-                    }
-                }
+//                            }
+//                        }
+//                    }
+//                }
             }
 
             if (runGeographos) {
@@ -255,7 +255,7 @@ public class RenderImage {
 //                    for (int j = -1; j <= 1; j++) {
 //                        for (int k = -1; k <= 1; k++) {
 //                            if (!(i == 0 && j == 0 && k == 0)) {
-                                int i = -1;
+                                int i = 1;
                                 int j = 1;
                                 int k = -1;
                                 
@@ -324,7 +324,7 @@ public class RenderImage {
 //                        }
 //                    }
 //                }
-            }Icosahedron_500x500pt(i=-64.7214j=-64.7214k=64.7214)_lighting(i=-0.2673j=-0.5345k=-0.8018_oom=-8
+            }
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }

@@ -109,8 +109,7 @@ public class STL_Reader {
         V3D_Vector rv = new V3D_Vector(x, y, z);
         short attribute = Short.reverseBytes(dis.readShort());
         triangles.add(new Triangle(
-                new V3D_Triangle(offset, pv, qv, rv, oom, rm)
-                , n, attribute));
+                new V3D_Triangle(offset, pv, qv, rv, oom, rm), n, attribute));
         while (dis.available() > 0) {
             n = new V3D_Vector(readFloat(dis), readFloat(dis), readFloat(dis));
             x = readFloat(dis);

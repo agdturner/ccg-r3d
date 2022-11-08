@@ -42,10 +42,10 @@ public class Triangle {
 
     /**
      * The normal as read in from for example an STL file. The normal can be 
-     * computed from the geometry, but there is some uncertainty as to the 
-     * direction of the normal and this can resolve it. This might be especially
-     * important if the properties of each side of the triangle are different. 
-     * For example the colour of one side may be different to another.  
+     * computed from the geometry using the order of the points and the right 
+     * hand rule. However, often the normal is provided. The direction of the
+     * normal vector allows us to specify sides of the triangle which can be 
+     * attributed with different properties e.g. colours.  
      */
     public V3D_Vector normal;
     
@@ -98,7 +98,8 @@ public class Triangle {
      * @param rm The RoundingMode for any rounding.
      */
     public void setLighting(V3D_Vector lightVector, int oom, RoundingMode rm) {
-        V3D_Vector n = triangle.getPl(oom, rm).n.getUnitVector(oom, rm);
+        //V3D_Vector n = triangle.getPl(oom, rm).n.getUnitVector(oom, rm);
+        V3D_Vector n = normal;
         Math_BigRational dot = n.getDotProduct(lightVector, oom, rm);
         Math_BigRational dot2 = dot.multiply(dot);
         if (dot.compareTo(Math_BigRational.ZERO) == -1) {

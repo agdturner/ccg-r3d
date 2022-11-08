@@ -360,8 +360,8 @@ public class Camera extends V3D_Point {
      */
     protected Grids_2D_ID_int getRC(V3D_Plane pl, V3D_Ray ray, V3D_LineSegment pq,
             V3D_LineSegment qr, int oom, RoundingMode rm) {        
-//        V3D_Point p = (V3D_Point) screen.getIntersection(ray, oom, rm);
-//        if (p == null) {
+//        V3D_Point pv = (V3D_Point) screen.getIntersection(ray, oom, rm);
+//        if (pv == null) {
 //            return null;
 //        }
         V3D_Point p = (V3D_Point) ray.getIntersection(pl, oom, rm);
@@ -370,7 +370,7 @@ public class Camera extends V3D_Point {
     }
 
     /**
-     * Calculate and return the row index of the screen that p is on.
+     * Calculate and return the row index of the screen that pv is on.
      * 
      * @param p The point on the screen.
      * @param pq The line segment from of the top or bottom of the screen.
@@ -386,7 +386,7 @@ public class Camera extends V3D_Point {
     }
 
     /**
-     * Calculate and return the column index of the screen that p is on.
+     * Calculate and return the column index of the screen that pv is on.
      * 
      * @param p The point on the screen.
      * @param qr The line segment from of the left or right the screen.
