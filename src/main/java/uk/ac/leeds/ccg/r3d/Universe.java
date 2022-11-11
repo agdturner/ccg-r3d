@@ -26,11 +26,13 @@ import uk.ac.leeds.ccg.r3d.entities.Triangle;
 import uk.ac.leeds.ccg.r3d.io.STL_Reader;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Envelope;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Tetrahedron;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 
 /**
  * A class that holds reference to visible and invisible objects.
+ *
  * @author Andy Turner
  */
 public class Universe {
@@ -39,7 +41,7 @@ public class Universe {
      * Envelope
      */
     V3D_Envelope envelope;
-    
+
     /**
      * The triangles to render.
      */
@@ -66,35 +68,87 @@ public class Universe {
         triangles = new ArrayList<>();
         tetrahedra = new ArrayList<>();
         /**
-         * Create a AABox centred at 0,0,0 
+         * Create a AABox centred at 0,0,0
          */
         V3D_Point[] points = new V3D_Point[8];
+        // multiplication factor
+        long m = 100;
+        V3D_Point lbf = new V3D_Point(offset, new V3D_Vector(-1 * m, -1 * m, -1 * m));
+        V3D_Point lba = new V3D_Point(offset, new V3D_Vector(-1 * m, -1 * m, 1 * m));
+        V3D_Point ltf = new V3D_Point(offset, new V3D_Vector(-1 * m, 1 * m, -1 * m));
+        V3D_Point lta = new V3D_Point(offset, new V3D_Vector(-1 * m, 1 * m, 1 * m));
+        V3D_Point rbf = new V3D_Point(offset, new V3D_Vector(1 * m, -1 * m, -1 * m));
+        V3D_Point rba = new V3D_Point(offset, new V3D_Vector(1 * m, -1 * m, 1 * m));
+        V3D_Point rtf = new V3D_Point(offset, new V3D_Vector(1 * m, 1 * m, -1 * m));
+        V3D_Point rta = new V3D_Point(offset, new V3D_Vector(1 * m, 1 * m, 1 * m));
+        //createCubeFrom5Tetrahedra(oom, rm, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
+        //createCubeFrom6Tetrahedra(oom, rm, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
+        createCubeSurfaceFromTriangles(oom, rm, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
+        points[0] = lbf;
+        points[1] = lba;
+        points[2] = ltf;
+        points[3] = lta;
+        points[4] = rbf;
+        points[5] = rba;
+        points[6] = rtf;
+        points[7] = rta;
+        this.envelope = new V3D_Envelope(oom, rm, points);
+    }
+
+    /**
+     * The central Tetrahedra is regular and different to the others.
+     */
+    public void createCubeFrom5Tetrahedra(int oom, RoundingMode rm,
+            V3D_Point lbf, V3D_Point lba, V3D_Point ltf, V3D_Point lta,
+            V3D_Point rbf, V3D_Point rba, V3D_Point rtf, V3D_Point rta) {
+        V3D_Tetrahedron t1 = new V3D_Tetrahedron(lbf, ltf, lta, rtf, oom, rm);
+        tetrahedra.add(new Tetrahedron(t1, Color.BLUE, oom, rm));
+        V3D_Tetrahedron t2 = new V3D_Tetrahedron(lta, lba, lbf, rba, oom, rm);
+        tetrahedra.add(new Tetrahedron(t2, Color.RED, oom, rm));
+        V3D_Tetrahedron t3 = new V3D_Tetrahedron(lta, rta, rba, rtf, oom, rm);
+        tetrahedra.add(new Tetrahedron(t3, Color.GREEN, oom, rm));
+        V3D_Tetrahedron t4 = new V3D_Tetrahedron(lbf, rbf, rtf, rba, oom, rm);
+        tetrahedra.add(new Tetrahedron(t4, Color.YELLOW, oom, rm));
+        V3D_Tetrahedron t5 = new V3D_Tetrahedron(lbf, rba, rtf, lta, oom, rm);
+        tetrahedra.add(new Tetrahedron(t5, Color.CYAN, oom, rm));
+        // Volume check
+        System.out.println("t1 volume=" + t1.getVolume(oom, rm));
+        System.out.println("t2 volume=" + t2.getVolume(oom, rm));
+        System.out.println("t3 volume=" + t3.getVolume(oom, rm));
+        System.out.println("t4 volume=" + t4.getVolume(oom, rm));
+        System.out.println("t5 volume=" + t5.getVolume(oom, rm));
+    }
+
+    public void createCubeFrom6Tetrahedra(int oom, RoundingMode rm,
+            V3D_Point lbf, V3D_Point lba, V3D_Point ltf, V3D_Point lta,
+            V3D_Point rbf, V3D_Point rba, V3D_Point rtf, V3D_Point rta) {
+        // Half - a triangular prism
+        V3D_Tetrahedron t1 = new V3D_Tetrahedron(ltf, rtf, rta, rba, oom, rm);
+        tetrahedra.add(new Tetrahedron(t1, Color.BLUE, oom, rm));
+        V3D_Tetrahedron t2 = new V3D_Tetrahedron(rtf, rbf, lbf, rba, oom, rm);
+        tetrahedra.add(new Tetrahedron(t2, Color.RED, oom, rm));
+        V3D_Tetrahedron t3 = new V3D_Tetrahedron(lbf, rtf, rba, ltf, oom, rm);
+        tetrahedra.add(new Tetrahedron(t3, Color.GREEN, oom, rm));
+        // Another Half - a triangular prism
+        V3D_Tetrahedron t4 = new V3D_Tetrahedron(ltf, lbf, lba, rta, oom, rm);
+        tetrahedra.add(new Tetrahedron(t4, Color.YELLOW, oom, rm));
+        V3D_Tetrahedron t5 = new V3D_Tetrahedron(ltf, lta, rta, lba, oom, rm);
+        tetrahedra.add(new Tetrahedron(t5, Color.CYAN, oom, rm));
+        V3D_Tetrahedron t6 = new V3D_Tetrahedron(lbf, lba, rba, rta, oom, rm);
+        tetrahedra.add(new Tetrahedron(t6, Color.MAGENTA, oom, rm));
+        // Volume check
+        System.out.println("t1 volume=" + t1.getVolume(oom, rm));
+        System.out.println("t2 volume=" + t2.getVolume(oom, rm));
+        System.out.println("t3 volume=" + t3.getVolume(oom, rm));
+        System.out.println("t4 volume=" + t4.getVolume(oom, rm));
+        System.out.println("t5 volume=" + t5.getVolume(oom, rm));
+        System.out.println("t6 volume=" + t6.getVolume(oom, rm));
+    }
+
+    public void createCubeSurfaceFromTriangles(int oom, RoundingMode rm,
+            V3D_Point lbf, V3D_Point lba, V3D_Point ltf, V3D_Point lta,
+            V3D_Point rbf, V3D_Point rba, V3D_Point rtf, V3D_Point rta) {
         V3D_Point centroid = V3D_Point.ORIGIN;
-        long multiplier = 100;
-//        V3D_Point lbf = new V3D_Point(offset, new V3D_Vector(-1,-1,-1));
-//        V3D_Point lba = new V3D_Point(offset, new V3D_Vector(-1,-1,1));
-//        V3D_Point ltf = new V3D_Point(offset, new V3D_Vector(-1,1,-1));
-//        V3D_Point lta = new V3D_Point(offset, new V3D_Vector(-1,1,1));
-//        V3D_Point rbf = new V3D_Point(offset, new V3D_Vector(1,-1,-1));
-//        V3D_Point rba = new V3D_Point(offset, new V3D_Vector(1,-1,1));
-//        V3D_Point rtf = new V3D_Point(offset, new V3D_Vector(1,1,-1));
-//        V3D_Point rta = new V3D_Point(offset, new V3D_Vector(1,1,1));
-        V3D_Point lbf = new V3D_Point(offset, new V3D_Vector(-1 * multiplier,-1 * multiplier,-1 * multiplier));
-        V3D_Point lba = new V3D_Point(offset, new V3D_Vector(-1 * multiplier,-1 * multiplier,1 * multiplier));
-        V3D_Point ltf = new V3D_Point(offset, new V3D_Vector(-1 * multiplier,1 * multiplier,-1 * multiplier));
-        V3D_Point lta = new V3D_Point(offset, new V3D_Vector(-1 * multiplier,1 * multiplier,1 * multiplier));
-        V3D_Point rbf = new V3D_Point(offset, new V3D_Vector(1 * multiplier,-1 * multiplier,-1 * multiplier));
-        V3D_Point rba = new V3D_Point(offset, new V3D_Vector(1 * multiplier,-1 * multiplier,1 * multiplier));
-        V3D_Point rtf = new V3D_Point(offset, new V3D_Vector(1 * multiplier,1 * multiplier,-1 * multiplier));
-        V3D_Point rta = new V3D_Point(offset, new V3D_Vector(1 * multiplier,1 * multiplier,1 * multiplier));
-//        tetrahedra.add(new Tetrahedron(new V3D_Tetrahedron(lbf, ltf, lta, rtf,
-//                oom, rm), Color.BLUE, oom, rm));
-//        tetrahedra.add(new Tetrahedron(new V3D_Tetrahedron(lta, lba, lbf, rba,
-//                oom, rm), Color.RED, oom, rm));
-//        tetrahedra.add(new Tetrahedron(new V3D_Tetrahedron(lta, rta, rba, rtf,
-//                oom, rm), Color.YELLOW, oom, rm));
-//        tetrahedra.add(new Tetrahedron(new V3D_Tetrahedron(lbf, rbf, rtf, rba,
-//                oom, rm), new Color(Color.GREEN.getRGB()), oom, rm));
 //        triangles.add(new Triangle(new V3D_Triangle(lbf, ltf, rtf, oom, rm), Color.WHITE));
 //        triangles.add(new Triangle(new V3D_Triangle(lbf, rbf, rtf, oom, rm), Color.WHITE));
 //        triangles.add(new Triangle(new V3D_Triangle(lbf, ltf, lta, oom, rm), Color.WHITE));
@@ -107,6 +161,7 @@ public class Universe {
 //        triangles.add(new Triangle(new V3D_Triangle(rtf, ltf, rta, oom, rm), Color.WHITE));
 //        triangles.add(new Triangle(new V3D_Triangle(lbf, rbf, rba, oom, rm), Color.WHITE));
 //        triangles.add(new Triangle(new V3D_Triangle(lbf, lba, rba, oom, rm), Color.WHITE));
+        // Coloured triangles
         triangles.add(new Triangle(new V3D_Triangle(centroid, lbf, ltf, rtf, oom, rm), Color.BLUE));
         triangles.add(new Triangle(new V3D_Triangle(centroid, lbf, rbf, rtf, oom, rm), Color.BLUE));
         triangles.add(new Triangle(new V3D_Triangle(centroid, lbf, ltf, lta, oom, rm), Color.RED));
@@ -119,17 +174,9 @@ public class Universe {
         triangles.add(new Triangle(new V3D_Triangle(centroid, rtf, ltf, rta, oom, rm), Color.ORANGE));
         triangles.add(new Triangle(new V3D_Triangle(centroid, lbf, rbf, rba, oom, rm), Color.PINK));
         triangles.add(new Triangle(new V3D_Triangle(centroid, lbf, lba, rba, oom, rm), Color.PINK));
-        points[0] = lbf;
-        points[1] = lba;
-        points[2] = ltf;
-        points[3] = lta;
-        points[4] = rbf;
-        points[5] = rba;
-        points[6] = rtf;
-        points[7] = rta;
-        this.envelope = new V3D_Envelope(oom, rm, points);
+
     }
-    
+
     /**
      * Create a new instance.
      *
@@ -138,11 +185,11 @@ public class Universe {
      * @param oom The Order of Magnitude for the precision.
      * @param rm The RoundingMode for any rounding.
      */
-    public Universe(Path path, V3D_Vector offset, Color color, int oom, 
-            RoundingMode rm) throws IOException {
+    public Universe(Path path, V3D_Vector offset, Color color,
+            boolean assessTopology, int oom, RoundingMode rm) throws IOException {
         triangles = new ArrayList<>();
         tetrahedra = new ArrayList<>();
-        STL_Reader data = new STL_Reader();
+        STL_Reader data = new STL_Reader(assessTopology);
         data.readBinary(path, offset, oom, rm);
         V3D_Point p = data.triangles.get(0).triangle.getPl(oom, rm).getP();
         Math_BigRational xmin = p.getX(oom, rm);
@@ -172,13 +219,13 @@ public class Universe {
 
     /**
      * Set the camera.
-     * 
-     * @param camera What {@link #camera} is set to. 
+     *
+     * @param camera What {@link #camera} is set to.
      */
     public void setCamera(Camera camera) {
         this.camera = camera;
     }
-    
+
     /**
      * This will be for updating the universe from one time to the next.
      */

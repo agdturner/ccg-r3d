@@ -18,8 +18,10 @@ package uk.ac.leeds.ccg.r3d.entities;
 import java.awt.Color;
 import java.math.RoundingMode;
 import uk.ac.leeds.ccg.math.number.Math_BigRational;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
+import uk.ac.leeds.ccg.v3d.geometry.light.V3D_V;
 
 /**
  * For visualising a triangle.
@@ -32,29 +34,30 @@ public class Triangle {
      * AmbientLight is so that non black surfaces are not completely black even
      * if they are orientated opposite to the lighting vector.
      */
-    private static final Math_BigRational AmbientLight = 
-            Math_BigRational.ONE.divide(Math_BigRational.valueOf(20));
-    
+    private static final Math_BigRational AmbientLight
+            = Math_BigRational.ONE.divide(Math_BigRational.valueOf(5));
+    private static final double AmbientLightD = AmbientLight.doubleValue();
+
     /**
      * The triangle geometry
      */
     public V3D_Triangle triangle;
 
     /**
-     * The normal as read in from for example an STL file. The normal can be 
-     * computed from the geometry using the order of the points and the right 
+     * The normal as read in from for example an STL file. The normal can be
+     * computed from the geometry using the order of the points and the right
      * hand rule. However, often the normal is provided. The direction of the
-     * normal vector allows us to specify sides of the triangle which can be 
-     * attributed with different properties e.g. colours.  
+     * normal vector allows us to specify sides of the triangle which can be
+     * attributed with different properties e.g. colours.
      */
-    public V3D_Vector normal;
-    
+    public V3D_V normal;
+
     /**
-     * An attribute as read in from for example an STL file. This could 
-     * represent the colour or texture or another property of the triangle.  
+     * An attribute as read in from for example an STL file. This could
+     * represent the colour or texture or another property of the triangle.
      */
     public short attribute;
-    
+
     /**
      * The base colour of the triangle.
      */
@@ -66,13 +69,18 @@ public class Triangle {
     public Color lightingColor;
 
     /**
+     * The colour of in ambient light.
+     */
+    public Color ambientColor;
+    
+    /**
      * Create a new instance.
-     * 
+     *
      * @param triangle What {@link #triangle} is set to.
      * @param normal What {@link #normal} is set to.
      * @param attribute What {@link #attribute} is set to.
      */
-    public Triangle(V3D_Triangle triangle, V3D_Vector normal, short attribute) {
+    public Triangle(V3D_Triangle triangle, V3D_V normal, short attribute) {
         this.triangle = triangle;
         this.normal = normal;
         this.attribute = attribute;
@@ -80,6 +88,7 @@ public class Triangle {
 
     /**
      * Create a new instance
+     *
      * @param triangle What {@link #triangle} is set to.
      * @param baseColor What {@link #baseColor} is set to.
      */
@@ -87,19 +96,31 @@ public class Triangle {
         this.triangle = triangle;
         this.baseColor = baseColor;
         this.lightingColor = baseColor;
+        initAmbientLightColour();
     }
 
     /**
      * Used to update {@link #lightingColor} based on the input lightVector. A
-     * triangle facing the vector will be bright. One facing away will be 
+     * triangle facing the vector will be bright. One facing away will be
      * darker. This helps give a 3D like effect to rendering.
+     *
+     * @param pt A point away from which the normal will face. If pt is null,
+     * then the normal direction is given by the right hand rule.
      * @param lightVector The direction that light is coming from.
      * @param oom The Order of Magnitude for the precision.
      * @param rm The RoundingMode for any rounding.
      */
-    public void setLighting(V3D_Vector lightVector, int oom, RoundingMode rm) {
-        //V3D_Vector n = triangle.getPl(oom, rm).n.getUnitVector(oom, rm);
-        V3D_Vector n = normal;
+    public void setLighting(V3D_Point pt, V3D_Vector lightVector, int oom, RoundingMode rm) {
+        V3D_Vector n;
+        if (normal == null) {
+            n = initN(pt, oom, rm);
+        } else {
+            if (normal.isZero()) {
+                n = initN(pt, oom, rm);
+            } else {
+                n = new V3D_Vector(normal);
+            }
+        }
         Math_BigRational dot = n.getDotProduct(lightVector, oom, rm);
         Math_BigRational dot2 = dot.multiply(dot);
         if (dot.compareTo(Math_BigRational.ZERO) == -1) {
@@ -114,5 +135,21 @@ public class Triangle {
         int green = (int) (baseColor.getGreen() * lightRatio);
         int blue = (int) (baseColor.getBlue() * lightRatio);
         lightingColor = new Color(red, green, blue);
+        initAmbientLightColour();
+    }
+
+    private void initAmbientLightColour() {
+        int red = (int) (lightingColor.getRed() * AmbientLightD);
+        int green = (int) (lightingColor.getGreen() * AmbientLightD);
+        int blue = (int) (lightingColor.getBlue() * AmbientLightD);
+        this.ambientColor = new Color(red, green, blue);
+    }
+    
+    private V3D_Vector initN(V3D_Point pt, int oom, RoundingMode rm) {
+        if (pt == null) {
+            return triangle.getPl(oom, rm).n.getUnitVector(oom, rm);
+        } else {
+            return triangle.getPl(oom, rm).n.getUnitVector(pt, oom, rm);
+        }
     }
 }
