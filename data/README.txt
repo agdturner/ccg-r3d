@@ -13,4 +13,7 @@ NASA Data from https://nasa3d.arc.nasa.gov/detail/geographos
 Hurricane_Katrina
 NASA Data from https://nasa3d.arc.nasa.gov/detail/hurricane-katrina
 
+Curiosity
+https://nasa3d.arc.nasa.gov/detail/mars-rover-curiosity
+
 output is a directory containing rendered input data
