@@ -22,6 +22,10 @@ For faster rendering, the implementation has been extended to alternatively use 
 
 The Hurricane Katrina image was produced by running [RenderImageDouble.java](https://github.com/agdturner/ccg-r3d/tree/main/src/main/java/uk/ac/leeds/ccg/r3d/d/RenderImageDouble.java). With some small edits to the source code it should be possible to reproduce it.
 
+Based on the simple complete [3D Model of Curiosity from NASA](https://nasa3d.arc.nasa.gov/detail/mars-rover-curiosity) below is another yellow shade image generated from 384942 Triangles in a minute.
+
+<img alt="A yellow rendering of a Curiosity model" src="data/output/Curiosity Rover 3D Printed Model/files/epsilon=1.0E-7/lighting(i=-0.27_j=-0.53_k=-0.80)_ambientLight(0.05)/Curiosity SM (Complete Print 200uM)_1000x1000pt(i=123.83_j=108.92_k=143.96)_lighting(i=-0.27_j=-0.53_k=-0.80)_ambientLight(0.05)_epsilon=1.0E-7.png" />
+
 More reproducible results will be generated in due course. These images for the time being serve to show that progress is being made...
 
 ## Uses
