@@ -18,9 +18,9 @@ The images of the Geographos and the Utah Teapot were produced by running [Rende
 
 For faster rendering, the implementation has been extended to alternatively use [IEEE double precision floating point format](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) numbers. This precision is often good enough. The image below is a rendering of [Hurricane Katrina](https://en.wikipedia.org/wiki/Hurricane_Katrina). Instead of specifying an [Order of Magnitude](https://en.wikipedia.org/wiki/Order_of_magnitude) precision and a [RoundingMode](https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/math/RoundingMode.java), for floating point 3D calculations it is necessary to set a small number used to determine if two values are significantly different (epsilon). For the rendering of Hurricane Katrina below the epsilon used is 1.0E-7.
 
-<img alt="A yellow rendering of Hurricane Katrina" src="data/output/Hurricane_Katrina/files/epsilon=1.0E-7\lighting(i=-0.2672612419124244_j=-0.5345224838248488_k=-0.8017837257372732)_ambientLight(0.05)/Katrina_1000x1000pt(i=159.6718892242295_j=159.6628865386826_k=159.66438762205664)_lighting(i=-0.2672612419124244_j=-0.5345224838248488_k=-0.8017837257372732)_ambientLight(0.05)_epsilon=1.0E-7.png" />
+<img alt="A yellow rendering of Hurricane Katrina" src="data/output/Hurricane_Katrina/files/epsilon=1.0E-7/lighting(i=-0.26_j=-0.53_k=-0.80)_ambientLight(0.05)/Katrina_1000x1000.png" />
 
-and the speed up for many applications will be worth iAs the rendering is slow using arbitrary precision It is my intension to showcase more reproducible results in due course. These images for the time being serve to show that progress is being made...
+More reproducible results will be generated in due course. These images for the time being serve to show that progress is being made...
 
 ## Uses
 * Help explain and develop [ccg-v3d](https://github.com/agdturner/ccg-v3d) - the underlying 3D Euclidean geometry library.
