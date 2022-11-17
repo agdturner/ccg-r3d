@@ -13,27 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.leeds.ccg.r3d.entities;
+package uk.ac.leeds.ccg.r3d.d.entities;
 
 import java.awt.Color;
-import java.math.RoundingMode;
-import uk.ac.leeds.ccg.math.number.Math_BigRational;
-import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
-import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
-import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
-import uk.ac.leeds.ccg.v3d.geometry.light.V3D_V;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PointDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TriangleDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_VectorDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.light.V3D_VDouble;
 
 /**
  * For visualising a triangle.
  *
  * @author Andy Turner
  */
-public class Triangle {
+public class TriangleDouble {
 
     /**
      * The triangle geometry
      */
-    public V3D_Triangle triangle;
+    public V3D_TriangleDouble triangle;
 
     /**
      * The normal as read in from for example an STL file. The normal can be
@@ -42,7 +40,7 @@ public class Triangle {
      * normal vector allows us to specify sides of the triangle which can be
      * attributed with different properties e.g. colours.
      */
-    public V3D_V normal;
+    public V3D_VDouble normal;
 
     /**
      * An attribute as read in from for example an STL file. This could
@@ -72,7 +70,8 @@ public class Triangle {
      * @param normal What {@link #normal} is set to.
      * @param attribute What {@link #attribute} is set to.
      */
-    public Triangle(V3D_Triangle triangle, V3D_V normal, short attribute) {
+    public TriangleDouble(V3D_TriangleDouble triangle, V3D_VDouble normal,
+            short attribute) {
         this.triangle = triangle;
         this.normal = normal;
         this.attribute = attribute;
@@ -84,7 +83,7 @@ public class Triangle {
      * @param triangle What {@link #triangle} is set to.
      * @param baseColor What {@link #baseColor} is set to.
      */
-    public Triangle(V3D_Triangle triangle, Color baseColor) {
+    public TriangleDouble(V3D_TriangleDouble triangle, Color baseColor) {
         this.triangle = triangle;
         this.baseColor = baseColor;
         this.lightingColor = baseColor;
@@ -101,33 +100,31 @@ public class Triangle {
      * @param oom The Order of Magnitude for the precision.
      * @param rm The RoundingMode for any rounding.
      */
-    public void setLighting(V3D_Point pt, V3D_Vector lightVector, 
-            Math_BigRational ambientLight, int oom, RoundingMode rm) {
-        V3D_Vector n;
+    public void setLighting(V3D_PointDouble pt, V3D_VectorDouble lightVector, 
+            double ambientLight, double epsilon) {
+        V3D_VectorDouble n;
         if (normal == null) {
-            n = initN(pt, oom, rm);
+            n = initN(pt);
         } else {
             if (normal.isZero()) {
-                n = initN(pt, oom, rm);
+                n = initN(pt);
             } else {
-                n = new V3D_Vector(normal);
+                n = new V3D_VectorDouble(normal);
             }
         }
-        Math_BigRational dot = n.getDotProduct(lightVector, oom, rm);
-        Math_BigRational dot2 = dot.multiply(dot);
-        if (dot.compareTo(Math_BigRational.ZERO) == -1) {
-            dot2 = dot2.negate();
+        double dot = n.getDotProduct(lightVector);
+        double dot2 = dot * dot;
+        if (dot < 0) {
+            dot2 = -dot2;
         }
-        dot2 = (dot2.add(Math_BigRational.ONE)).divide(
-                Math_BigRational.TWO.multiply(
-                        Math_BigRational.ONE.subtract(ambientLight)));
+        dot2 = (dot2 + 1d) / (2d * (1d - ambientLight));
         double lightRatio = Math.min(1.0d, Math.max(0.0d,
-                ambientLight.add(dot2).doubleValue()));
+                ambientLight + dot2));
         int red = (int) (baseColor.getRed() * lightRatio);
         int green = (int) (baseColor.getGreen() * lightRatio);
         int blue = (int) (baseColor.getBlue() * lightRatio);
         lightingColor = new Color(red, green, blue);
-        initAmbientLightColour(ambientLight.doubleValue());
+        initAmbientLightColour(ambientLight);
     }
 
     private void initAmbientLightColour(double ambientLight) {
@@ -137,11 +134,11 @@ public class Triangle {
         this.ambientColor = new Color(red, green, blue);
     }
     
-    private V3D_Vector initN(V3D_Point pt, int oom, RoundingMode rm) {
+    private V3D_VectorDouble initN(V3D_PointDouble pt) {
         if (pt == null) {
-            return triangle.getPl(oom, rm).n.getUnitVector(oom, rm);
+            return triangle.getPl().n.getUnitVector();
         } else {
-            return triangle.getPl(oom, rm).n.getUnitVector(pt, oom, rm);
+            return triangle.getPl().n.getUnitVector(pt);
         }
     }
 }

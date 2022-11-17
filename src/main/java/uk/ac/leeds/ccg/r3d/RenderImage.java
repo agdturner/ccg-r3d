@@ -80,12 +80,12 @@ public class RenderImage {
         try {
             //boolean run0 = true;
             boolean run0 = false;
-            boolean run1 = true;
-            //boolean run1 = false;
+            //boolean run1 = true;
+            boolean run1 = false;
             //boolean runUtah = true;
             boolean runUtah = false;
-            //boolean runGeographos = true;
-            boolean runGeographos = false;
+            boolean runGeographos = true;
+            //boolean runGeographos = false;
             //boolean runKatrina = true;
             boolean runKatrina = false;
             Path inDataDir = Paths.get("data", "input");
@@ -108,7 +108,14 @@ public class RenderImage {
                 //String name = "tetras6";
                 //String name = "tetras5";
                 String name = "triangles";
-                boolean castShadow = true;
+                boolean assessTopology = false;
+                boolean castShadow = false;
+                /**
+                 * AmbientLight makes non black surfaces non black even if they
+                 * are orientated opposite to the lighting vector.
+                 */
+                Math_BigRational ambientLight = Math_BigRational.ONE.divide(Math_BigRational.valueOf(20));
+                //Math_BigRational ambientLight = Math_BigRational.ONE.divide(Math_BigRational.valueOf(5));
                 for (int i = -1; i <= 1; i++) {
                     for (int j = -1; j <= 1; j++) {
                         for (int k = -1; k <= 1; k++) {
@@ -124,7 +131,8 @@ public class RenderImage {
                                 V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
                                 String ls = "lighting(i=" + lighting.getDX(oom, rm).round(-4, rm).getStringValue().trim()
                                         + "_j=" + lighting.getDY(oom, rm).round(-4, rm).getStringValue().trim()
-                                        + "_k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim() + ")";
+                                        + "_k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim()
+                                            + ")_ambientLight(" + ambientLight.round(-4, rm) + ")";
                                 Path dir = Paths.get(outDataDir.toString(), "test", name, "oom=" + oom, ls);
                                 if (castShadow) {
                                     dir = Paths.get(dir.toString(), "shadow");
@@ -135,7 +143,7 @@ public class RenderImage {
                                         + "_j=" + pt.getY(oom, rm).round(-4, rm).getStringValue().trim()
                                         + "_k=" + pt.getZ(oom, rm).round(-4, rm).getStringValue().trim()
                                         + ")_" + ls + "_oom=" + oom + ".png");
-                                r.run(lighting, castShadow);
+                                r.run(lighting, ambientLight, castShadow);
                             }
                         }
                     }
@@ -150,8 +158,14 @@ public class RenderImage {
                 int h = 100 * n;
                 //int w = 100 * n;
                 //int h = 75 * n;
-                boolean assessTopology = true;
-                boolean castShadow = true;
+                boolean assessTopology = false;
+                boolean castShadow = false;
+                /**
+                 * AmbientLight makes non black surfaces non black even if they
+                 * are orientated opposite to the lighting vector.
+                 */
+                Math_BigRational ambientLight = Math_BigRational.ONE.divide(Math_BigRational.valueOf(20));
+                //Math_BigRational ambientLight = Math_BigRational.ONE.divide(Math_BigRational.valueOf(5));
                 String name = "3361664_Platonic_Solid_Collection";
                 String filename = "Icosahedron";
                 Path input = Paths.get(inDataDir.toString(), name, "files", filename + ".stl");
@@ -164,6 +178,7 @@ public class RenderImage {
                 V3D_Point centroid = universe.envelope.getCentroid(oom, rm);
                 Math_BigRational radius = universe.envelope.getPoints(oom, rm)[0]
                         .getDistance(centroid, oom, rm);
+                V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
                 for (int i = -1; i <= 1; i++) {
                     for (int j = -1; j <= 1; j++) {
                         for (int k = -1; k <= 1; k++) {
@@ -173,10 +188,10 @@ public class RenderImage {
                                         radius.multiply(2), oom, rm);
                                 // Render the image
                                 RenderImage r = new RenderImage(universe, pt, size, oom, rm);
-                                V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
                                 String ls = "lighting(i=" + lighting.getDX(oom, rm).round(-4, rm).getStringValue().trim()
                                         + "_j=" + lighting.getDY(oom, rm).round(-4, rm).getStringValue().trim()
-                                        + "_k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim() + ")";
+                                        + "_k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim()
+                                            + ")_ambientLight(" + ambientLight.round(-4, rm) + ")";
                                 Path dir = Paths.get(outDataDir.toString(), name, "files", "oom=" + oom, ls);
                                 if (castShadow) {
                                     dir = Paths.get(dir.toString(), "shadow");
@@ -188,7 +203,7 @@ public class RenderImage {
                                         + "_j=" + pt.getY(oom, rm).round(-4, rm).getStringValue().trim()
                                         + "_k=" + pt.getZ(oom, rm).round(-4, rm).getStringValue().trim()
                                         + ")_" + ls + "_oom=" + oom + ".png");
-                                r.run(lighting, castShadow);
+                                r.run(lighting, ambientLight, castShadow);
                             }
                         }
                     }
@@ -207,8 +222,14 @@ public class RenderImage {
                 n = 5;
                 int w = 100 * n;
                 int h = 75 * n;
-                boolean assessTopology = true;
-                boolean castShadow = true;
+                boolean assessTopology = false;
+                boolean castShadow = false;
+                /**
+                 * AmbientLight makes non black surfaces non black even if they
+                 * are orientated opposite to the lighting vector.
+                 */
+                Math_BigRational ambientLight = Math_BigRational.ONE.divide(Math_BigRational.valueOf(20));
+                //Math_BigRational ambientLight = Math_BigRational.ONE.divide(Math_BigRational.valueOf(5));
                 String name = "Utah_teapot_(solid)";
                 Color color = Color.YELLOW;
                 Path input = Paths.get(inDataDir.toString(), name, name + ".stl");
@@ -234,7 +255,8 @@ public class RenderImage {
                 V3D_Vector lighting = new V3D_Vector(1, 2, 3).getUnitVector(oom, rm);
                 String ls = "lighting(i=" + lighting.getDX(oom, rm).round(-4, rm).getStringValue().trim()
                         + "_j=" + lighting.getDY(oom, rm).round(-4, rm).getStringValue().trim()
-                        + "_k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim() + ")";
+                        + "_k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim()
+                                            + ")_ambientLight(" + ambientLight.round(-4, rm) + ")";
                 Path dir = Paths.get(outDataDir.toString(), name, "oom=" + oom, ls);
                 if (castShadow) {
                     dir = Paths.get(dir.toString(), "shadow");
@@ -246,7 +268,7 @@ public class RenderImage {
                         + "_j=" + pt.getY(oom, rm).round(-4, rm).getStringValue().trim()
                         + "_k=" + pt.getZ(oom, rm).round(-4, rm).getStringValue().trim()
                         + ")_" + ls + "_oom=" + oom + ".png");
-                r.run(lighting, castShadow);
+                r.run(lighting, ambientLight, castShadow);
 //                            }
 //                        }
 //                    }
@@ -264,9 +286,14 @@ public class RenderImage {
                 int h = 75 * n;
                 String name = "geographos";
                 String filename = "1620geographos";
-                //boolean assessTopology = true;
-                boolean castShadow = true;
                 boolean assessTopology = false;
+                boolean castShadow = false;
+                /**
+                 * AmbientLight makes non black surfaces non black even if they
+                 * are orientated opposite to the lighting vector.
+                 */
+                Math_BigRational ambientLight = Math_BigRational.ONE.divide(Math_BigRational.valueOf(20));
+                //Math_BigRational ambientLight = Math_BigRational.ONE.divide(Math_BigRational.valueOf(5));
                 Path input = Paths.get(inDataDir.toString(), name, filename + ".stl");
                 Color color = Color.YELLOW;
                 // Init universe
@@ -277,40 +304,41 @@ public class RenderImage {
                 V3D_Point centroid = universe.envelope.getCentroid(oom, rm);
                 Math_BigRational radius = universe.envelope.getPoints(oom, rm)[0]
                         .getDistance(centroid, oom, rm);
-//                for (int i = -1; i <= 1; i++) {
-//                    for (int j = -1; j <= 1; j++) {
-//                        for (int k = -1; k <= 1; k++) {
-//                            if (!(i == 0 && j == 0 && k == 0)) {
-                //if (!(i==1 && j ==1 && k ==-1)){
-                int i = -1;
-                int j = 1;
-                int k = 1;
-                V3D_Vector direction = new V3D_Vector(i, j, k).getUnitVector(oom, rm);
-                V3D_Point pt = getCameraPt(centroid, direction,
-                        radius.multiply(2), oom, rm);
-                // Render the image
-                RenderImage r = new RenderImage(universe, pt, size, oom, rm);
-                V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
-                String ls = "lighting(i=" + lighting.getDX(oom, rm).round(-4, rm).getStringValue().trim()
-                        + "_j=" + lighting.getDY(oom, rm).round(-4, rm).getStringValue().trim()
-                        + "_k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim() + ")";
-                Path dir = Paths.get(outDataDir.toString(), name, "files", "oom=" + oom, ls, "nset");
-                if (castShadow) {
-                    dir = Paths.get(dir.toString(), "shadow");
+                for (int i = -1; i <= 1; i++) {
+                    for (int j = -1; j <= 1; j++) {
+                        for (int k = -1; k <= 1; k++) {
+                            if (!(i == 0 && j == 0 && k == 0)) {
+                                if (!(i == -1 && j == 1 && k == 1)) {
+//                int i = -1;
+//                int j = 1;
+//                int k = 1;
+                                    V3D_Vector direction = new V3D_Vector(i, j, k).getUnitVector(oom, rm);
+                                    V3D_Point pt = getCameraPt(centroid, direction,
+                                            radius.multiply(2), oom, rm);
+                                    // Render the image
+                                    RenderImage r = new RenderImage(universe, pt, size, oom, rm);
+                                    V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
+                                    String ls = "lighting(i=" + lighting.getDX(oom, rm).round(-4, rm).getStringValue().trim()
+                                            + "_j=" + lighting.getDY(oom, rm).round(-4, rm).getStringValue().trim()
+                                            + "_k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim()
+                                            + ")_ambientLight(" + ambientLight.round(-4, rm) + ")";
+                                    Path dir = Paths.get(outDataDir.toString(), name, "files", "oom=" + oom, ls, "nset");
+                                    if (castShadow) {
+                                        dir = Paths.get(dir.toString(), "shadow");
+                                    }
+                                    r.output = Paths.get(dir.toString(),
+                                            filename
+                                            + "_" + r.size.width + "x" + r.size.height
+                                            + "_pt(i=" + pt.getX(oom, rm).round(-4, rm).getStringValue().trim()
+                                            + "_j=" + pt.getY(oom, rm).round(-4, rm).getStringValue().trim()
+                                            + "_k=" + pt.getZ(oom, rm).round(-4, rm).getStringValue().trim()
+                                            + ")_" + ls + "_oom=" + oom + ".png");
+                                    r.run(lighting, ambientLight, castShadow);
+                                }
+                            }
+                        }
+                    }
                 }
-                r.output = Paths.get(dir.toString(),
-                        filename
-                        + "_" + r.size.width + "x" + r.size.height
-                        + "_pt(i=" + pt.getX(oom, rm).round(-4, rm).getStringValue().trim()
-                        + "_j=" + pt.getY(oom, rm).round(-4, rm).getStringValue().trim()
-                        + "_k=" + pt.getZ(oom, rm).round(-4, rm).getStringValue().trim()
-                        + ")_" + ls + "_oom=" + oom + ".png");
-                r.run(lighting, castShadow);
-                //}
-//                            }
-//                        }
-//                    }
-//                }
             }
 
             if (runKatrina) {
@@ -320,8 +348,14 @@ public class RenderImage {
                 int h = 75 * n;
                 String name = "Hurricane_Katrina";
                 String filename = "Katrina";
-                boolean assessTopology = true;
-                boolean castShadow = true;
+                boolean assessTopology = false;
+                boolean castShadow = false;
+                /**
+                 * AmbientLight makes non black surfaces non black even if they
+                 * are orientated opposite to the lighting vector.
+                 */
+                Math_BigRational ambientLight = Math_BigRational.ONE.divide(Math_BigRational.valueOf(20));
+                //Math_BigRational ambientLight = Math_BigRational.ONE.divide(Math_BigRational.valueOf(5));
                 Path input = Paths.get(inDataDir.toString(), name, filename + ".stl");
                 Color color = Color.YELLOW;
                 // Init universe
@@ -345,7 +379,8 @@ public class RenderImage {
                 V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
                 String ls = "lighting(i=" + lighting.getDX(oom, rm).round(-4, rm).getStringValue().trim()
                         + "_j=" + lighting.getDY(oom, rm).round(-4, rm).getStringValue().trim()
-                        + "_k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim() + ")";
+                        + "_k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim()
+                                            + ")_ambientLight(" + ambientLight.round(-4, rm) + ")";
                 Path dir = Paths.get(outDataDir.toString(), name, "files", "oom=" + oom, ls);
                 if (castShadow) {
                     dir = Paths.get(dir.toString(), "shadow");
@@ -357,7 +392,7 @@ public class RenderImage {
                         + "_j=" + pt.getY(oom, rm).round(-4, rm).getStringValue().trim()
                         + "_k=" + pt.getZ(oom, rm).round(-4, rm).getStringValue().trim()
                         + ")_" + ls + "_oom=" + oom + ".png");
-                r.run(lighting, castShadow);
+                r.run(lighting, ambientLight, castShadow);
 //                            }
 //                        }
 //                    }
@@ -373,8 +408,9 @@ public class RenderImage {
      *
      * @throws Exception
      */
-    public void run(V3D_Vector lighting, boolean castShadow) throws Exception {
-        int[] pix = universe.camera.render(this.universe, lighting, castShadow, oom, rm);
+    public void run(V3D_Vector lighting, Math_BigRational ambientLight,
+            boolean castShadow) throws Exception {
+        int[] pix = universe.camera.render(this.universe, lighting, ambientLight, castShadow, oom, rm);
         /**
          * Convert pix to an image and write to a file.
          */
