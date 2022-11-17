@@ -20,7 +20,7 @@ For faster rendering, the implementation has been extended to alternatively use 
 
 <img alt="A yellow rendering of Hurricane Katrina" src="data/output/Hurricane_Katrina/files/epsilon=1.0E-7/lighting(i=-0.27_j=-0.53_k=-0.80)_ambientLight(0.05)/Katrina_1000x1000.png" />
 
-The Hurricane Katrina image was produced by running [RenderImageDouble.java](https://github.com/agdturner/ccg-r3d/tree/main/src/main/java/uk/ac/leeds/ccg/r3d/d.RenderImageDouble.java). With some small edits to the source code it should be possible to reproduce it.
+The Hurricane Katrina image was produced by running [RenderImageDouble.java](https://github.com/agdturner/ccg-r3d/tree/main/src/main/java/uk/ac/leeds/ccg/r3d/d/RenderImageDouble.java). With some small edits to the source code it should be possible to reproduce it.
 
 More reproducible results will be generated in due course. These images for the time being serve to show that progress is being made...
 
