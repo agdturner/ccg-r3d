@@ -75,6 +75,8 @@ public class RenderImageDouble {
             boolean runKatrina = false;
             //boolean runCuriosity = true;
             boolean runCuriosity = false;
+            boolean runApollo17 = true;
+            //boolean runApollo17 = false;
             
             Path inDataDir = Paths.get("data", "input");
             Path outDataDir = Paths.get("data", "output");
@@ -261,7 +263,7 @@ public class RenderImageDouble {
                 String name = "geographos";
                 String filename = "1620geographos";
                 boolean assessTopology = false;
-                boolean castShadow = false;
+                boolean castShadow = true;
                 /**
                  * AmbientLight makes non black surfaces non black even if they
                  * are orientated opposite to the lighting vector.
@@ -388,6 +390,64 @@ public class RenderImageDouble {
                 Path input = Paths.get(inDataDir.toString(), name, name, 
                         "Simplified Curiosity Model (Small)", filename + ".stl");
                 Color color = Color.YELLOW;
+                // Init universe
+                UniverseDouble universe = new UniverseDouble(input,
+                        V3D_VectorDouble.ZERO, color, assessTopology, epsilon);
+                // Detail the camera
+                Dimension size = new Dimension(w, h);
+                V3D_PointDouble centroid = universe.envelope.getCentroid();
+                double radius = universe.envelope.getPoints()[0]
+                        .getDistance(centroid);
+//                for (int i = -1; i <= 1; i++) {
+//                    for (int j = -1; j <= 1; j++) {
+//                        for (int k = -1; k <= 1; k++) {
+//                            if (!(i == 0 && j == 0 && k == 0)) {
+//                                V3D_VectorDouble direction = new V3D_VectorDouble(i, j, k).getUnitVector();
+                V3D_VectorDouble direction = new V3D_VectorDouble(1, 1, 1).getUnitVector();
+                V3D_PointDouble pt = getCameraPt(centroid, direction,
+                        radius * 2d);
+                // Render the image
+                RenderImageDouble r = new RenderImageDouble(universe, pt, size, epsilon);
+                V3D_VectorDouble lighting = new V3D_VectorDouble(-1, -2, -3).getUnitVector();
+                String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
+                        + "_j=" + String.format("%,.2f", lighting.dy)
+                        + "_k=" + String.format("%,.2f", lighting.dz)
+                        + ")_ambientLight(" + ambientLight + ")";
+                Path dir = Paths.get(outDataDir.toString(), name, "files", "epsilon=" + epsilon, ls);
+                if (castShadow) {
+                    dir = Paths.get(dir.toString(), "shadow");
+                }
+                r.output = Paths.get(dir.toString(),
+                        filename
+                        + "_" + r.size.width + "x" + r.size.height
+                        + "pt(i=" + String.format("%,.2f", pt.getX())
+                        + "_j=" + String.format("%,.2f", pt.getY())
+                        + "_k=" + String.format("%,.2f", pt.getZ())
+                        + ")_" + ls + "_epsilon=" + epsilon + ".png");
+                r.run(lighting, ambientLight, castShadow, epsilon);
+//                            }
+//                        }
+//                    }
+//                }
+            }
+            
+            if (runApollo17) {
+                double epsilon = 1d / 10000000d;
+                int n = 10;
+                int w = 100 * n;
+                int h = 75 * n;
+                String name = "Apollo_17";
+                String filename = "Apollo_17";
+                boolean assessTopology = false;
+                boolean castShadow = false;
+                /**
+                 * AmbientLight makes non black surfaces non black even if they
+                 * are orientated opposite to the lighting vector.
+                 */
+                double ambientLight = 1d / 20d;
+                Path input = Paths.get(inDataDir.toString(), name, 
+                        filename + ".stl");
+                Color color = Color.WHITE;
                 // Init universe
                 UniverseDouble universe = new UniverseDouble(input,
                         V3D_VectorDouble.ZERO, color, assessTopology, epsilon);
