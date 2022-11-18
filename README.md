@@ -1,9 +1,11 @@
 # [ccg-r3d](https://github.com/agdturner/ccg-r3d)
-A Java library for rendering 3D spatial data. This is built on top of [ccg-v3d]((https://github.com/agdturner/ccg-v3d)) to provide the ability to render scenes with [6 degrees of freedom](https://en.wikipedia.org/wiki/Six_degrees_of_freedom) achieved through translation of a camera focal point and rectangular screen. The screen position relative to the focal point gives the pitch and yaw and the orientation of the rectangle gives the roll.
+A Java library for rendering 3D spatial data. This is built on top of [ccg-v3d]((https://github.com/agdturner/ccg-v3d)) to provide the ability to reproducibly render scenes with [6 degrees of freedom](https://en.wikipedia.org/wiki/Six_degrees_of_freedom). The 6 degrees of freedom are realised through translation of camera focal points and rectangular screens. The centre point of each screen relative to the focal point gives the pitch and yaw and the orientation of the rectangle gives the roll.
 
-Currently, the library has been used to render some scenes using a single colour that is modified by a vector lighting condition that uses the normal direction of each triangle to modify the colour and applies an ambient lighting condition so that triangles facing directly away from the lighting vector are not completely black.
+The library has been used to render some scenes using a single colour for shade that is modified by a vector lighting condition that uses the normal direction of each triangle to define the shade and the colour for a triangle. An ambient lighting condition is applied so that triangles facing directly away from the lighting vector are not completely black.
 
-The intension is also to support rendering raster data using [ccg-grids]((https://github.com/agdturner/ccg-grids)). Initially, the camera screen was a grid, but this was slightly problematic and so for the time being the screen has a basic vectorised representation.
+Some other experiments with shade have been done, but more realistic texture rendering and rendering with more complex lighting conditions has not yet been attempted. Realisitc scene rendering is not yet a focus of development, the focus is more on geometry and structure and on rendering more 4D scenes where the cameras and the objects in the scene are moving in time. 
+
+Support for rendering raster data using [ccg-grids]((https://github.com/agdturner/ccg-grids)) may also be added if the difference between raster and vector models become a research focus. Initially, the camera screen was a ccg-grids grid, but this was slightly problematic and so for the time being the screen has a basic vectorised representation.
 
 ## Uses
 * Basic 3D Scene rendering.
@@ -32,13 +34,13 @@ For faster rendering, the implementation has been extended to alternatively use 
 
 The Hurricane Katrina image was produced by running [RenderImageDouble.java](https://github.com/agdturner/ccg-r3d/tree/main/src/main/java/uk/ac/leeds/ccg/r3d/d/RenderImageDouble.java). With some small edits to the source code it should be possible to reproduce it.
 
-Based on the simple complete [3D Model of Curiosity from NASA](https://nasa3d.arc.nasa.gov/detail/mars-rover-curiosity) below is another yellow scale image generated from 384942 Triangles in a minute.
+Based on the simple complete [3D Model of Curiosity from NASA](https://nasa3d.arc.nasa.gov/detail/mars-rover-curiosity) below is another yellow scale image generated from 384942 Triangles in about a minute.
 
 <img alt="A yellow scale rendering of a Curiosity model" src="data/output/Curiosity Rover 3D Printed Model/files/epsilon=1.0E-7/lighting(i=-0.27_j=-0.53_k=-0.80)_ambientLight(0.05)/Curiosity SM (Complete Print 200uM)_1000x1000pt(i=123.83_j=108.92_k=143.96)_lighting(i=-0.27_j=-0.53_k=-0.80)_ambientLight(0.05)_epsilon=1.0E-7.png" />
 
-Based on the [3D Model of the Apollo 17 Landing Site from NASA](https://nasa3d.arc.nasa.gov/detail/mars-rover-curiosity) below is another yellow shade image generated from 384942 Triangles in a minute.
+Based on the [3D Model of the Apollo 17 Landing Site from NASA](https://nasa3d.arc.nasa.gov/detail/Apollo17-Landing)) below is a grey shade image generated from  533506 Triangles in about 3.5 minutes.
 
-<img alt="A grey scale rendering of Hurricane Katrina" src="data/output/Apollo_17\files\epsilon=1.0E-7\lighting(i=-0.27_j=-0.53_k=-0.80)_ambientLight(0.05)/Apollo_17_1000x1000pt(i=208.79_j=208.79_k=215.65)_lighting(i=-0.27_j=-0.53_k=-0.80)_ambientLight(0.05)_epsilon=1.0E-7.png" />
+<img alt="A grey scale rendering of the Apollo 17 Landing Site" src="data/output/Apollo_17\files\epsilon=1.0E-7\lighting(i=-0.27_j=-0.53_k=-0.80)_ambientLight(0.05)/Apollo_17_1000x1000pt(i=208.79_j=208.79_k=215.65)_lighting(i=-0.27_j=-0.53_k=-0.80)_ambientLight(0.05)_epsilon=1.0E-7.png" />
 
 More reproducible results will be generated in due course...
 
