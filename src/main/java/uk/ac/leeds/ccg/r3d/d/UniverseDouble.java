@@ -146,7 +146,6 @@ public class UniverseDouble {
     public void createCubeSurfaceFromTriangles(double epsilon,
             V3D_PointDouble lbf, V3D_PointDouble lba, V3D_PointDouble ltf, V3D_PointDouble lta,
             V3D_PointDouble rbf, V3D_PointDouble rba, V3D_PointDouble rtf, V3D_PointDouble rta) {
-        V3D_PointDouble centroid = V3D_PointDouble.ORIGIN;
 //        triangles.add(new TriangleDouble(new V3D_TriangleDouble(lbf, ltf, rtf), Color.WHITE));
 //        triangles.add(new TriangleDouble(new V3D_TriangleDouble(lbf, rbf, rtf), Color.WHITE));
 //        triangles.add(new TriangleDouble(new V3D_TriangleDouble(lbf, ltf, lta), Color.WHITE));
@@ -160,18 +159,18 @@ public class UniverseDouble {
 //        triangles.add(new TriangleDouble(new V3D_TriangleDouble(lbf, rbf, rba), Color.WHITE));
 //        triangles.add(new TriangleDouble(new V3D_TriangleDouble(lbf, lba, rba), Color.WHITE));
         // Coloured triangles
-        triangles.add(new TriangleDouble(new V3D_TriangleDouble(centroid, lbf, ltf, rtf), Color.BLUE));
-        triangles.add(new TriangleDouble(new V3D_TriangleDouble(centroid, lbf, rbf, rtf), Color.BLUE));
-        triangles.add(new TriangleDouble(new V3D_TriangleDouble(centroid, lbf, ltf, lta), Color.RED));
-        triangles.add(new TriangleDouble(new V3D_TriangleDouble(centroid, lbf, lba, lta), Color.RED));
-        triangles.add(new TriangleDouble(new V3D_TriangleDouble(centroid, lba, lta, rta), Color.YELLOW));
-        triangles.add(new TriangleDouble(new V3D_TriangleDouble(centroid, lba, rba, rta), Color.YELLOW));
-        triangles.add(new TriangleDouble(new V3D_TriangleDouble(centroid, rbf, rtf, rta), Color.GREEN));
-        triangles.add(new TriangleDouble(new V3D_TriangleDouble(centroid, rbf, rta, rba), Color.GREEN));
-        triangles.add(new TriangleDouble(new V3D_TriangleDouble(centroid, ltf, lta, rta), Color.ORANGE));
-        triangles.add(new TriangleDouble(new V3D_TriangleDouble(centroid, rtf, ltf, rta), Color.ORANGE));
-        triangles.add(new TriangleDouble(new V3D_TriangleDouble(centroid, lbf, rbf, rba), Color.PINK));
-        triangles.add(new TriangleDouble(new V3D_TriangleDouble(centroid, lbf, lba, rba), Color.PINK));
+        triangles.add(new TriangleDouble(new V3D_TriangleDouble(lbf, ltf, rtf), Color.BLUE));
+        triangles.add(new TriangleDouble(new V3D_TriangleDouble(lbf, rbf, rtf), Color.BLUE));
+        triangles.add(new TriangleDouble(new V3D_TriangleDouble(lbf, ltf, lta), Color.RED));
+        triangles.add(new TriangleDouble(new V3D_TriangleDouble(lbf, lba, lta), Color.RED));
+        triangles.add(new TriangleDouble(new V3D_TriangleDouble(lba, lta, rta), Color.YELLOW));
+        triangles.add(new TriangleDouble(new V3D_TriangleDouble(lba, rba, rta), Color.YELLOW));
+        triangles.add(new TriangleDouble(new V3D_TriangleDouble(rbf, rtf, rta), Color.GREEN));
+        triangles.add(new TriangleDouble(new V3D_TriangleDouble(rbf, rta, rba), Color.GREEN));
+        triangles.add(new TriangleDouble(new V3D_TriangleDouble(ltf, lta, rta), Color.ORANGE));
+        triangles.add(new TriangleDouble(new V3D_TriangleDouble(rtf, ltf, rta), Color.ORANGE));
+        triangles.add(new TriangleDouble(new V3D_TriangleDouble(lbf, rbf, rba), Color.PINK));
+        triangles.add(new TriangleDouble(new V3D_TriangleDouble(lbf, lba, rba), Color.PINK));
 
     }
 
@@ -184,11 +183,11 @@ public class UniverseDouble {
      * @param rm The RoundingMode for any rounding.
      */
     public UniverseDouble(Path path, V3D_VectorDouble offset, Color color,
-            boolean assessTopology, double epsilon) throws IOException {
+            boolean assessTopology, double epsilon, boolean initNormal) throws IOException {
         triangles = new ArrayList<>();
         tetrahedra = new ArrayList<>();
         STL_ReaderDouble data = new STL_ReaderDouble(assessTopology);
-        data.readBinary(path, offset);
+        data.readBinary(path, offset, initNormal);
         V3D_PointDouble p = data.triangles.get(0).triangle.getPl().getP();
         double xmin = p.getX();
         double xmax = p.getX();
@@ -213,6 +212,7 @@ public class UniverseDouble {
             }
         }
         envelope = new V3D_EnvelopeDouble(xmin, xmax, ymin, ymax, zmin, zmax);
+        System.out.println(envelope.toString());
     }
 
     /**

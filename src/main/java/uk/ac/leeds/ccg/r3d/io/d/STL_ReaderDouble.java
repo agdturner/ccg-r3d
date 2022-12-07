@@ -16,6 +16,7 @@
 package uk.ac.leeds.ccg.r3d.io.d;
 
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -111,7 +112,7 @@ public class STL_ReaderDouble {
         Path p = Paths.get("data", "Utah_teapot_(solid).stl");
         try {
             STL_ReaderDouble s = new STL_ReaderDouble(true);
-            s.readBinary(p, V3D_VectorDouble.ZERO);
+            s.readBinary(p, V3D_VectorDouble.ZERO, false);
             //System.out.println(ts.get(0));
             System.out.println("minx=" + s.stats.minx);
             System.out.println("maxx=" + s.stats.maxx);
@@ -132,12 +133,13 @@ public class STL_ReaderDouble {
      *
      * @param p The file to read.
      * @param offset The common offset.
-     * @param oom
-     * @param rm
+     * @param initNormal If this is true, then the normal read from the file is 
+     * discounted and the normal is calculated from the triangle corner point
+     * vectors. 
      * @return An ArrayList of triangles read from the file.
      * @throws IOException
      */
-    public void readBinary(Path p, V3D_VectorDouble offset)
+    public void readBinary(Path p, V3D_VectorDouble offset, boolean initNormal)
             throws IOException {
         DataInputStream dis = new DataInputStream(new FileInputStream(
                 p.toFile()));
@@ -171,13 +173,20 @@ public class STL_ReaderDouble {
         V3D_VLineDouble qr = new V3D_VLineDouble(qv, rv);
         V3D_VLineDouble rp = new V3D_VLineDouble(rv, pv);
         short attribute = Short.reverseBytes(dis.readShort());
-        process(offset, pv, qv, rv, pq, qr, rp, n, attribute);
+        process(offset, pv, qv, rv, pq, qr, rp, n, attribute, initNormal);
         int i = 1;
+        int nTriangles1PC = nTriangles / 100;
+        if (nTriangles1PC < 1) {
+            nTriangles1PC = 1;
+        }
         while (dis.available() > 0) {
-            if (i % 100 == 0) {
+            try {
+            if (i % nTriangles1PC == 0) {
                 System.out.println("Reading " + i + " out of " + nTriangles + " triangles.");
             }
             n = new V3D_VDouble(readFloat(dis), readFloat(dis), readFloat(dis));
+            // Turn n into a unit normal.
+            n = n.getUnitVector();
             x = readFloat(dis);
             y = readFloat(dis);
             z = readFloat(dis);
@@ -197,8 +206,11 @@ public class STL_ReaderDouble {
             pq = new V3D_VLineDouble(pv, qv);
             qr = new V3D_VLineDouble(qv, rv);
             rp = new V3D_VLineDouble(rv, pv);
-            process(offset, pv, qv, rv, pq, qr, rp, n, attribute);
+            process(offset, pv, qv, rv, pq, qr, rp, n, attribute, initNormal);
             i++;
+            } catch (EOFException ex) {
+                break;
+            }
         }
         if (assessTopology) {
             // Topology checks and reporting.
@@ -232,9 +244,9 @@ public class STL_ReaderDouble {
     private void process(V3D_VectorDouble offset, V3D_VDouble pv, 
             V3D_VDouble qv, V3D_VDouble rv, V3D_VLineDouble pq, 
             V3D_VLineDouble qr, V3D_VLineDouble rp, V3D_VDouble n, 
-            short attribute) {
+            short attribute, boolean initNormal) {
         V3D_VTriangleDouble vt = new V3D_VTriangleDouble(pq, qr, rp);
-        if (n.isZero()) {
+        if (n.isZero() || initNormal) {
             n = vt.getNormal().getUnitVector();
         }
         TriangleDouble t = new TriangleDouble(

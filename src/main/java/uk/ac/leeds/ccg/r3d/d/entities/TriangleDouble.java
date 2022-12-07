@@ -112,17 +112,15 @@ public class TriangleDouble {
                 n = new V3D_VectorDouble(normal);
             }
         }
-        double dot = n.getDotProduct(lightVector);
-        double dot2 = dot * dot;
-        if (dot < 0) {
-            dot2 = -dot2;
-        }
-        dot2 = (dot2 + 1d) / (2d * (1d - ambientLight));
-        double lightRatio = Math.min(1.0d, Math.max(0.0d,
-                ambientLight + dot2));
-        int red = (int) (baseColor.getRed() * lightRatio);
-        int green = (int) (baseColor.getGreen() * lightRatio);
-        int blue = (int) (baseColor.getBlue() * lightRatio);
+        double dot = Math.abs(n.getDotProduct(lightVector));
+        double lr = Math.pow(dot, 3d); 
+//        double lr = dot * dot;
+         lr = (lr + 1d) / (2d * (1d - ambientLight));
+        lr = Math.min(1.0d, Math.max(0.0d,
+                ambientLight + lr));
+        int red = (int) (baseColor.getRed() * lr);
+        int green = (int) (baseColor.getGreen() * lr);
+        int blue = (int) (baseColor.getBlue() * lr);
         lightingColor = new Color(red, green, blue);
         initAmbientLightColour(ambientLight);
     }

@@ -23,7 +23,9 @@ import java.awt.image.MemoryImageSource;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import uk.ac.leeds.ccg.r3d.io.IO;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PointDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_RectangleDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_VectorDouble;
 
 public class RenderImageDouble {
@@ -53,10 +55,17 @@ public class RenderImageDouble {
      * @throws Exception
      */
     public RenderImageDouble(UniverseDouble universe, V3D_PointDouble pt,
-            Dimension size, double epsilon) throws Exception {
+            Dimension size, double zoomFactor, V3D_RectangleDouble screen, 
+            double epsilon) throws Exception {
         this.universe = universe;
-        CameraDouble c = new CameraDouble(pt, universe.envelope, size.width,
-                size.height, epsilon);
+        CameraDouble c;
+        if (screen == null) {
+            c = new CameraDouble(pt, universe.envelope, size.width,
+                size.height, zoomFactor, epsilon);
+        } else {
+            c = new CameraDouble(pt, universe.envelope, size.width,
+                size.height, screen, epsilon);
+        }
         this.universe.setCamera(c);
         this.size = new Dimension(c.ncols, c.nrows);
     }
@@ -75,8 +84,14 @@ public class RenderImageDouble {
             boolean runKatrina = false;
             //boolean runCuriosity = true;
             boolean runCuriosity = false;
-            boolean runApollo17 = true;
-            //boolean runApollo17 = false;
+            //boolean runApollo17 = true;
+            boolean runApollo17 = false;
+            //boolean run3dcityloader = true;
+            boolean run3dcityloader = false;
+            boolean runGlacier = true;
+            //boolean runGlacier = false;
+            
+            
             
             Path inDataDir = Paths.get("data", "input");
             Path outDataDir = Paths.get("data", "output");
@@ -96,8 +111,10 @@ public class RenderImageDouble {
                 //String name = "tetras6";
                 //String name = "tetras5";
                 String name = "triangles";
-                boolean assessTopology = false;
                 boolean castShadow = false;
+                double zoomFactor = 1.0d;
+                double distance = 2.0d;
+                boolean addGraticules = true;
                 /**
                  * AmbientLight makes non black surfaces non black even if they
                  * are orientated opposite to the lighting vector.
@@ -112,15 +129,16 @@ public class RenderImageDouble {
 //                                int k = 1; 
                                 V3D_VectorDouble direction = new V3D_VectorDouble(i, j, k).getUnitVector();
                                 V3D_PointDouble pt = getCameraPt(centroid, direction,
-                                        radius * 2d);
+                                        radius * distance);
                                 // Render the image
-                                RenderImageDouble r = new RenderImageDouble(universe, pt, size, epsilon);
+                                RenderImageDouble r = new RenderImageDouble(universe, pt, size, zoomFactor, null, epsilon);
                                 V3D_VectorDouble lighting = new V3D_VectorDouble(-1, -2, -3).getUnitVector();
                                 String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
                                         + "_j=" + String.format("%,.2f", lighting.dy)
                                         + "_k=" + String.format("%,.2f", lighting.dz)
                                         + ")_ambientLight(" + ambientLight + ")";
-                                Path dir = Paths.get(outDataDir.toString(), "test", name, "epsilon=" + epsilon, ls);
+                                Path dir = Paths.get(outDataDir.toString(), "test", name, "epsilon=" + epsilon, ls,
+                                        "zoomFactor=" + zoomFactor, "distance=" + distance);
                                 if (castShadow) {
                                     dir = Paths.get(dir.toString(), "shadow");
                                 }
@@ -130,7 +148,7 @@ public class RenderImageDouble {
                                         + "_j=" + String.format("%,.2f", pt.getY())
                                         + "_k=" + String.format("%,.2f", pt.getZ())
                                         + ")_" + ls + "_epsilon=" + epsilon + ".png");
-                                r.run(lighting, ambientLight, castShadow, epsilon);
+                                r.run(lighting, ambientLight, castShadow, addGraticules, epsilon);
                             }
                         }
                     }
@@ -145,40 +163,54 @@ public class RenderImageDouble {
                 int h = 100 * n;
                 //int w = 100 * n;
                 //int h = 75 * n;
+                boolean addGraticules = true;
                 boolean assessTopology = false;
-                boolean castShadow = false;
+                boolean castShadow = true;
+                // Zoom factor should be at least as big as distance?
+                double zoomFactor = 1d; 
+                //double zoomFactor = 2d;
+                //double zoomFactor = 1.5d;
+                //double distance = 3d;
+                double distance = 2d;
+                //double distance = 0.5d;
                 /**
                  * AmbientLight makes non black surfaces non black even if they
                  * are orientated opposite to the lighting vector.
                  */
+                //double ambientLight = 0d;
                 double ambientLight = 1d / 20d;
+                //double ambientLight = 1d / 15d;
+                //double ambientLight = 1d / 2d;
+                //double ambientLight = 1d;
                 String name = "3361664_Platonic_Solid_Collection";
                 String filename = "Icosahedron";
                 Path input = Paths.get(inDataDir.toString(), name, "files", filename + ".stl");
                 Color color = Color.YELLOW;
                 // Init universe
                 UniverseDouble universe = new UniverseDouble(input,
-                        V3D_VectorDouble.ZERO, color, assessTopology, epsilon);
+                        V3D_VectorDouble.ZERO, color, assessTopology, epsilon,
+                        false);
                 // Detail the camera
                 Dimension size = new Dimension(w, h);
                 V3D_PointDouble centroid = universe.envelope.getCentroid();
                 double radius = universe.envelope.getPoints()[0]
                         .getDistance(centroid);
-                V3D_VectorDouble lighting = new V3D_VectorDouble(-1, -2, -3).getUnitVector();
+                V3D_VectorDouble lighting = new V3D_VectorDouble(-1, -5, -3).getUnitVector();
                 for (int i = -1; i <= 1; i++) {
                     for (int j = -1; j <= 1; j++) {
                         for (int k = -1; k <= 1; k++) {
                             if (!(i == 0 && j == 0 && k == 0)) {
                                 V3D_VectorDouble direction = new V3D_VectorDouble(i, j, k).getUnitVector();
                                 V3D_PointDouble pt = getCameraPt(centroid, direction,
-                                        radius * 2d);
+                                        radius * distance);
                                 // Render the image
-                                RenderImageDouble r = new RenderImageDouble(universe, pt, size, epsilon);
+                                RenderImageDouble r = new RenderImageDouble(universe, pt, size, zoomFactor, null, epsilon);
                                 String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
                                         + "_j=" + String.format("%,.2f", lighting.dy)
                                         + "_k=" + String.format("%,.2f", lighting.dz)
                                         + ")_ambientLight(" + ambientLight + ")";
-                                Path dir = Paths.get(outDataDir.toString(), name, "files", "epsilon=" + epsilon, ls);
+                                Path dir = Paths.get(outDataDir.toString(), name, "files", "epsilon=" + epsilon, ls,
+                                        "zoomFactor=" + zoomFactor, "distance=" + distance);
                                 if (castShadow) {
                                     dir = Paths.get(dir.toString(), "shadow");
                                 }
@@ -189,7 +221,7 @@ public class RenderImageDouble {
                                         + "_j=" + String.format("%,.2f", pt.getY())
                                         + "_k=" + String.format("%,.2f", pt.getZ())
                                         + ")_" + ls + "_epsilon=" + epsilon + ".png");
-                                r.run(lighting, ambientLight, castShadow, epsilon);
+                                r.run(lighting, ambientLight, castShadow, addGraticules, epsilon);
                             }
                         }
                     }
@@ -204,6 +236,8 @@ public class RenderImageDouble {
                 int h = 75 * n;
                 boolean assessTopology = false;
                 boolean castShadow = false;
+                double zoomFactor = 1.0d;
+                double distance = 2.0d;
                 /**
                  * AmbientLight makes non black surfaces non black even if they
                  * are orientated opposite to the lighting vector.
@@ -214,7 +248,8 @@ public class RenderImageDouble {
                 Path input = Paths.get(inDataDir.toString(), name, name + ".stl");
                 // Init universe
                 UniverseDouble universe = new UniverseDouble(input,
-                        V3D_VectorDouble.ZERO, color, assessTopology, epsilon);
+                        V3D_VectorDouble.ZERO, color, assessTopology, epsilon,
+                        false);
                 // Detail the camera
                 Dimension size = new Dimension(w, h);
                 V3D_PointDouble centroid = universe.envelope.getCentroid();
@@ -227,16 +262,17 @@ public class RenderImageDouble {
                                 V3D_VectorDouble direction = new V3D_VectorDouble(i, j, k).getUnitVector();
                 //V3D_VectorDouble direction = new V3D_VectorDouble(-1, 1, 1).getUnitVector();
                 V3D_PointDouble pt = getCameraPt(centroid, direction,
-                        radius * 2d);
+                        radius * distance);
                 // Render the image
-                RenderImageDouble r = new RenderImageDouble(universe, pt, size, epsilon);
+                RenderImageDouble r = new RenderImageDouble(universe, pt, size, zoomFactor, null, epsilon);
                 //V3D_VectorDouble lighting = new V3D_VectorDouble(-1, -2, -3).getUnitVector();
                 V3D_VectorDouble lighting = new V3D_VectorDouble(1, 2, 3).getUnitVector();
                 String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
                         + "_j=" + String.format("%,.2f", lighting.dy)
                         + "_k=" + String.format("%,.2f", lighting.dz)
                         + ")_ambientLight(" + ambientLight + ")";
-                Path dir = Paths.get(outDataDir.toString(), name, "epsilon=" + epsilon, ls);
+                Path dir = Paths.get(outDataDir.toString(), name, "epsilon=" + epsilon, ls,
+                                        "zoomFactor=" + zoomFactor, "distance=" + distance);
                 if (castShadow) {
                     dir = Paths.get(dir.toString(), "shadow");
                 }
@@ -264,6 +300,8 @@ public class RenderImageDouble {
                 String filename = "1620geographos";
                 boolean assessTopology = false;
                 boolean castShadow = true;
+                double zoomFactor = 1.0d;
+                double distance = 2.0d;
                 /**
                  * AmbientLight makes non black surfaces non black even if they
                  * are orientated opposite to the lighting vector.
@@ -273,7 +311,8 @@ public class RenderImageDouble {
                 Color color = Color.YELLOW;
                 // Init universe
                 UniverseDouble universe = new UniverseDouble(input,
-                        V3D_VectorDouble.ZERO, color, assessTopology, epsilon);
+                        V3D_VectorDouble.ZERO, color, assessTopology, epsilon,
+                        false);
                 // Detail the camera
                 Dimension size = new Dimension(w, h);
                 V3D_PointDouble centroid = universe.envelope.getCentroid();
@@ -289,15 +328,16 @@ public class RenderImageDouble {
 //                int k = 1;
                                     V3D_VectorDouble direction = new V3D_VectorDouble(i, j, k).getUnitVector();
                                     V3D_PointDouble pt = getCameraPt(centroid, direction,
-                                            radius * 2d);
+                                            radius * distance);
                                     // Render the image
-                                    RenderImageDouble r = new RenderImageDouble(universe, pt, size, epsilon);
+                                    RenderImageDouble r = new RenderImageDouble(universe, pt, size, zoomFactor, null, epsilon);
                                     V3D_VectorDouble lighting = new V3D_VectorDouble(-1, -2, -3).getUnitVector();
                                     String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
                                             + "_j=" + String.format("%,.2f", lighting.dy)
                                             + "_k=" + String.format("%,.2f", lighting.dz)
                                             + ")_ambientLight(" + ambientLight + ")";
-                                    Path dir = Paths.get(outDataDir.toString(), name, "files", "epsilon=" + epsilon, ls, "nset");
+                                    Path dir = Paths.get(outDataDir.toString(), name, "files", "epsilon=" + epsilon, ls, "nset",
+                                        "zoomFactor=" + zoomFactor, "distance=" + distance);
                                     if (castShadow) {
                                         dir = Paths.get(dir.toString(), "shadow");
                                     }
@@ -325,6 +365,8 @@ public class RenderImageDouble {
                 String filename = "Katrina";
                 boolean assessTopology = false;
                 boolean castShadow = false;
+                double zoomFactor = 1.0d;
+                double distance = 2.0d;
                 /**
                  * AmbientLight makes non black surfaces non black even if they
                  * are orientated opposite to the lighting vector.
@@ -334,7 +376,8 @@ public class RenderImageDouble {
                 Color color = Color.YELLOW;
                 // Init universe
                 UniverseDouble universe = new UniverseDouble(input,
-                        V3D_VectorDouble.ZERO, color, assessTopology, epsilon);
+                        V3D_VectorDouble.ZERO, color, assessTopology, epsilon,
+                        false);
                 // Detail the camera
                 Dimension size = new Dimension(w, h);
                 V3D_PointDouble centroid = universe.envelope.getCentroid();
@@ -347,15 +390,16 @@ public class RenderImageDouble {
 //                                V3D_VectorDouble direction = new V3D_VectorDouble(i, j, k).getUnitVector();
                 V3D_VectorDouble direction = new V3D_VectorDouble(1, 1, 1).getUnitVector();
                 V3D_PointDouble pt = getCameraPt(centroid, direction,
-                        radius * 2d);
+                        radius * distance);
                 // Render the image
-                RenderImageDouble r = new RenderImageDouble(universe, pt, size, epsilon);
+                RenderImageDouble r = new RenderImageDouble(universe, pt, size, zoomFactor, null, epsilon);
                 V3D_VectorDouble lighting = new V3D_VectorDouble(-1, -2, -3).getUnitVector();
                 String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
                         + "_j=" + String.format("%,.2f", lighting.dy)
                         + "_k=" + String.format("%,.2f", lighting.dz)
                         + ")_ambientLight(" + ambientLight + ")";
-                Path dir = Paths.get(outDataDir.toString(), name, "files", "epsilon=" + epsilon, ls);
+                Path dir = Paths.get(outDataDir.toString(), name, "files", "epsilon=" + epsilon, ls,
+                                        "zoomFactor=" + zoomFactor, "distance=" + distance);
                 if (castShadow) {
                     dir = Paths.get(dir.toString(), "shadow");
                 }
@@ -382,6 +426,8 @@ public class RenderImageDouble {
                 String filename = "Curiosity SM (Complete Print 200uM)";
                 boolean assessTopology = false;
                 boolean castShadow = false;
+                double zoomFactor = 1.0d;
+                double distance = 2.0d;
                 /**
                  * AmbientLight makes non black surfaces non black even if they
                  * are orientated opposite to the lighting vector.
@@ -392,7 +438,8 @@ public class RenderImageDouble {
                 Color color = Color.YELLOW;
                 // Init universe
                 UniverseDouble universe = new UniverseDouble(input,
-                        V3D_VectorDouble.ZERO, color, assessTopology, epsilon);
+                        V3D_VectorDouble.ZERO, color, assessTopology, epsilon,
+                        false);
                 // Detail the camera
                 Dimension size = new Dimension(w, h);
                 V3D_PointDouble centroid = universe.envelope.getCentroid();
@@ -405,15 +452,16 @@ public class RenderImageDouble {
 //                                V3D_VectorDouble direction = new V3D_VectorDouble(i, j, k).getUnitVector();
                 V3D_VectorDouble direction = new V3D_VectorDouble(1, 1, 1).getUnitVector();
                 V3D_PointDouble pt = getCameraPt(centroid, direction,
-                        radius * 2d);
+                        radius * distance);
                 // Render the image
-                RenderImageDouble r = new RenderImageDouble(universe, pt, size, epsilon);
+                RenderImageDouble r = new RenderImageDouble(universe, pt, size, zoomFactor, null, epsilon);
                 V3D_VectorDouble lighting = new V3D_VectorDouble(-1, -2, -3).getUnitVector();
                 String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
                         + "_j=" + String.format("%,.2f", lighting.dy)
                         + "_k=" + String.format("%,.2f", lighting.dz)
                         + ")_ambientLight(" + ambientLight + ")";
-                Path dir = Paths.get(outDataDir.toString(), name, "files", "epsilon=" + epsilon, ls);
+                Path dir = Paths.get(outDataDir.toString(), name, "files", "epsilon=" + epsilon, ls,
+                                        "zoomFactor=" + zoomFactor, "distance=" + distance);
                 if (castShadow) {
                     dir = Paths.get(dir.toString(), "shadow");
                 }
@@ -440,6 +488,8 @@ public class RenderImageDouble {
                 String filename = "Apollo_17";
                 boolean assessTopology = false;
                 boolean castShadow = false;
+                double zoomFactor = 1.0d;
+                double distance = 2.0d;
                 /**
                  * AmbientLight makes non black surfaces non black even if they
                  * are orientated opposite to the lighting vector.
@@ -450,7 +500,8 @@ public class RenderImageDouble {
                 Color color = Color.WHITE;
                 // Init universe
                 UniverseDouble universe = new UniverseDouble(input,
-                        V3D_VectorDouble.ZERO, color, assessTopology, epsilon);
+                        V3D_VectorDouble.ZERO, color, assessTopology, epsilon,
+                        false);
                 // Detail the camera
                 Dimension size = new Dimension(w, h);
                 V3D_PointDouble centroid = universe.envelope.getCentroid();
@@ -463,15 +514,16 @@ public class RenderImageDouble {
 //                                V3D_VectorDouble direction = new V3D_VectorDouble(i, j, k).getUnitVector();
                 V3D_VectorDouble direction = new V3D_VectorDouble(1, 1, 1).getUnitVector();
                 V3D_PointDouble pt = getCameraPt(centroid, direction,
-                        radius * 2d);
+                        radius * distance);
                 // Render the image
-                RenderImageDouble r = new RenderImageDouble(universe, pt, size, epsilon);
+                RenderImageDouble r = new RenderImageDouble(universe, pt, size, zoomFactor, null, epsilon);
                 V3D_VectorDouble lighting = new V3D_VectorDouble(-1, -2, -3).getUnitVector();
                 String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
                         + "_j=" + String.format("%,.2f", lighting.dy)
                         + "_k=" + String.format("%,.2f", lighting.dz)
                         + ")_ambientLight(" + ambientLight + ")";
-                Path dir = Paths.get(outDataDir.toString(), name, "files", "epsilon=" + epsilon, ls);
+                Path dir = Paths.get(outDataDir.toString(), name, "files", "epsilon=" + epsilon, ls,
+                                        "zoomFactor=" + zoomFactor, "distance=" + distance);
                 if (castShadow) {
                     dir = Paths.get(dir.toString(), "shadow");
                 }
@@ -488,6 +540,168 @@ public class RenderImageDouble {
 //                    }
 //                }
             }
+            
+            if (run3dcityloader) {            
+                //https://3dcityloader.com/en/city/worldwide
+                double epsilon = 1d / 10000000d;
+                int n = 10;
+                int w = 100 * n;
+                int h = 75 * n;
+                String name = "3dcityloader";
+                String filename = "76d5e2d2-7410-4ab3-bd07-9faeeb08d4c4";
+                boolean assessTopology = false;
+                boolean castShadow = false;
+                double zoomFactor = 1.0d;
+                double distance = 2.0d;
+                /**
+                 * AmbientLight makes non black surfaces non black even if they
+                 * are orientated opposite to the lighting vector.
+                 */
+                double ambientLight = 1d / 20d;
+                Path input = Paths.get(inDataDir.toString(), name, filename,
+                        filename + ".stl");
+                Color color = Color.WHITE;
+                // Init universe
+                UniverseDouble universe = new UniverseDouble(input,
+                        V3D_VectorDouble.ZERO, color, assessTopology, epsilon,
+                        false);
+                // Detail the camera
+                Dimension size = new Dimension(w, h);
+                V3D_PointDouble centroid = universe.envelope.getCentroid();
+                double radius = universe.envelope.getPoints()[0]
+                        .getDistance(centroid);
+//                for (int i = -1; i <= 1; i++) {
+//                    for (int j = -1; j <= 1; j++) {
+//                        for (int k = -1; k <= 1; k++) {
+//                            if (!(i == 0 && j == 0 && k == 0)) {
+//                                V3D_VectorDouble direction = new V3D_VectorDouble(i, j, k).getUnitVector();
+                V3D_VectorDouble direction = new V3D_VectorDouble(1, 1, 1).getUnitVector();
+                V3D_PointDouble pt = getCameraPt(centroid, direction,
+                        radius * distance);
+                // Render the image
+                RenderImageDouble r = new RenderImageDouble(universe, pt, size, zoomFactor, null, epsilon);
+                V3D_VectorDouble lighting = new V3D_VectorDouble(1, -2, 3).getUnitVector();
+                String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
+                        + "_j=" + String.format("%,.2f", lighting.dy)
+                        + "_k=" + String.format("%,.2f", lighting.dz)
+                        + ")_ambientLight(" + ambientLight + ")";
+                Path dir = Paths.get(outDataDir.toString(), name, "files", "epsilon=" + epsilon, ls,
+                                        "zoomFactor=" + zoomFactor, "distance=" + distance);
+                if (castShadow) {
+                    dir = Paths.get(dir.toString(), "shadow");
+                }
+                r.output = Paths.get(dir.toString(),
+                        filename
+                        + "_" + r.size.width + "x" + r.size.height
+                        + "pt(i=" + String.format("%,.2f", pt.getX())
+                        + "_j=" + String.format("%,.2f", pt.getY())
+                        + "_k=" + String.format("%,.2f", pt.getZ())
+                        + ")_" + ls + "_epsilon=" + epsilon + ".png");
+                r.run(lighting, ambientLight, castShadow, epsilon);
+//                            }
+//                        }
+//                    }
+//                }
+            }
+            
+            if (runGlacier) {
+                double epsilon = 1d / 10000000d;
+                int n = 10;
+                int w = 100 * n;
+                int h = 75 * n;
+                String name = "Mosaics";
+                String filename = "contemp_mosaic_model";
+                //String filename = "future_mosaic_model";
+                
+                boolean assessTopology = false;
+                boolean castShadow = false;
+//                double zoomFactor = 3.0d;
+                double zoomFactor = 2.0d;
+                double distance = 2.0d;
+                //double distance = 1.0d;
+                //double distance = 0.75d;
+                /**
+                 * AmbientLight makes non black surfaces non black even if they
+                 * are orientated opposite to the lighting vector.
+                 */
+                double ambientLight = 1d / 20d;
+                Path input = Paths.get(inDataDir.toString(), name, name,
+                        filename + ".stl");
+                Color color = Color.WHITE;
+                // Init universe
+                UniverseDouble universe = new UniverseDouble(input,
+                        V3D_VectorDouble.ZERO, color, assessTopology, epsilon,
+                        false);
+                // Detail the camera
+                Dimension size = new Dimension(w, h);
+                V3D_PointDouble centroid = universe.envelope.getCentroid();
+                double radius = universe.envelope.getPoints()[0]
+                        .getDistance(centroid);
+//                for (int i = -1; i <= 1; i++) {
+//                    for (int j = -1; j <= 1; j++) {
+//                        for (int k = -1; k <= 1; k++) {
+//                            if (!(i == 0 && j == 0 && k == 0)) {
+//                                V3D_VectorDouble direction = new V3D_VectorDouble(i, j, k).getUnitVector();
+                V3D_VectorDouble direction = new V3D_VectorDouble(1, 1, 1).getUnitVector();
+                // (xMin=0.0, xMax=104.31999969482422, yMin=0.0, yMax=140.0, zMin=0.0, zMax=94.50718688964844
+                // Render the image
+//                V3D_PointDouble pt = getCameraPt(centroid, direction,
+//                        radius * distance);
+//                V3D_RectangleDouble screen = null;
+                double x = 50d;
+                double y = 70d;
+                //double z = 90d;
+                double z = 60d;
+                V3D_PointDouble pt = new V3D_PointDouble(x, y, z);
+                distance = 5.0d;
+                double apertureWidthd2 = 5d;
+                double apertureHeightd2 = 5d;
+                zoomFactor = 5.0d;
+                V3D_RectangleDouble screen = new V3D_RectangleDouble(
+                        new V3D_PointDouble(x - apertureWidthd2, 75d, z - apertureHeightd2),
+                        new V3D_PointDouble(x - apertureWidthd2, 75d, z + apertureHeightd2),
+                        new V3D_PointDouble(x + apertureWidthd2, 75d, z + apertureHeightd2),
+                        new V3D_PointDouble(x + apertureWidthd2, 75d, z - apertureHeightd2));
+                for (int angles = 1; angles < 6; angles ++){
+                double angle = (Math.PI/6) * angles;
+                screen = screen.rotate(V3D_LineDouble.Z_AXIS, angle, epsilon);
+                RenderImageDouble r = new RenderImageDouble(universe, pt, size, zoomFactor, screen, epsilon);
+                V3D_VectorDouble lighting = new V3D_VectorDouble(1, -2, 3).getUnitVector();
+                String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
+                        + "_j=" + String.format("%,.2f", lighting.dy)
+                        + "_k=" + String.format("%,.2f", lighting.dz)
+                        + ")_ambientLight(" + ambientLight + ")";
+                Path dir;
+                if (screen == null) {
+                    dir = Paths.get(outDataDir.toString(), name, "files", "epsilon=" + epsilon, ls,
+                                        "zoomFactor=" + zoomFactor, "distance=" + distance);
+                } else {
+                    dir = Paths.get(outDataDir.toString(), name, "files", "epsilon=" + epsilon, ls,
+                                         "_distance=" + distance);
+                }
+                if (castShadow) {
+                    dir = Paths.get(dir.toString(), "shadow");
+                }
+                r.output = Paths.get(dir.toString(),
+                        filename
+                        + "_" + r.size.width + "x" + r.size.height
+                        + "pt(i=" + String.format("%,.2f", pt.getX())
+                        + "_j=" + String.format("%,.2f", pt.getY())
+                        + "_k=" + String.format("%,.2f", pt.getZ())
+                        + ")_angle=" + String.format("%,.2f", angle)
+                        + "_aperture=" + apertureWidthd2+ "x" + apertureHeightd2
+                        + "_" + ls + "_epsilon=" + epsilon + ".png");
+                r.run(lighting, ambientLight, castShadow, epsilon);
+            }
+//                            }
+//                        }
+//                    }
+//                }
+            }
+            
+            
+                    
+            
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
@@ -500,8 +714,19 @@ public class RenderImageDouble {
      */
     public void run(V3D_VectorDouble lighting, double ambientLight,
             boolean castShadow, double epsilon) throws Exception {
+        run(lighting, ambientLight, castShadow, false, epsilon);
+    }
+    
+    /**
+     * The process for rendering and image.
+     *
+     * @throws Exception
+     */
+    public void run(V3D_VectorDouble lighting, double ambientLight,
+            boolean castShadow, boolean addGraticules, double epsilon) 
+            throws Exception {
         int[] pix = universe.camera.render(this.universe, lighting,
-                ambientLight, castShadow, epsilon);
+                ambientLight, castShadow, addGraticules, epsilon);
         /**
          * Convert pix to an image and write to a file.
          */
@@ -512,6 +737,8 @@ public class RenderImageDouble {
         System.out.println("Rendered");
     }
 
+    
+            
     /**
      * Get the focal point for a camera.
      *
