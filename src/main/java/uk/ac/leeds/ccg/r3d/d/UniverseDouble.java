@@ -19,11 +19,17 @@ import java.awt.Color;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import uk.ac.leeds.ccg.r3d.d.entities.LineDouble;
+import uk.ac.leeds.ccg.r3d.d.entities.PointDouble;
 import uk.ac.leeds.ccg.r3d.d.entities.TetrahedronDouble;
 import uk.ac.leeds.ccg.r3d.d.entities.TriangleDouble;
 import uk.ac.leeds.ccg.r3d.io.d.STL_ReaderDouble;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_LineSegment;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_EnvelopeDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineSegmentDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PointDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_RectangleDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TetrahedronDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TriangleDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_VectorDouble;
@@ -39,6 +45,16 @@ public class UniverseDouble {
      * Envelope
      */
     V3D_EnvelopeDouble envelope;
+
+    /**
+     * The triangles to render.
+     */
+    public ArrayList<PointDouble> points;
+
+    /**
+     * The triangles to render.
+     */
+    public ArrayList<LineDouble> lines;
 
     /**
      * The triangles to render.
@@ -63,6 +79,8 @@ public class UniverseDouble {
      * @param rm The RoundingMode for any rounding.
      */
     public UniverseDouble(V3D_VectorDouble offset, double epsilon) {
+        points = new ArrayList<>();
+        lines = new ArrayList<>();
         triangles = new ArrayList<>();
         tetrahedra = new ArrayList<>();
         /**
@@ -70,7 +88,7 @@ public class UniverseDouble {
          */
         V3D_PointDouble[] points = new V3D_PointDouble[8];
         // multiplication factor
-        long m = 100;
+        long m = 3;
         V3D_PointDouble lbf = new V3D_PointDouble(offset, new V3D_VectorDouble(-1 * m, -1 * m, -1 * m));
         V3D_PointDouble lba = new V3D_PointDouble(offset, new V3D_VectorDouble(-1 * m, -1 * m, 1 * m));
         V3D_PointDouble ltf = new V3D_PointDouble(offset, new V3D_VectorDouble(-1 * m, 1 * m, -1 * m));
@@ -81,7 +99,9 @@ public class UniverseDouble {
         V3D_PointDouble rta = new V3D_PointDouble(offset, new V3D_VectorDouble(1 * m, 1 * m, 1 * m));
         //createCubeFrom5Tetrahedra(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
         //createCubeFrom6Tetrahedra(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
-        createCubeSurfaceFromTriangles(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
+        //createCubeSurfaceFromTriangles(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
+        //createAxes(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
+        createTriangle(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
         points[0] = lbf;
         points[1] = lba;
         points[2] = ltf;
@@ -91,6 +111,46 @@ public class UniverseDouble {
         points[6] = rtf;
         points[7] = rta;
         this.envelope = new V3D_EnvelopeDouble(points);
+    }
+
+    /**
+     *
+     */
+    public void createTriangle(double epsilon,
+            V3D_PointDouble lbf, V3D_PointDouble lba, V3D_PointDouble ltf, V3D_PointDouble lta,
+            V3D_PointDouble rbf, V3D_PointDouble rba, V3D_PointDouble rtf, V3D_PointDouble rta) {
+        V3D_EnvelopeDouble e = new V3D_EnvelopeDouble(lbf, lba, ltf, lta,
+                rbf, rba, rtf, rta);
+        // Create x axis
+        V3D_PointDouble p = new V3D_PointDouble(e.getXMin(), 0d, -1d);
+        //V3D_PointDouble q = new V3D_PointDouble(0d, e.getYMax(), -1d);
+        V3D_PointDouble q = new V3D_PointDouble(e.getXMax(), e.getYMax(), -1d);
+        V3D_PointDouble r = new V3D_PointDouble(e.getXMax(), 0d, -1d);
+        triangles.add(new TriangleDouble(new V3D_TriangleDouble(p, q, r), Color.RED));
+    }
+    
+    /**
+     *
+     */
+    public void createAxes(double epsilon,
+            V3D_PointDouble lbf, V3D_PointDouble lba, V3D_PointDouble ltf, V3D_PointDouble lta,
+            V3D_PointDouble rbf, V3D_PointDouble rba, V3D_PointDouble rtf, V3D_PointDouble rta) {
+        V3D_EnvelopeDouble e = new V3D_EnvelopeDouble(lbf, lba, ltf, lta,
+                rbf, rba, rtf, rta);
+        // Create x axis
+        V3D_PointDouble xMin = new V3D_PointDouble(e.getXMin(), 0d, 0d);
+        V3D_PointDouble xMax = new V3D_PointDouble(e.getXMax(), 0d, 0d);
+        lines.add(new LineDouble(new V3D_LineSegmentDouble(xMin, xMax), Color.RED));
+        // Create y axis
+        V3D_PointDouble yMin = new V3D_PointDouble(0d, e.getYMin(), 0d);
+        V3D_PointDouble yMax = new V3D_PointDouble(0d, e.getYMax(), 0d);
+        lines.add(new LineDouble(new V3D_LineSegmentDouble(yMin, yMax), Color.GREEN));
+        // Create z axis
+        V3D_PointDouble zMin = new V3D_PointDouble(0d, 0d, e.getZMin());
+        V3D_PointDouble zMax = new V3D_PointDouble(0d, 0d, e.getZMax());
+        lines.add(new LineDouble(new V3D_LineSegmentDouble(zMin, zMax), Color.BLUE));
+
+
     }
 
     /**
@@ -188,7 +248,7 @@ public class UniverseDouble {
         tetrahedra = new ArrayList<>();
         STL_ReaderDouble data = new STL_ReaderDouble(assessTopology);
         data.readBinary(path, offset, initNormal);
-        V3D_PointDouble p = data.triangles.get(0).triangle.getPl().getP();
+        V3D_PointDouble p = data.triangles.get(0).triangle.getPl(epsilon).getP();
         double xmin = p.getX();
         double xmax = p.getX();
         double ymin = p.getY();

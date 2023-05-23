@@ -15,12 +15,12 @@
  */
 package uk.ac.leeds.ccg.r3d;
 
+import ch.obermuhlner.math.big.BigRational;
 import java.awt.Color;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import uk.ac.leeds.ccg.math.number.Math_BigRational;
 import uk.ac.leeds.ccg.r3d.entities.Tetrahedron;
 import uk.ac.leeds.ccg.r3d.entities.Triangle;
 import uk.ac.leeds.ccg.r3d.io.STL_Reader;
@@ -92,7 +92,7 @@ public class Universe {
         points[5] = rba;
         points[6] = rtf;
         points[7] = rta;
-        this.envelope = new V3D_Envelope(oom, rm, points);
+        this.envelope = new V3D_Envelope(oom, points);
     }
 
     /**
@@ -192,29 +192,29 @@ public class Universe {
         STL_Reader data = new STL_Reader(assessTopology);
         data.readBinary(path, offset, oom, rm);
         V3D_Point p = data.triangles.get(0).triangle.getPl(oom, rm).getP();
-        Math_BigRational xmin = p.getX(oom, rm);
-        Math_BigRational xmax = p.getX(oom, rm);
-        Math_BigRational ymin = p.getY(oom, rm);
-        Math_BigRational ymax = p.getY(oom, rm);
-        Math_BigRational zmin = p.getZ(oom, rm);
-        Math_BigRational zmax = p.getZ(oom, rm);
+        BigRational xmin = p.getX(oom, rm);
+        BigRational xmax = p.getX(oom, rm);
+        BigRational ymin = p.getY(oom, rm);
+        BigRational ymax = p.getY(oom, rm);
+        BigRational zmin = p.getZ(oom, rm);
+        BigRational zmax = p.getZ(oom, rm);
         for (Triangle t : data.triangles) {
             t.baseColor = color;
             t.lightingColor = color;
             triangles.add(t);
-            for (var pt : t.triangle.getPoints(oom, rm)) {
-                Math_BigRational x = pt.getX(oom, rm);
-                Math_BigRational y = pt.getY(oom, rm);
-                Math_BigRational z = pt.getZ(oom, rm);
-                xmin = xmin.min(x);
-                xmax = xmax.max(x);
-                ymin = ymin.min(y);
-                ymax = ymax.max(y);
-                zmin = zmin.min(z);
-                zmax = zmax.max(z);
+            for (var pt : t.triangle.getPoints()) {
+                BigRational x = pt.getX(oom, rm);
+                BigRational y = pt.getY(oom, rm);
+                BigRational z = pt.getZ(oom, rm);
+                xmin = BigRational.min(xmin, x);
+                xmax = BigRational.max(xmax, x);
+                ymin = BigRational.min(ymin, y);
+                ymax = BigRational.max(ymax, y);
+                zmin = BigRational.min(zmin, z);
+                zmax = BigRational.max(zmax, z);
             }
         }
-        envelope = new V3D_Envelope(oom, rm, xmin, xmax, ymin, ymax, zmin, zmax);
+        envelope = new V3D_Envelope(oom, xmin, xmax, ymin, ymax, zmin, zmax);
     }
 
     /**

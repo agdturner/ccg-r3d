@@ -16,6 +16,7 @@
 package uk.ac.leeds.ccg.r3d.d.entities;
 
 import java.awt.Color;
+import uk.ac.leeds.ccg.r3d.entities.Entity;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PointDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TriangleDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_VectorDouble;
@@ -26,7 +27,7 @@ import uk.ac.leeds.ccg.v3d.geometry.d.light.V3D_VDouble;
  *
  * @author Andy Turner
  */
-public class TriangleDouble {
+public class TriangleDouble extends Entity {
 
     /**
      * The triangle geometry
@@ -104,10 +105,10 @@ public class TriangleDouble {
             double ambientLight, double epsilon) {
         V3D_VectorDouble n;
         if (normal == null) {
-            n = initN(pt);
+            n = initN(pt, epsilon);
         } else {
             if (normal.isZero()) {
-                n = initN(pt);
+                n = initN(pt, epsilon);
             } else {
                 n = new V3D_VectorDouble(normal);
             }
@@ -132,11 +133,11 @@ public class TriangleDouble {
         this.ambientColor = new Color(red, green, blue);
     }
     
-    private V3D_VectorDouble initN(V3D_PointDouble pt) {
+    private V3D_VectorDouble initN(V3D_PointDouble pt, double epsilon) {
         if (pt == null) {
-            return triangle.getPl().n.getUnitVector();
+            return triangle.getPl(epsilon).getN().getUnitVector();
         } else {
-            return triangle.getPl().n.getUnitVector(pt);
+            return triangle.getPl(epsilon).getN().getUnitVector(pt);
         }
     }
 }

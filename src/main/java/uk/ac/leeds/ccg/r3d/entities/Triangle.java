@@ -15,9 +15,9 @@
  */
 package uk.ac.leeds.ccg.r3d.entities;
 
+import ch.obermuhlner.math.big.BigRational;
 import java.awt.Color;
 import java.math.RoundingMode;
-import uk.ac.leeds.ccg.math.number.Math_BigRational;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
@@ -28,7 +28,7 @@ import uk.ac.leeds.ccg.v3d.geometry.light.V3D_V;
  *
  * @author Andy Turner
  */
-public class Triangle {
+public class Triangle extends Entity {
 
     /**
      * The triangle geometry
@@ -50,21 +50,6 @@ public class Triangle {
      */
     public short attribute;
 
-    /**
-     * The base colour of the triangle.
-     */
-    public Color baseColor;
-
-    /**
-     * The colour of the triangle given some lighting conditions.
-     */
-    public Color lightingColor;
-
-    /**
-     * The colour of in ambient light.
-     */
-    public Color ambientColor;
-    
     /**
      * Create a new instance.
      *
@@ -102,7 +87,7 @@ public class Triangle {
      * @param rm The RoundingMode for any rounding.
      */
     public void setLighting(V3D_Point pt, V3D_Vector lightVector, 
-            Math_BigRational ambientLight, int oom, RoundingMode rm) {
+            BigRational ambientLight, int oom, RoundingMode rm) {
         V3D_Vector n;
         if (normal == null) {
             n = initN(pt, oom, rm);
@@ -113,14 +98,14 @@ public class Triangle {
                 n = new V3D_Vector(normal);
             }
         }
-        Math_BigRational dot = n.getDotProduct(lightVector, oom, rm);
-        Math_BigRational dot2 = dot.multiply(dot);
-        if (dot.compareTo(Math_BigRational.ZERO) == -1) {
+        BigRational dot = n.getDotProduct(lightVector, oom, rm);
+        BigRational dot2 = dot.multiply(dot);
+        if (dot.compareTo(BigRational.ZERO) == -1) {
             dot2 = dot2.negate();
         }
-        dot2 = (dot2.add(Math_BigRational.ONE)).divide(
-                Math_BigRational.TWO.multiply(
-                        Math_BigRational.ONE.subtract(ambientLight)));
+        dot2 = (dot2.add(BigRational.ONE)).divide(
+                BigRational.TWO.multiply(
+                        BigRational.ONE.subtract(ambientLight)));
         double lightRatio = Math.min(1.0d, Math.max(0.0d,
                 ambientLight.add(dot2).doubleValue()));
         int red = (int) (baseColor.getRed() * lightRatio);
@@ -139,9 +124,9 @@ public class Triangle {
     
     private V3D_Vector initN(V3D_Point pt, int oom, RoundingMode rm) {
         if (pt == null) {
-            return triangle.getPl(oom, rm).n.getUnitVector(oom, rm);
+            return triangle.getPl(oom, rm).getN().getUnitVector(oom, rm);
         } else {
-            return triangle.getPl(oom, rm).n.getUnitVector(pt, oom, rm);
+            return triangle.getPl(oom, rm).getN().getUnitVector(pt, oom, rm);
         }
     }
 }

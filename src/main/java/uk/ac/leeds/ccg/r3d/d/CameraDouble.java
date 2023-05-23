@@ -21,6 +21,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import uk.ac.leeds.ccg.generic.util.Generic_Collections;
 import uk.ac.leeds.ccg.grids.d2.Grids_2D_ID_int;
+import uk.ac.leeds.ccg.r3d.d.entities.LineDouble;
+import uk.ac.leeds.ccg.r3d.d.entities.PointDouble;
 import uk.ac.leeds.ccg.r3d.d.entities.TriangleDouble;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Ray;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_GeometryDouble;
@@ -174,16 +176,19 @@ public class CameraDouble extends V3D_PointDouble {
             double ambientLight, boolean castShadow, boolean addGraticules,
             double epsilon)
             throws Exception {
+        int n = ncols * nrows;
+        int[] pix = new int[n];
         // Collect all the triangles from the triangles and tetrahedra.
         int nTriangles = universe.triangles.size();
         int nt = nTriangles + (4 * universe.tetrahedra.size());
-        TriangleDouble[] ts = new TriangleDouble[nt];
-        for (int i = 0; i < nTriangles; i++) {
-            ts[i] = universe.triangles.get(i);
-        }
-        for (int i = 0; i < universe.tetrahedra.size(); i++) {
-            System.arraycopy(universe.tetrahedra.get(i).triangles, 0, ts, (i * 4) + nTriangles, 4);
-        }
+        if (nt > 0) {
+            TriangleDouble[] ts = new TriangleDouble[nt];
+            for (int i = 0; i < nTriangles; i++) {
+                ts[i] = universe.triangles.get(i);
+            }
+            for (int i = 0; i < universe.tetrahedra.size(); i++) {
+                System.arraycopy(universe.tetrahedra.get(i).triangles, 0, ts, (i * 4) + nTriangles, 4);
+            }
 
 //        /**
 //         * Currently, if a ray intersects a triangle, no matter how small, if 
@@ -200,236 +205,331 @@ public class CameraDouble extends V3D_PointDouble {
 //            //System.out.println(i + " out of " + ts.length);
 //            tetras[i] = new V3D_Tetrahedron(this, ts[i].triangle);
 //        }
-        /**
-         * Calculate the minimum distance between each triangle and the camera
-         * focal point, order the triangles by the distance, and set the
-         * lighting. This currently assumes that all of all the triangles are in
-         * the picture.
-         */
-        System.out.println("Calculate the minimum distance between each"
-                + " triangle and the camera focal point, order the triangles by"
-                + " the distance, and set the lighting.");
-        TreeMap<Double, Set<Integer>> mindOrderedTriangles = new TreeMap<>();
-        double[] mind2t = new double[ts.length];
-        V3D_PointDouble centroid = universe.envelope.getCentroid();
-        process(centroid, 0, ts, lighting, ambientLight, mindOrderedTriangles, mind2t, epsilon);
-        int nTriangles1PC = (nTriangles / 100);
-        if (nTriangles1PC < 1) {
-            nTriangles1PC = 1;
-        }
-        for (int i = 1; i < ts.length; i++) {
-            if (i % nTriangles1PC == 0) {
-                System.out.println("Triangle " + i + " out of " + ts.length);
+            /**
+             * Calculate the minimum distance between each triangle and the
+             * camera focal point, order the triangles by the distance, and set
+             * the lighting. This currently assumes that all of all the
+             * triangles are in the picture.
+             */
+            System.out.println("Calculate the minimum distance between each"
+                    + " triangle and the camera focal point, order the triangles by"
+                    + " the distance, and set the lighting.");
+            TreeMap<Double, Set<Integer>> mindOrderedTriangles = new TreeMap<>();
+            double[] mind2t = new double[ts.length];
+            V3D_PointDouble centroid = universe.envelope.getCentroid();
+            process(centroid, 0, ts, lighting, ambientLight, mindOrderedTriangles, mind2t, epsilon);
+            int nTriangles1PC = (nTriangles / 100);
+            if (nTriangles1PC < 1) {
+                nTriangles1PC = 1;
             }
-            process(centroid, i, ts, lighting, ambientLight, mindOrderedTriangles, mind2t, epsilon);
-        }
-        System.out.println("Minimum distance squared between any triangle and"
-                + " the camera focal point = "
-                + mindOrderedTriangles.firstKey().toString());
-        /**
-         * For each pixel, it is possible to find the area of intersection on
-         * each pixel for each triangle. To do this, use tetrahedrons with the
-         * fourth point of each tetrahedron being the focal point of the camera.
-         * Then working from front to back calculate the areas of each triangle
-         * on the pixel not obscured by closer triangles. The area information
-         * for each triangle visible at the pixel level could then be used to
-         * assign a colour. This would stop small things in the foreground
-         * suddenly obscuring what would normally be seen behind.
-         */
-        System.out.println("Process each triangle working from the closest to "
-                + "the furthest.");
-        V3D_VectorDouble lightingr = lighting.reverse();
-        HashMap<Grids_2D_ID_int, Double> mind = new HashMap<>();
-        HashMap<Grids_2D_ID_int, Integer> closestIndex = new HashMap<>();
-        /**
-         * idPoint is used to store the point of intersection for the triangle
-         * closest to the camera. This is later used to see if that point on the
-         * triangle is in shadow
-         */
-        HashMap<Grids_2D_ID_int, V3D_PointDouble> idPoint = new HashMap<>();
-        int j = 0;
-        V3D_TriangleDouble screenpqr = screen.getPQR();
-        V3D_LineSegmentDouble pq = screenpqr.getPQ();
-        V3D_LineSegmentDouble qr = screen.getRSP().getQR();
-        V3D_PlaneDouble screenPlane = screenpqr.getPl();
-        for (double mind2 : mindOrderedTriangles.keySet()) {
-            Set<Integer> triangleIndexes = mindOrderedTriangles.get(mind2);
-            for (var i : triangleIndexes) {
-                if (j % nTriangles1PC == 0) {
-                    System.out.println("Triangle " + (j + 1) + " out of " + ts.length + ":");
+            for (int i = 1; i < ts.length; i++) {
+                if (i % nTriangles1PC == 0) {
+                    System.out.println("Triangle " + i + " out of " + ts.length);
                 }
-                processTriangle(screenPlane, pq, qr, i, ts[i].triangle, mind2t,
-                        mind, closestIndex, idPoint, epsilon);
-                j++;
+                process(centroid, i, ts, lighting, ambientLight, mindOrderedTriangles, mind2t, epsilon);
             }
-        }
-        // Render each pixel, apply shadow and flip upside down for an image.
-        System.out.println("Render the closest triangles applying shadow.");
-        int n = ncols * nrows;
-        int[] pix = new int[n];
-        int pixelsToPop = closestIndex.size();
-        int pixelsToPopPC = pixelsToPop / 100;
-        if (castShadow) {
-            int pixel = 0;
-            for (var x : closestIndex.keySet()) {
-                if (pixel % pixelsToPopPC == 0) {
-                    System.out.println("Rendering pixel " + pixel + " out of " + pixelsToPop);
+            System.out.println("Minimum distance squared between any triangle and"
+                    + " the camera focal point = "
+                    + mindOrderedTriangles.firstKey().toString());
+            /**
+             * For each pixel, it is possible to find the area of intersection
+             * on each pixel for each triangle. To do this, use tetrahedrons
+             * with the fourth point of each tetrahedron being the focal point
+             * of the camera. Then working from front to back calculate the
+             * areas of each triangle on the pixel not obscured by closer
+             * triangles. The area information for each triangle visible at the
+             * pixel level could then be used to assign a colour. This would
+             * stop small things in the foreground suddenly obscuring what would
+             * normally be seen behind.
+             */
+            System.out.println("Process each triangle working from the closest to "
+                    + "the furthest.");
+            V3D_VectorDouble lightingr = lighting.reverse();
+            HashMap<Grids_2D_ID_int, Double> mind = new HashMap<>();
+            HashMap<Grids_2D_ID_int, Integer> closestIndex = new HashMap<>();
+            /**
+             * idPoint is used to store the point of intersection for the
+             * triangle closest to the camera. This is later used to see if that
+             * point on the triangle is in shadow
+             */
+            HashMap<Grids_2D_ID_int, V3D_PointDouble> idPoint = new HashMap<>();
+            int j = 0;
+            V3D_TriangleDouble screenpqr = screen.getPQR();
+            V3D_LineSegmentDouble pq = screenpqr.getPQ();
+            V3D_LineSegmentDouble qr = screen.getRSP().getQR();
+            V3D_PlaneDouble screenPlane = screenpqr.getPl(epsilon);
+            for (double mind2 : mindOrderedTriangles.keySet()) {
+                Set<Integer> triangleIndexes = mindOrderedTriangles.get(mind2);
+                for (var i : triangleIndexes) {
+                    if (j % nTriangles1PC == 0) {
+                        System.out.println("Triangle " + (j + 1) + " out of " + ts.length + ":");
+                    }
+                    processTriangle(screenPlane, pq, qr, i, ts[i].triangle, mind2t,
+                            mind, closestIndex, idPoint, epsilon);
+                    j++;
                 }
-                pixel++;
-                int r = nrows - x.getRow() - 1;
-                int in = (r * ncols) + x.getCol();
-                int ci = closestIndex.get(x);
-                TriangleDouble t = ts[ci];
-                int rgb = t.lightingColor.getRGB();
-                /**
-                 * Determine if parts of each triangle that are visible from the
-                 * camera are in shadow, i.e. the parts would not directly
-                 * receive light from the lighting vector direction as some
-                 * other triangle is in the way of this light. Normally, a
-                 * triangle in such shadow appears darker. But, the way things
-                 * appear in reality is complicated as surfaces absorb light and
-                 * emit light. And, light emitted from surfaces can concentrate
-                 * on particular parts of that same surface which in turn emit
-                 * more light. Anyway, for those parts that are shaded from
-                 * light coming from a particular direction, there are options
-                 * about how dark to make things appear. The lighting colour can
-                 * be set according to the ambient light, the colour that might
-                 * have been (without shadow) could be reduced by some factor,
-                 * or we can try to account for light emitted from the surface
-                 * to provide variable shading. Setting to a default ambient
-                 * light colour will typically make for a picture where many
-                 * parts have the same murky colour which many viewers might
-                 * regard as being unrealistic. Accounting for light emitted
-                 * from surfaces is typically computationally demanding and more
-                 * so with more surfaces with more concave features. Shading in
-                 * a way is infinitely complex! Physics suggests that billions
-                 * of photons (packets of energy) are emitted
-                 * electromagnetically from light sources that convert mass into
-                 * energy. Our vision - our eyes and our brains are geared to
-                 * build up a visualisation - what we see. The process is
-                 * amazing really and as things move there is a lot of
-                 * calculation being done! Modelling this iteratively can help
-                 * to generate more realistic images, but at what cost? Even
-                 * accounting for first and second order shadows can be so
-                 * computationally demanding, there has to be a value judgement
-                 * about whether the effort is worth it!
-                 */
-                // Apply shadow
-                V3D_RayDouble ray = new V3D_RayDouble(idPoint.get(x), lightingr);
-                for (int i = 0; i < universe.triangles.size(); i++) {
-                    if (i != ci) {
-                        if (universe.triangles.get(i).triangle.getIntersection(ray, epsilon) != null) {
-                            //rgb = t.ambientColor.getRGB();
+            }
+            // Render each pixel, apply shadow and flip upside down for an image.
+            System.out.println("Render the closest triangles applying shadow.");
+            int pixelsToPop = closestIndex.size();
+            int pixelsToPopPC = pixelsToPop / 100;
+            if (castShadow) {
+                int pixel = 0;
+                for (var x : closestIndex.keySet()) {
+                    if (pixel % pixelsToPopPC == 0) {
+                        System.out.println("Rendering pixel " + pixel + " out of " + pixelsToPop);
+                    }
+                    pixel++;
+                    int r = nrows - x.getRow() - 1;
+                    int in = (r * ncols) + x.getCol();
+                    int ci = closestIndex.get(x);
+                    TriangleDouble t = ts[ci];
+                    int rgb = t.lightingColor.getRGB();
+                    /**
+                     * Determine if parts of each triangle that are visible from
+                     * the camera are in shadow, i.e. the parts would not
+                     * directly receive light from the lighting vector direction
+                     * as some other triangle is in the way of this light.
+                     * Normally, a triangle in such shadow appears darker. But,
+                     * the way things appear in reality is complicated as
+                     * surfaces absorb light and emit light. And, light emitted
+                     * from surfaces can concentrate on particular parts of that
+                     * same surface which in turn emit more light. Anyway, for
+                     * those parts that are shaded from light coming from a
+                     * particular direction, there are options about how dark to
+                     * make things appear. The lighting colour can be set
+                     * according to the ambient light, the colour that might
+                     * have been (without shadow) could be reduced by some
+                     * factor, or we can try to account for light emitted from
+                     * the surface to provide variable shading. Setting to a
+                     * default ambient light colour will typically make for a
+                     * picture where many parts have the same murky colour which
+                     * many viewers might regard as being unrealistic.
+                     * Accounting for light emitted from surfaces is typically
+                     * computationally demanding and more so with more surfaces
+                     * with more concave features. Shading in a way is
+                     * infinitely complex! Physics suggests that billions of
+                     * photons (packets of energy) are emitted
+                     * electromagnetically from light sources that convert mass
+                     * into energy. Our vision - our eyes and our brains are
+                     * geared to build up a visualisation - what we see. The
+                     * process is amazing really and as things move there is a
+                     * lot of calculation being done! Modelling this iteratively
+                     * can help to generate more realistic images, but at what
+                     * cost? Even accounting for first and second order shadows
+                     * can be so computationally demanding, there has to be a
+                     * value judgement about whether the effort is worth it!
+                     */
+                    // Apply shadow
+                    V3D_RayDouble ray = new V3D_RayDouble(idPoint.get(x), lightingr);
+                    for (int i = 0; i < universe.triangles.size(); i++) {
+                        if (i != ci) {
+                            if (universe.triangles.get(i).triangle.getIntersection(ray, epsilon) != null) {
+                                //rgb = t.ambientColor.getRGB();
 //                            int red = (t.lightingColor.getRed() + t.ambientColor.getRed()) / 2;
 //                            int green = (t.lightingColor.getGreen() + t.ambientColor.getGreen()) / 2;
 //                            int blue = (t.lightingColor.getBlue() + t.ambientColor.getBlue()) / 2;
-                            int red = (int) (t.lightingColor.getRed() * 0.9d);
-                            int green = (int) (t.lightingColor.getGreen() * 0.9d);
-                            int blue = (int) (t.lightingColor.getBlue() * 0.9d);
-                            rgb = new Color(red, green, blue).getRGB();
-                            break;
+                                int red = (int) (t.lightingColor.getRed() * 0.9d);
+                                int green = (int) (t.lightingColor.getGreen() * 0.9d);
+                                int blue = (int) (t.lightingColor.getBlue() * 0.9d);
+                                rgb = new Color(red, green, blue).getRGB();
+                                break;
+                            }
+                        }
+                    }
+                    pix[in] = rgb;
+                }
+            } else {
+                int pixel = 0;
+                for (var x : closestIndex.keySet()) {
+                    if (pixel % pixelsToPopPC == 0) {
+                        System.out.println("Rendering pixel " + pixel + " out of " + pixelsToPop);
+                    }
+                    pixel++;
+                    int r = nrows - x.getRow() - 1;
+                    int in = (r * ncols) + x.getCol();
+                    int ci = closestIndex.get(x);
+                    TriangleDouble t = ts[ci];
+                    pix[in] = t.lightingColor.getRGB();
+                }
+            }
+
+            // Render triangle corners and edges
+            // Render edges
+            for (var t : universe.triangles) {
+                renderLine(epsilon, new LineDouble(t.triangle.getPQ(), Color.BLACK), pix);
+                renderLine(epsilon, new LineDouble(t.triangle.getQR(), Color.BLUE), pix);
+                renderLine(epsilon, new LineDouble(t.triangle.getRP(), Color.GREEN), pix);
+            }
+            // Render corners
+            for (var t : universe.triangles) {
+                renderPoint(epsilon, new PointDouble(t.triangle.getP(), Color.ORANGE), pix);
+                renderPoint(epsilon, new PointDouble(t.triangle.getQ(), Color.ORANGE), pix);
+                renderPoint(epsilon, new PointDouble(t.triangle.getR(), Color.ORANGE), pix);
+            }
+
+            if (addGraticules) {
+
+                double xmin = universe.envelope.getXMin();
+                double xmax = universe.envelope.getXMax();
+                double ymin = universe.envelope.getYMin();
+                double ymax = universe.envelope.getYMax();
+                double zmin = universe.envelope.getZMin();
+                double zmax = universe.envelope.getZMax();
+
+                // Create axes
+                V3D_PointDouble x_min = new V3D_PointDouble(new V3D_VectorDouble(xmin, 0d, 0d));
+                V3D_PointDouble x_max = new V3D_PointDouble(new V3D_VectorDouble(xmax, 0d, 0d));
+                if (!V3D_LineDouble.isCollinear(epsilon, x_min, x_max, this)) {
+                    V3D_TriangleDouble x_axist = new V3D_TriangleDouble(x_min, x_max, this);
+                    for (int r = 0; r < nrows; r++) {
+                        for (int c = 0; c < ncols; c++) {
+                            V3D_RectangleDouble pixel = getPixelBounds(r, c);
+                            if (pixel.getIntersection(x_axist, epsilon) != null) {
+                                int row = nrows - r - 1;
+                                int in = (row * ncols) + c;
+                                pix[in] = Color.BLUE.getRGB();
+                            }
+                        }
+                    }
+                } else {
+                    V3D_LineDouble x_axis = V3D_LineDouble.X_AXIS;
+                    for (int r = 0; r < nrows; r++) {
+                        for (int c = 0; c < ncols; c++) {
+                            V3D_RectangleDouble pixel = getPixelBounds(r, c);
+                            if (pixel.getIntersection(x_axis, epsilon) != null) {
+                                int row = nrows - r - 1;
+                                int in = (row * ncols) + c;
+                                pix[in] = Color.BLUE.getRGB();
+                            }
                         }
                     }
                 }
-                pix[in] = rgb;
-            }
-        } else {
-            int pixel = 0;
-            for (var x : closestIndex.keySet()) {
-                if (pixel % pixelsToPopPC == 0) {
-                    System.out.println("Rendering pixel " + pixel + " out of " + pixelsToPop);
+                V3D_PointDouble y_min = new V3D_PointDouble(new V3D_VectorDouble(0d, ymin, 0d));
+                V3D_PointDouble y_max = new V3D_PointDouble(new V3D_VectorDouble(0d, ymax, 0d));
+                if (!V3D_LineDouble.isCollinear(epsilon, y_min, y_max, this)) {
+                    V3D_TriangleDouble y_axist = new V3D_TriangleDouble(y_min, y_max, this);
+                    for (int r = 0; r < nrows; r++) {
+                        for (int c = 0; c < ncols; c++) {
+                            V3D_RectangleDouble pixel = getPixelBounds(r, c);
+                            if (pixel.getIntersection(y_axist, epsilon) != null) {
+                                int row = nrows - r - 1;
+                                int in = (row * ncols) + c;
+                                pix[in] = Color.RED.getRGB();
+                            }
+                        }
+                    }
+                } else {
+                    V3D_LineDouble y_axis = V3D_LineDouble.Y_AXIS;
+                    for (int r = 0; r < nrows; r++) {
+                        for (int c = 0; c < ncols; c++) {
+                            V3D_RectangleDouble pixel = getPixelBounds(r, c);
+                            if (pixel.getIntersection(y_axis, epsilon) != null) {
+                                int row = nrows - r - 1;
+                                int in = (row * ncols) + c;
+                                pix[in] = Color.RED.getRGB();
+                            }
+                        }
+                    }
                 }
-                pixel++;
-                int r = nrows - x.getRow() - 1;
-                int in = (r * ncols) + x.getCol();
-                int ci = closestIndex.get(x);
-                TriangleDouble t = ts[ci];
-                pix[in] = t.lightingColor.getRGB();
+                V3D_PointDouble z_min = new V3D_PointDouble(new V3D_VectorDouble(0d, 0d, zmin));
+                V3D_PointDouble z_max = new V3D_PointDouble(new V3D_VectorDouble(0d, 0d, zmax));
+                if (!V3D_LineDouble.isCollinear(epsilon, z_min, z_max, this)) {
+                    V3D_TriangleDouble z_axist = new V3D_TriangleDouble(z_min, z_max, this);
+                    for (int r = 0; r < nrows; r++) {
+                        for (int c = 0; c < ncols; c++) {
+                            V3D_RectangleDouble pixel = getPixelBounds(r, c);
+                            if (pixel.getIntersection(z_axist, epsilon) != null) {
+                                int row = nrows - r - 1;
+                                int in = (row * ncols) + c;
+                                pix[in] = Color.GREEN.getRGB();
+                            }
+                        }
+                    }
+                } else {
+                    V3D_LineDouble z_axis = V3D_LineDouble.Z_AXIS;
+                    for (int r = 0; r < nrows; r++) {
+                        for (int c = 0; c < ncols; c++) {
+                            V3D_RectangleDouble pixel = getPixelBounds(r, c);
+                            if (pixel.getIntersection(z_axis, epsilon) != null) {
+                                int row = nrows - r - 1;
+                                int in = (row * ncols) + c;
+                                pix[in] = Color.GREEN.getRGB();
+                            }
+                        }
+                    }
+                }
+
             }
         }
-        if (addGraticules) {
-            double xmin = universe.envelope.getXMin();
-            double xmax = universe.envelope.getXMax();
-            double ymin = universe.envelope.getYMin();
-            double ymax = universe.envelope.getYMax();
-            double zmin = universe.envelope.getZMin();
-            double zmax = universe.envelope.getZMax();
-//            // Create x axis
-//            V3D_PointDouble x_min = new V3D_PointDouble(new V3D_VectorDouble(xmin, 0d, 0d));
-//            V3D_PointDouble x_max = new V3D_PointDouble(new V3D_VectorDouble(xmax, 0d, 0d));
-//            if (!V3D_LineDouble.isCollinear(epsilon, x_min, x_max, this)) {
-//            V3D_TriangleDouble x_axist = new V3D_TriangleDouble(x_min, x_max, this);
-//            Grids_2D_ID_int px_min = getRC(screenPlane, x_min, pq, qr, epsilon);
-//            Grids_2D_ID_int px_max = getRC(screenPlane, x_max, pq, qr, epsilon);
-//            int minrow = Math.min(px_min.getRow(), px_max.getRow());
-//            int maxrow = Math.max(px_min.getRow(), px_max.getRow());
-//            int mincol = Math.min(px_min.getCol(), px_max.getCol());
-//            int maxcol = Math.max(px_min.getCol(), px_max.getCol());
-//            for (int r = minrow; r <= maxrow; r ++ ) {
-//                for (int c = mincol; c <= maxcol; c ++ ) {
-//                    V3D_RectangleDouble pixel = getPixelBounds(r, c);
-//                    if (pixel.getIntersection(x_axist, epsilon) != null) {
-//                        int row = nrows - r - 1;
-//                        int in = (row * ncols) + c;
-//                        pix[in] = Color.PINK.getRGB();
-//                    }
-//                }
-//            }
-//            }
-            // Create y axis
-            V3D_PointDouble y_min = new V3D_PointDouble(new V3D_VectorDouble(0d, ymin, 0d));
-            V3D_PointDouble y_max = new V3D_PointDouble(new V3D_VectorDouble(0d, ymax, 0d));
-            if (!V3D_LineDouble.isCollinear(epsilon, y_min, y_max, this)) {
-            V3D_TriangleDouble y_axist = new V3D_TriangleDouble(y_min, y_max, this);
-            
-            y_axist.getPl();
-            
-            Grids_2D_ID_int py_min = getRC(screenPlane, y_min, pq, qr, epsilon);
-            Grids_2D_ID_int py_max = getRC(screenPlane, y_max, pq, qr, epsilon);
-            int minrow = Math.min(py_min.getRow(), py_max.getRow());
-            int maxrow = Math.max(py_min.getRow(), py_max.getRow());
-            int mincol = Math.min(py_min.getCol(), py_max.getCol());
-            int maxcol = Math.max(py_min.getCol(), py_max.getCol());
-            for (int r = minrow; r <= maxrow; r ++ ) {
-                for (int c = mincol; c <= maxcol; c ++ ) {
+        return renderAxes(epsilon, universe, pix);
+    }
+
+    /**
+     * For rendering lines on the image.
+     * 
+     * @param epsilon The tolerance for intersection.
+     * @param l The line to render.
+     * @param pix The image.
+     * @return pix
+     */
+    public int[] renderLine(double epsilon, LineDouble l, int[] pix) {
+        V3D_PointDouble p = l.l.getP();
+        V3D_PointDouble q = l.l.getQ();
+        if (!V3D_LineDouble.isCollinear(epsilon, p, q, this)) {
+            V3D_TriangleDouble t = new V3D_TriangleDouble(p, q, this);
+            for (int r = 0; r < nrows; r++) {
+                for (int c = 0; c < ncols; c++) {
                     V3D_RectangleDouble pixel = getPixelBounds(r, c);
-                    
-                    try {
-                    if (pixel.getIntersection(y_axist, epsilon) != null) {
+                    if (pixel.getIntersection(t, epsilon) != null) {
                         int row = nrows - r - 1;
                         int in = (row * ncols) + c;
-                        pix[in] = Color.PINK.getRGB();
+                        pix[in] = l.baseColor.getRGB();
                     }
-                    } catch (RuntimeException e) {
-                        if (pixel.getIntersection(y_axist, epsilon) != null) {
-                        int row = nrows - r - 1;
-                        int in = (row * ncols) + c;
-                        pix[in] = Color.PINK.getRGB();
-                    }
-                    }
-                    
                 }
             }
+        } else {
+            V3D_LineDouble x_axis = V3D_LineDouble.X_AXIS;
+            for (int r = 0; r < nrows; r++) {
+                for (int c = 0; c < ncols; c++) {
+                    V3D_RectangleDouble pixel = getPixelBounds(r, c);
+                    if (pixel.getIntersection(x_axis, epsilon) != null) {
+                        int row = nrows - r - 1;
+                        int in = (row * ncols) + c;
+                        pix[in] = l.baseColor.getRGB();
+                    }
+                }
             }
+        }
+        return pix;
+    }
 
-//            
-//            V3D_PointDouble y_min = new V3D_PointDouble(offset, new V3D_VectorDouble(0d, ymin, 0d));
-//            V3D_PointDouble y_max = new V3D_PointDouble(offset, new V3D_VectorDouble(0d, ymax, 0d));
-//            V3D_PointDouble z_min = new V3D_PointDouble(offset, new V3D_VectorDouble(0d, 0d, zmin));
-//            V3D_PointDouble z_max = new V3D_PointDouble(offset, new V3D_VectorDouble(0d, 0d, zmax));
-//            Grids_2D_ID_int py_min = getRC(screenPlane, y_min, pq, qr, epsilon);
-//            Grids_2D_ID_int py_max = getRC(screenPlane, y_max, pq, qr, epsilon);
-//            Grids_2D_ID_int pz_min = getRC(screenPlane, z_min, pq, qr, epsilon);
-//            Grids_2D_ID_int pz_max = getRC(screenPlane, z_max, pq, qr, epsilon);
-//                    
-//            V3D_RayDouble x_minpt = new V3D_RayDouble(x_min, this);
-//            V3D_RayDouble x_maxpt = new V3D_RayDouble(x_max, this);
-//            V3D_RayDouble y_minpt = new V3D_RayDouble(y_min, this);
-//            V3D_RayDouble y_maxpt = new V3D_RayDouble(y_max, this);
-//            V3D_RayDouble z_minpt = new V3D_RayDouble(z_min, this);
-//            V3D_RayDouble z_maxpt = new V3D_RayDouble(z_max, this);
-//            
-            
+    /**
+     * For rendering lines on the image.
+     * 
+     * @param epsilon The tolerance for intersection.
+     * @param l The line to render.
+     * @param pix The image.
+     * @return pix
+     */
+    public int[] renderPoint(double epsilon, PointDouble p, int[] pix) {
+            V3D_LineDouble t = new V3D_LineDouble(p.p, this);
+            for (int r = 0; r < nrows; r++) {
+                for (int c = 0; c < ncols; c++) {
+                    V3D_RectangleDouble pixel = getPixelBounds(r, c);
+                    if (pixel.getIntersection(t, epsilon) != null) {
+                        int row = nrows - r - 1;
+                        int in = (row * ncols) + c;
+                        pix[in] = p.baseColor.getRGB();
+                    }
+                }
+            }
+        return pix;
+    }
+    
+    public int[] renderAxes(double epsilon, UniverseDouble universe, int[] pix) {
+        for (var l : universe.lines) {
+            renderLine(epsilon, l, pix);
         }
         return pix;
     }
@@ -607,32 +707,31 @@ public class CameraDouble extends V3D_PointDouble {
         }
         return r;
     }
-    
+
+    /**
+     * @param row The row index for the pixel returned.
+     * @param col The column index for the pixel returned.
+     * @return The pixel rectangle.
+     */
     public V3D_RectangleDouble getPixelBounds(int row, int col) {
         // p
         V3D_PointDouble p = new V3D_PointDouble(screen.getP());
-        V3D_VectorDouble pq = screen.getPQR().getPQ().l.v.divide((double) nrows * row);
-        V3D_VectorDouble qr = screen.getPQR().getQR().l.v.divide((double) ncols * col);
-        p.translate(pq);
-        p.translate(qr);
+        V3D_VectorDouble pqv = screen.getPQR().getPQ().l.v.divide((double) nrows);
+        V3D_VectorDouble qrv = screen.getPQR().getQR().l.v.divide((double) ncols);
+        p.translate(pqv.multiply(row));
+        p.translate(qrv.multiply(col));
         // q
         V3D_PointDouble q = new V3D_PointDouble(screen.getP());
-        pq = screen.getPQR().getPQ().l.v.divide((double) nrows * row + 1);
-        qr = screen.getPQR().getQR().l.v.divide((double) ncols * col);
-        q.translate(pq);
-        q.translate(qr);
+        q.translate(pqv.multiply(row + 1));
+        q.translate(qrv.multiply(col));
         // r
         V3D_PointDouble r = new V3D_PointDouble(screen.getP());
-        pq = screen.getPQR().getPQ().l.v.divide((double) nrows * row + 1);
-        qr = screen.getPQR().getQR().l.v.divide((double) ncols * col + 1);
-        r.translate(pq);
-        r.translate(qr);
-        // r
+        r.translate(pqv.multiply(row + 1));
+        r.translate(qrv.multiply(col + 1));
+        // s
         V3D_PointDouble s = new V3D_PointDouble(screen.getP());
-        pq = screen.getPQR().getPQ().l.v.divide((double) nrows * row);
-        qr = screen.getPQR().getQR().l.v.divide((double) ncols * col + 1);
-        s.translate(pq);
-        s.translate(qr);
-        return new V3D_RectangleDouble(p, q, r, s);        
+        s.translate(pqv.multiply(row));
+        s.translate(qrv.multiply(col + 1));
+        return new V3D_RectangleDouble(p, q, r, s);
     }
 }
