@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import uk.ac.leeds.ccg.grids.d2.Grids_2D_ID_long;
 import uk.ac.leeds.ccg.grids.d2.grid.i.Grids_GridInt;
-import uk.ac.leeds.ccg.math.number.Math_BigRational;
 import uk.ac.leeds.ccg.v3d.core.V3D_Environment;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Envelope;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;

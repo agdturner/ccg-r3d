@@ -24,7 +24,6 @@ import uk.ac.leeds.ccg.grids.d2.Grids_2D_ID_int;
 import uk.ac.leeds.ccg.r3d.d.entities.LineDouble;
 import uk.ac.leeds.ccg.r3d.d.entities.PointDouble;
 import uk.ac.leeds.ccg.r3d.d.entities.TriangleDouble;
-import uk.ac.leeds.ccg.v3d.geometry.V3D_Ray;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_GeometryDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PointDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_RectangleDouble;
@@ -342,8 +341,10 @@ public class CameraDouble extends V3D_PointDouble {
             } else {
                 int pixel = 0;
                 for (var x : closestIndex.keySet()) {
-                    if (pixel % pixelsToPopPC == 0) {
-                        System.out.println("Rendering pixel " + pixel + " out of " + pixelsToPop);
+                    if (pixelsToPopPC > 0) {
+                        if (pixel % pixelsToPopPC == 0) {
+                            System.out.println("Rendering pixel " + pixel + " out of " + pixelsToPop);
+                        }
                     }
                     pixel++;
                     int r = nrows - x.getRow() - 1;
@@ -466,38 +467,37 @@ public class CameraDouble extends V3D_PointDouble {
     }
 
     /**
-     * For rendering lines on the image.
-     * 
+     * For rendering a line on the image.
+     *
      * @param epsilon The tolerance for intersection.
      * @param l The line to render.
      * @param pix The image.
      * @return pix
      */
     public int[] renderLine(double epsilon, LineDouble l, int[] pix) {
+        V3D_LineSegmentDouble pq = screen.getPQR().getPQ();
+        V3D_LineSegmentDouble qr = screen.getRSP().getQR();
         V3D_PointDouble p = l.l.getP();
         V3D_PointDouble q = l.l.getQ();
-        if (!V3D_LineDouble.isCollinear(epsilon, p, q, this)) {
-            V3D_TriangleDouble t = new V3D_TriangleDouble(p, q, this);
-            for (int r = 0; r < nrows; r++) {
-                for (int c = 0; c < ncols; c++) {
-                    V3D_RectangleDouble pixel = getPixelBounds(r, c);
-                    if (pixel.getIntersection(t, epsilon) != null) {
-                        int row = nrows - r - 1;
-                        int in = (row * ncols) + c;
-                        pix[in] = l.baseColor.getRGB();
-                    }
-                }
-            }
-        } else {
-            V3D_LineDouble x_axis = V3D_LineDouble.X_AXIS;
-            for (int r = 0; r < nrows; r++) {
-                for (int c = 0; c < ncols; c++) {
-                    V3D_RectangleDouble pixel = getPixelBounds(r, c);
-                    if (pixel.getIntersection(x_axis, epsilon) != null) {
-                        int row = nrows - r - 1;
-                        int in = (row * ncols) + c;
-                        pix[in] = l.baseColor.getRGB();
-                    }
+        V3D_TriangleDouble t = new V3D_TriangleDouble(p, q, this);
+        V3D_LineSegmentDouble loi = (V3D_LineSegmentDouble) screen.getIntersection(t, epsilon);
+        V3D_PointDouble ps = loi.getP();
+        int psr = getScreenRow(ps, qr, epsilon);
+        int psc = getScreenCol(ps, pq, epsilon);
+        V3D_PointDouble qs = loi.getQ();
+        int qsr = getScreenRow(qs, qr, epsilon);
+        int qsc = getScreenCol(qs, pq, epsilon);
+        int minr = Math.min(psr, qsr);
+        int minc = Math.min(psc, qsc);
+        int maxr = Math.max(psr, qsr);
+        int maxc = Math.max(psc, qsc);
+        for (int r = minr; r <= maxr; r++) {
+            for (int c = minc; c <= maxc; c++) {
+                V3D_RectangleDouble pixel = getPixelBounds(r, c);
+                if (pixel.getIntersection(t, epsilon) != null) {
+                    int row = nrows - r - 1;
+                    int in = (row * ncols) + c;
+                    pix[in] = l.baseColor.getRGB();
                 }
             }
         }
@@ -505,31 +505,40 @@ public class CameraDouble extends V3D_PointDouble {
     }
 
     /**
-     * For rendering lines on the image.
-     * 
+     * For rendering a point on the image.
+     *
      * @param epsilon The tolerance for intersection.
-     * @param l The line to render.
+     * @param p The point to render.
      * @param pix The image.
      * @return pix
      */
     public int[] renderPoint(double epsilon, PointDouble p, int[] pix) {
-            V3D_LineDouble t = new V3D_LineDouble(p.p, this);
-            for (int r = 0; r < nrows; r++) {
-                for (int c = 0; c < ncols; c++) {
-                    V3D_RectangleDouble pixel = getPixelBounds(r, c);
-                    if (pixel.getIntersection(t, epsilon) != null) {
-                        int row = nrows - r - 1;
-                        int in = (row * ncols) + c;
-                        pix[in] = p.baseColor.getRGB();
-                    }
-                }
-            }
+        V3D_LineSegmentDouble pq = screen.getPQR().getPQ();
+        V3D_LineSegmentDouble qr = screen.getRSP().getQR();
+        V3D_LineDouble l = new V3D_LineDouble(p.p, this);
+        V3D_PointDouble poi = (V3D_PointDouble) screen.getIntersection(l, epsilon);
+        int sr = getScreenRow(poi, qr, epsilon);
+        int sc = getScreenCol(poi, pq, epsilon);
+        getScreenCol(p.p, qr, epsilon);
+        int r = nrows - sr - 1;
+        int in = (r * ncols) + sc;
+        pix[in] = p.baseColor.getRGB();
         return pix;
     }
-    
+
+    /**
+     * For rendering the axes on the image.
+     *
+     * @param epsilon The tolerance for intersection.
+     * @param universe
+     * @param pix The image.
+     * @return pix
+     */
     public int[] renderAxes(double epsilon, UniverseDouble universe, int[] pix) {
-        for (var l : universe.lines) {
-            renderLine(epsilon, l, pix);
+        if (universe.lines != null) {
+            for (var l : universe.lines) {
+                renderLine(epsilon, l, pix);
+            }
         }
         return pix;
     }
@@ -663,7 +672,7 @@ public class CameraDouble extends V3D_PointDouble {
      * Calculate and return the row index of the screen that pv is on.
      *
      * @param p The point on the screen.
-     * @param pq The line segment from of the top or bottom of the screen.
+     * @param qr The line segment from of the top or bottom of the screen.
      * @return The row index of the screen that ray passes through.
      */
     protected int getScreenRow(V3D_PointDouble p, V3D_LineSegmentDouble qr,

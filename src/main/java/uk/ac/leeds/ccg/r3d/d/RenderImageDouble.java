@@ -96,9 +96,10 @@ public class RenderImageDouble {
             Path inDataDir = Paths.get("data", "input");
             Path outDataDir = Paths.get("data", "output");
             if (run0) {
-                double epsilon = 1d / 10000000d;
+                //double epsilon = 1d / 10000000d;
+                double epsilon = 1d / 100000000d;
                 int n = 1;
-                //n = 5;
+                n = 2;
                 int w = 100 * n;
                 int h = 100 * n;
                 // Init universe
@@ -114,19 +115,20 @@ public class RenderImageDouble {
                 boolean castShadow = false;
                 double zoomFactor = 1.0d;
                 double distance = 2.0d;
-                boolean addGraticules = false;
+                boolean addGraticules = true;
+                //boolean addGraticules = false;
                 /**
                  * AmbientLight makes non black surfaces non black even if they
                  * are orientated opposite to the lighting vector.
                  */
                 double ambientLight = 1d / 20d;
-//                for (int i = -1; i <= 1; i++) {
-//                    for (int j = -1; j <= 1; j++) {
-//                        for (int k = -1; k <= 1; k++) {
-//                            if (!(i == 0 && j == 0 && k == 0)) {
-                                int i = 0;
-                                int j = 0;
-                                int k = 1; 
+                for (int i = -1; i <= 1; i++) {
+                    for (int j = -1; j <= 1; j++) {
+                        for (int k = -1; k <= 1; k++) {
+                            if (!(i == 0 && j == 0 && k == 0)) {
+                                //int i = 0;
+                                //int j = 0;
+                                //int k = 1; 
                                 V3D_VectorDouble direction = new V3D_VectorDouble(i, j, k).getUnitVector();
                                 V3D_PointDouble pt = getCameraPt(centroid, direction,
                                         radius * distance);
@@ -149,10 +151,10 @@ public class RenderImageDouble {
                                         + "_k=" + String.format("%,.2f", pt.getZ())
                                         + ")_" + ls + "_epsilon=" + epsilon + ".png");
                                 r.run(lighting, ambientLight, castShadow, addGraticules, epsilon);
-//                            }
-//                        }
-//                    }
-//                }
+                            }
+                        }
+                    }
+                }
             }
 
             if (run1) {
