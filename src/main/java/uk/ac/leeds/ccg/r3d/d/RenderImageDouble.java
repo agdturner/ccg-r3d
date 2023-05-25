@@ -96,8 +96,8 @@ public class RenderImageDouble {
             Path inDataDir = Paths.get("data", "input");
             Path outDataDir = Paths.get("data", "output");
             if (run0) {
-                //double epsilon = 1d / 10000000d;
-                double epsilon = 1d / 100000000d;
+                double epsilon = 1d / 10000000d;
+                //double epsilon = 1d / 100000000d;
                 int n = 1;
                 n = 2;
                 int w = 100 * n;
