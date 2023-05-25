@@ -33,7 +33,7 @@ public class RenderImageDouble {
     /**
      * The width and height.
      */
-    public Dimension size;
+//    public Dimension size;
 
     /**
      * Universe.
@@ -60,14 +60,12 @@ public class RenderImageDouble {
         this.universe = universe;
         CameraDouble c;
         if (screen == null) {
-            c = new CameraDouble(pt, universe.envelope, size.width,
-                size.height, zoomFactor, epsilon);
+            c = new CameraDouble(pt, universe.envelope, size, zoomFactor, epsilon);
         } else {
-            c = new CameraDouble(pt, universe.envelope, size.width,
-                size.height, screen, epsilon);
+            c = new CameraDouble(pt, universe.envelope, size, screen, epsilon);
         }
         this.universe.setCamera(c);
-        this.size = new Dimension(c.ncols, c.nrows);
+        //this.size = size;
     }
 
     public static void main(String[] args) {
@@ -100,12 +98,10 @@ public class RenderImageDouble {
                 //double epsilon = 1d / 100000000d;
                 int n = 1;
                 n = 2;
-                int w = 100 * n;
-                int h = 100 * n;
                 // Init universe
                 UniverseDouble universe = new UniverseDouble(V3D_VectorDouble.ZERO, epsilon);
                 // Detail the camera
-                Dimension size = new Dimension(w, h);
+                Dimension size = new Dimension(100 * n, 100 * n);
                 V3D_PointDouble centroid = universe.envelope.getCentroid();
                 double radius = universe.envelope.getPoints()[0]
                         .getDistance(centroid);
@@ -145,12 +141,13 @@ public class RenderImageDouble {
                                     dir = Paths.get(dir.toString(), "shadow");
                                 }
                                 r.output = Paths.get(dir.toString(),
-                                        "test_" + r.size.width + "x" + r.size.height
+                                        "test_" + r.universe.camera.nrows + "x"
+                                        + "_" + size.width + "x" + size.height
                                         + "_pt(i=" + String.format("%,.2f", pt.getX())
                                         + "_j=" + String.format("%,.2f", pt.getY())
                                         + "_k=" + String.format("%,.2f", pt.getZ())
                                         + ")_" + ls + "_epsilon=" + epsilon + ".png");
-                                r.run(lighting, ambientLight, castShadow, addGraticules, epsilon);
+                                r.run(size, lighting, ambientLight, castShadow, addGraticules, epsilon);
                             }
                         }
                     }
@@ -218,12 +215,12 @@ public class RenderImageDouble {
                                 }
                                 r.output = Paths.get(dir.toString(),
                                         filename
-                                        + "_" + r.size.width + "x" + r.size.height
+                                        + "_" + size.width + "x" + size.height
                                         + "_pt(i=" + String.format("%,.2f", pt.getX())
                                         + "_j=" + String.format("%,.2f", pt.getY())
                                         + "_k=" + String.format("%,.2f", pt.getZ())
                                         + ")_" + ls + "_epsilon=" + epsilon + ".png");
-                                r.run(lighting, ambientLight, castShadow, addGraticules, epsilon);
+                                r.run(size, lighting, ambientLight, castShadow, addGraticules, epsilon);
                             }
                         }
                     }
@@ -280,12 +277,12 @@ public class RenderImageDouble {
                 }
                 r.output = Paths.get(dir.toString(),
                         name
-                        + "_" + r.size.width + "x" + r.size.height
+                        + "_" + size.width + "x" + size.height
                         + "_pt(i=" + String.format("%,.2f", pt.getX())
                         + "_j=" + String.format("%,.2f", pt.getY())
                         + "_k=" + String.format("%,.2f", pt.getZ())
                         + ")_" + ls + "_epsilon=" + epsilon + ".png");
-                r.run(lighting, ambientLight, castShadow, epsilon);
+                r.run(size, lighting, ambientLight, castShadow, epsilon);
                             }
                         }
                     }
@@ -345,12 +342,12 @@ public class RenderImageDouble {
                                     }
                                     r.output = Paths.get(dir.toString(),
                                             filename
-                                            + "_" + r.size.width + "x" + r.size.height
+                                        + "_" + size.width + "x" + size.height
                                             + "_pt(i=" + String.format("%,.2f", pt.getX())
                                             + "_j=" + String.format("%,.2f", pt.getY())
                                             + "_k=" + String.format("%,.2f", pt.getZ())
                                             + ")_" + ls + "_epsilon=" + epsilon + ".png");
-                                    r.run(lighting, ambientLight, castShadow, epsilon);
+                                    r.run(size, lighting, ambientLight, castShadow, epsilon);
                                 }
                             }
                         }
@@ -407,12 +404,12 @@ public class RenderImageDouble {
                 }
                 r.output = Paths.get(dir.toString(),
                         filename
-                        + "_" + r.size.width + "x" + r.size.height
+                                        + "_" + size.width + "x" + size.height
                         + "pt(i=" + String.format("%,.2f", pt.getX())
                         + "_j=" + String.format("%,.2f", pt.getY())
                         + "_k=" + String.format("%,.2f", pt.getZ())
                         + ")_" + ls + "_epsilon=" + epsilon + ".png");
-                r.run(lighting, ambientLight, castShadow, epsilon);
+                r.run(size, lighting, ambientLight, castShadow, epsilon);
 //                            }
 //                        }
 //                    }
@@ -469,12 +466,12 @@ public class RenderImageDouble {
                 }
                 r.output = Paths.get(dir.toString(),
                         filename
-                        + "_" + r.size.width + "x" + r.size.height
+                                        + "_" + size.width + "x" + size.height
                         + "pt(i=" + String.format("%,.2f", pt.getX())
                         + "_j=" + String.format("%,.2f", pt.getY())
                         + "_k=" + String.format("%,.2f", pt.getZ())
                         + ")_" + ls + "_epsilon=" + epsilon + ".png");
-                r.run(lighting, ambientLight, castShadow, epsilon);
+                r.run(size, lighting, ambientLight, castShadow, epsilon);
 //                            }
 //                        }
 //                    }
@@ -531,12 +528,12 @@ public class RenderImageDouble {
                 }
                 r.output = Paths.get(dir.toString(),
                         filename
-                        + "_" + r.size.width + "x" + r.size.height
+                                        + "_" + size.width + "x" + size.height
                         + "pt(i=" + String.format("%,.2f", pt.getX())
                         + "_j=" + String.format("%,.2f", pt.getY())
                         + "_k=" + String.format("%,.2f", pt.getZ())
                         + ")_" + ls + "_epsilon=" + epsilon + ".png");
-                r.run(lighting, ambientLight, castShadow, epsilon);
+                r.run(size, lighting, ambientLight, castShadow, epsilon);
 //                            }
 //                        }
 //                    }
@@ -594,12 +591,12 @@ public class RenderImageDouble {
                 }
                 r.output = Paths.get(dir.toString(),
                         filename
-                        + "_" + r.size.width + "x" + r.size.height
+                                        + "_" + size.width + "x" + size.height
                         + "pt(i=" + String.format("%,.2f", pt.getX())
                         + "_j=" + String.format("%,.2f", pt.getY())
                         + "_k=" + String.format("%,.2f", pt.getZ())
                         + ")_" + ls + "_epsilon=" + epsilon + ".png");
-                r.run(lighting, ambientLight, castShadow, epsilon);
+                r.run(size, lighting, ambientLight, castShadow, epsilon);
 //                            }
 //                        }
 //                    }
@@ -686,14 +683,14 @@ public class RenderImageDouble {
                 }
                 r.output = Paths.get(dir.toString(),
                         filename
-                        + "_" + r.size.width + "x" + r.size.height
+                                        + "_" + size.width + "x" + size.height
                         + "pt(i=" + String.format("%,.2f", pt.getX())
                         + "_j=" + String.format("%,.2f", pt.getY())
                         + "_k=" + String.format("%,.2f", pt.getZ())
                         + ")_angle=" + String.format("%,.2f", angle)
                         + "_aperture=" + apertureWidthd2+ "x" + apertureHeightd2
                         + "_" + ls + "_epsilon=" + epsilon + ".png");
-                r.run(lighting, ambientLight, castShadow, epsilon);
+                r.run(size, lighting, ambientLight, castShadow, epsilon);
             }
 //                            }
 //                        }
@@ -714,9 +711,9 @@ public class RenderImageDouble {
      *
      * @throws Exception
      */
-    public void run(V3D_VectorDouble lighting, double ambientLight,
+    public void run(Dimension size, V3D_VectorDouble lighting, double ambientLight,
             boolean castShadow, double epsilon) throws Exception {
-        run(lighting, ambientLight, castShadow, false, epsilon);
+        run(size, lighting, ambientLight, castShadow, false, epsilon);
     }
     
     /**
@@ -724,7 +721,7 @@ public class RenderImageDouble {
      *
      * @throws Exception
      */
-    public void run(V3D_VectorDouble lighting, double ambientLight,
+    public void run(Dimension size, V3D_VectorDouble lighting, double ambientLight,
             boolean castShadow, boolean addGraticules, double epsilon) 
             throws Exception {
         int[] pix = universe.camera.render(this.universe, lighting,
