@@ -23,17 +23,12 @@ import java.awt.image.MemoryImageSource;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import uk.ac.leeds.ccg.r3d.io.IO;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PointDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_RayDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_RectangleDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_VectorDouble;
 
 public class RenderImageDouble {
-
-    /**
-     * The width and height.
-     */
-//    public Dimension size;
 
     /**
      * Universe.
@@ -52,6 +47,10 @@ public class RenderImageDouble {
      * @param pt The camera focal point as a unit vector.
      * @param size The preferred image size. Although a square image is
      * currently returned.
+     * @param zoomFactor
+     * @param screen 
+     * @param epsilon The tolerance within which two vector coordinates are 
+     * considered equal.
      * @throws Exception
      */
     public RenderImageDouble(UniverseDouble universe, V3D_PointDouble pt,
@@ -94,14 +93,15 @@ public class RenderImageDouble {
             Path inDataDir = Paths.get("data", "input");
             Path outDataDir = Paths.get("data", "output");
             if (run0) {
-                double epsilon = 1d / 10000000d;
-                //double epsilon = 1d / 100000000d;
-                int n = 1;
-                n = 2;
+                //double epsilon = 1d / 10000000d;
+                double epsilon = 1d / 100000000000d;
+                //double epsilon = 0d;
+                int nrows = 150;
+                int ncols = 150;
                 // Init universe
                 UniverseDouble universe = new UniverseDouble(V3D_VectorDouble.ZERO, epsilon);
                 // Detail the camera
-                Dimension size = new Dimension(100 * n, 100 * n);
+                Dimension size = new Dimension(ncols, nrows);
                 V3D_PointDouble centroid = universe.envelope.getCentroid();
                 double radius = universe.envelope.getPoints()[0]
                         .getDistance(centroid);
@@ -110,7 +110,7 @@ public class RenderImageDouble {
                 String name = "triangles";
                 boolean castShadow = false;
                 double zoomFactor = 1.0d;
-                double distance = 2.0d;
+                double distance = 10.0d;
                 boolean addGraticules = true;
                 //boolean addGraticules = false;
                 /**
@@ -118,16 +118,15 @@ public class RenderImageDouble {
                  * are orientated opposite to the lighting vector.
                  */
                 double ambientLight = 1d / 20d;
-                for (int i = -1; i <= 1; i++) {
-                    for (int j = -1; j <= 1; j++) {
-                        for (int k = -1; k <= 1; k++) {
-                            if (!(i == 0 && j == 0 && k == 0)) {
-                                //int i = 0;
-                                //int j = 0;
-                                //int k = 1; 
+//                for (int i = -1; i <= 1; i++) {
+//                    for (int j = -1; j <= 1; j++) {
+//                        for (int k = -1; k <= 1; k++) {
+//                            if (!(i == 0 && j == 0 && k == 0)) {
+                                int i = 0;
+                                int j = 0;
+                                int k = 1; 
                                 V3D_VectorDouble direction = new V3D_VectorDouble(i, j, k).getUnitVector();
-                                V3D_PointDouble pt = getCameraPt(centroid, direction,
-                                        radius * distance);
+                                V3D_PointDouble pt = getCameraPt(centroid, direction, radius * distance);
                                 // Render the image
                                 RenderImageDouble r = new RenderImageDouble(universe, pt, size, zoomFactor, null, epsilon);
                                 V3D_VectorDouble lighting = new V3D_VectorDouble(-1, -2, -3).getUnitVector();
@@ -148,10 +147,10 @@ public class RenderImageDouble {
                                         + "_k=" + String.format("%,.2f", pt.getZ())
                                         + ")_" + ls + "_epsilon=" + epsilon + ".png");
                                 r.run(size, lighting, ambientLight, castShadow, addGraticules, epsilon);
-                            }
-                        }
-                    }
-                }
+//                            }
+//                        }
+//                    }
+//                }
             }
 
             if (run1) {
@@ -663,7 +662,8 @@ public class RenderImageDouble {
                         new V3D_PointDouble(x + apertureWidthd2, 75d, z - apertureHeightd2));
                 for (int angles = 1; angles < 6; angles ++){
                 double angle = (Math.PI/6) * angles;
-                screen = screen.rotate(V3D_LineDouble.Z_AXIS, angle, epsilon);
+                V3D_RayDouble zAxis = new V3D_RayDouble(new V3D_PointDouble(0d, 0d, 0d), new V3D_PointDouble(0d,0d,1d));
+                screen = screen.rotate(zAxis, angle, epsilon);
                 RenderImageDouble r = new RenderImageDouble(universe, pt, size, zoomFactor, screen, epsilon);
                 V3D_VectorDouble lighting = new V3D_VectorDouble(1, -2, 3).getUnitVector();
                 String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
@@ -697,9 +697,6 @@ public class RenderImageDouble {
 //                    }
 //                }
             }
-            
-            
-                    
             
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
@@ -735,8 +732,6 @@ public class RenderImageDouble {
         IO.imageToFile(image, "png", this.output);
         System.out.println("Rendered");
     }
-
-    
             
     /**
      * Get the focal point for a camera.

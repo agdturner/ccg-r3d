@@ -48,7 +48,7 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Ray;
  *
  * @author Andy Turner
  */
-public class Camera extends V3D_Point {
+public class CameraOld extends V3D_Point {
 
     private static final long serialVersionUID = 1L;
 
@@ -103,13 +103,13 @@ public class Camera extends V3D_Point {
      * @param p The camera observer location.
      * @param screen The screen.
      */
-    public Camera(V3D_Point pt, V3D_Envelope ve, int width, int height, int oom,
+    public CameraOld(V3D_Point pt, V3D_Envelope ve, int width, int height, int oom,
             RoundingMode rm) throws Exception {
         super(pt);
         System.out.println("Initialise Camera.");
         // Need something orthoganol to pt and ve centroid
         V3D_Plane pl = new V3D_Plane(pt, new V3D_Vector(pt, ve.getCentroid(oom, rm), oom, rm));
-        V3D_Vector pv = pl.getPV();
+        V3D_Vector pv = pl.getPV(oom, rm);
         // Initialise the screen
         //screen = ve.getViewport2(pt, pv, oom, rm);
         screen = ve.getViewport3(pt, pv, oom, rm);

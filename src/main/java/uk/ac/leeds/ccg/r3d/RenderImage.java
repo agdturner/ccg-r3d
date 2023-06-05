@@ -32,21 +32,6 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 public class RenderImage {
 
     /**
-     * The Order of Magnitude for the precision.
-     */
-    int oom;
-
-    /**
-     * The RoundingMode for any rounding.
-     */
-    RoundingMode rm;
-
-    /**
-     * The width and height.
-     */
-    public Dimension size;
-
-    /**
      * Universe.
      */
     public Universe universe;
@@ -70,11 +55,8 @@ public class RenderImage {
     public RenderImage(Universe universe, V3D_Point pt, Dimension size,
             int oom, RoundingMode rm) throws Exception {
         this.universe = universe;
-        this.oom = oom;
-        this.rm = rm;
-        Camera c = new Camera(pt, universe.envelope, size.width, size.height, oom, rm);
+        CameraOld c = new CameraOld(pt, universe.envelope, size.width, size.height, oom, rm);
         this.universe.setCamera(c);
-        this.size = new Dimension(c.ncols, c.nrows);
     }
 
     public static void main(String[] args) {
@@ -85,8 +67,8 @@ public class RenderImage {
             boolean run1 = false;
             //boolean runUtah = true;
             boolean runUtah = false;
-            boolean runGeographos = true;
-            //boolean runGeographos = false;
+            //boolean runGeographos = true;
+            boolean runGeographos = false;
             //boolean runKatrina = true;
             boolean runKatrina = false;
             Path inDataDir = Paths.get("data", "input");
@@ -140,12 +122,12 @@ public class RenderImage {
                                     dir = Paths.get(dir.toString(), "shadow");
                                 }
                                 r.output = Paths.get(dir.toString(),
-                                        "test_" + r.size.width + "x" + r.size.height
+                                        "test_" //+ r.size.width + "x" + r.size.height
                                         + "_pt(i=" + Math_BigRational.round(pt.getX(oom, rm),-4, rm).toString()
                                         + "_j=" + Math_BigRational.round(pt.getY(oom, rm),-4, rm).toString()
                                         + "_k=" + Math_BigRational.round(pt.getZ(oom, rm),-4, rm).toString()
                                         + ")_" + ls + "_oom=" + oom + ".png");
-                                r.run(lighting, ambientLight, castShadow);
+                                //r.run(lighting, ambientLight, castShadow);
                             }
                         }
                     }
@@ -405,23 +387,23 @@ public class RenderImage {
         }
     }
 
-    /**
-     * The process for rendering and image.
-     *
-     * @throws Exception
-     */
-    public void run(V3D_Vector lighting, BigRational ambientLight,
-            boolean castShadow) throws Exception {
-        int[] pix = universe.camera.render(this.universe, lighting, ambientLight, castShadow, oom, rm);
-        /**
-         * Convert pix to an image and write to a file.
-         */
-        MemoryImageSource m = new MemoryImageSource(size.width, size.height, pix, 0, size.width);
-        Panel panel = new Panel();
-        Image image = panel.createImage(m);
-        IO.imageToFile(image, "png", this.output);
-        System.out.println("Rendered");
-    }
+//    /**
+//     * The process for rendering and image.
+//     *
+//     * @throws Exception
+//     */
+//    public void run(V3D_Vector lighting, BigRational ambientLight,
+//            boolean castShadow) throws Exception {
+//        int[] pix = universe.camera.render(this.universe, lighting, ambientLight, castShadow, oom, rm);
+//        /**
+//         * Convert pix to an image and write to a file.
+//         */
+//        MemoryImageSource m = new MemoryImageSource(size.width, size.height, pix, 0, size.width);
+//        Panel panel = new Panel();
+//        Image image = panel.createImage(m);
+//        IO.imageToFile(image, "png", this.output);
+//        System.out.println("Rendered");
+//    }
 
     /**
      * Get the focal point for a camera.

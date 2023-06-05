@@ -122,11 +122,13 @@ public class UniverseDouble {
         V3D_EnvelopeDouble e = new V3D_EnvelopeDouble(lbf, lba, ltf, lta,
                 rbf, rba, rtf, rta);
         // Create x axis
-        V3D_PointDouble p = new V3D_PointDouble(e.getXMin(), 0d, -1d);
-        //V3D_PointDouble q = new V3D_PointDouble(0d, e.getYMax(), -1d);
-        V3D_PointDouble q = new V3D_PointDouble(e.getXMax(), e.getYMax(), -1d);
-        V3D_PointDouble r = new V3D_PointDouble(e.getXMax(), 0d, -1d);
-        triangles.add(new TriangleDouble(new V3D_TriangleDouble(p, q, r), Color.RED));
+        //V3D_PointDouble p = new V3D_PointDouble(e.getXMin(), 0d, -1d);
+        V3D_PointDouble p = new V3D_PointDouble(e.getXMin(), 0d, e.getZMin());
+        //V3D_PointDouble q = new V3D_PointDouble(e.getXMax(), e.getYMax(), -1d);
+        V3D_PointDouble q = new V3D_PointDouble(e.getXMax(), e.getYMax(),  e.getZMin());
+        //V3D_PointDouble r = new V3D_PointDouble(e.getXMax(), 0d, -1d);
+        V3D_PointDouble r = new V3D_PointDouble(e.getXMax(), 0d, e.getZMin());
+        triangles.add(new TriangleDouble(new V3D_TriangleDouble(p, q, r), Color.PINK));
     }
     
     /**
