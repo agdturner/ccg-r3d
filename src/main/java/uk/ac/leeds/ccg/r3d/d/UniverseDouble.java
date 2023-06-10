@@ -250,7 +250,7 @@ public class UniverseDouble {
         tetrahedra = new ArrayList<>();
         STL_ReaderDouble data = new STL_ReaderDouble(assessTopology);
         data.readBinary(path, offset, initNormal);
-        V3D_PointDouble p = data.triangles.get(0).triangle.getPl(epsilon).getP();
+        V3D_PointDouble p = data.triangles.get(0).triangle.pl.getP();
         double xmin = p.getX();
         double xmax = p.getX();
         double ymin = p.getY();

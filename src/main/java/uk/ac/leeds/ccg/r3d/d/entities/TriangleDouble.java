@@ -135,9 +135,9 @@ public class TriangleDouble extends Entity {
     
     private V3D_VectorDouble initN(V3D_PointDouble pt, double epsilon) {
         if (pt == null) {
-            return triangle.getPl(epsilon).getN().getUnitVector();
+            return triangle.pl.getN().getUnitVector();
         } else {
-            return triangle.getPl(epsilon).getN().getUnitVector(pt);
+            return triangle.pl.getN().getUnitVector(pt);
         }
     }
 }

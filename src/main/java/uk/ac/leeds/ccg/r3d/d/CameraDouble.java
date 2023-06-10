@@ -190,11 +190,11 @@ public class CameraDouble extends V3D_PointDouble {
 
     private void init() {
         p = screen.getP();
-        pqr = screen.getPQR();
+        pqr = screen.pqr;
         pq = pqr.getPQ();
         //qr = pqr.getQR();
-        qr = screen.getRSP().getQR();
-        screenPlane = screen.getPlane(epsilon);
+        qr = screen.rsp.getQR();
+        screenPlane = screen.getPlane();
         pqv = pq.l.v.divide((double) nrows);
         qrv = qr.l.v.divide((double) ncols).reverse();
         screenWidth = qr.getLength();
@@ -397,7 +397,7 @@ public class CameraDouble extends V3D_PointDouble {
                     pixel++;
                     int ci = closestIndex.get(x);
                     TriangleDouble t = ts[ci];
-                    //render(pix, x.getRow(), x.getCol(), t.lightingColor);
+                    render(pix, x.getRow(), x.getCol(), t.lightingColor);
                 }
             }
 
@@ -411,31 +411,31 @@ public class CameraDouble extends V3D_PointDouble {
                 //renderLine(epsilon, new LineDouble(t.triangle.getQR(), Color.BLUE), pix);
                 //renderLine(epsilon, new LineDouble(t.triangle.getRP(), Color.GREEN), pix);
             }
-//            
-//
-//            if (addGraticules) {
-//
-//                double xmin = universe.envelope.getXMin();
-//                double xmax = universe.envelope.getXMax();
-//                double ymin = universe.envelope.getYMin();
-//                double ymax = universe.envelope.getYMax();
-//                double zmin = universe.envelope.getZMin();
-//                double zmax = universe.envelope.getZMax();
-//
-//                // Render axes
-//                V3D_PointDouble x_min = new V3D_PointDouble(new V3D_VectorDouble(xmin, 0d, 0d));
-//                V3D_PointDouble x_max = new V3D_PointDouble(new V3D_VectorDouble(xmax, 0d, 0d));
-//                LineDouble xAxis = new LineDouble(new V3D_LineSegmentDouble(x_min, x_max), Color.BLUE);
-//                renderLine(epsilon, mind2s, xAxis, pix);
-//                V3D_PointDouble y_min = new V3D_PointDouble(new V3D_VectorDouble(0d, ymin, 0d));
-//                V3D_PointDouble y_max = new V3D_PointDouble(new V3D_VectorDouble(0d, ymax, 0d));
-//                LineDouble yAxis = new LineDouble(new V3D_LineSegmentDouble(y_min, y_max), Color.RED);
-//                renderLine(epsilon, mind2s, yAxis, pix);
-//                V3D_PointDouble z_min = new V3D_PointDouble(new V3D_VectorDouble(0d, 0d, zmin));
-//                V3D_PointDouble z_max = new V3D_PointDouble(new V3D_VectorDouble(0d, 0d, zmax));
-//                LineDouble zAxis = new LineDouble(new V3D_LineSegmentDouble(z_min, z_max), Color.GREEN);
-//                renderLine(epsilon, mind2s, zAxis, pix);
-//            }
+            
+
+            if (addGraticules) {
+
+                double xmin = universe.envelope.getXMin();
+                double xmax = universe.envelope.getXMax();
+                double ymin = universe.envelope.getYMin();
+                double ymax = universe.envelope.getYMax();
+                double zmin = universe.envelope.getZMin();
+                double zmax = universe.envelope.getZMax();
+
+                // Render axes
+                V3D_PointDouble x_min = new V3D_PointDouble(new V3D_VectorDouble(xmin, 0d, 0d));
+                V3D_PointDouble x_max = new V3D_PointDouble(new V3D_VectorDouble(xmax, 0d, 0d));
+                LineDouble xAxis = new LineDouble(new V3D_LineSegmentDouble(x_min, x_max), Color.BLUE);
+                renderLine(epsilon, mind2s, xAxis, pix);
+                V3D_PointDouble y_min = new V3D_PointDouble(new V3D_VectorDouble(0d, ymin, 0d));
+                V3D_PointDouble y_max = new V3D_PointDouble(new V3D_VectorDouble(0d, ymax, 0d));
+                LineDouble yAxis = new LineDouble(new V3D_LineSegmentDouble(y_min, y_max), Color.RED);
+                renderLine(epsilon, mind2s, yAxis, pix);
+                V3D_PointDouble z_min = new V3D_PointDouble(new V3D_VectorDouble(0d, 0d, zmin));
+                V3D_PointDouble z_max = new V3D_PointDouble(new V3D_VectorDouble(0d, 0d, zmax));
+                LineDouble zAxis = new LineDouble(new V3D_LineSegmentDouble(z_min, z_max), Color.GREEN);
+                renderLine(epsilon, mind2s, zAxis, pix);
+            }
             
             // Render corners
             for (var t : universe.triangles) {
@@ -477,53 +477,32 @@ public class CameraDouble extends V3D_PointDouble {
 //                    }
 
                     V3D_LineSegmentDouble til = (V3D_LineSegmentDouble) ti;
+                    // Calculate the row and column bounds.
                     int minr = getScreenRow(til.getP(), epsilon);
                     int minc = getScreenCol(til.getP(), epsilon);
                     int maxr = minr;
                     int maxc = minc;
-                    Grids_2D_ID_int prc = getRC(l.l.getP(), epsilon);
-                    Grids_2D_ID_int qrc = getRC(l.l.getQ(), epsilon);
-
-                    Grids_2D_ID_int prc2 = getRC(til.getP(), epsilon);
-                    Grids_2D_ID_int qrc2 = getRC(til.getQ(), epsilon);
-                    // Calculate the row bounds.
-                    //int minr = Integer.MAX_VALUE;
-                    //int maxr = Integer.MIN_VALUE;
-                    //int minc = Integer.MAX_VALUE;
-                    //int maxc = Integer.MIN_VALUE;
                     int sr = getScreenRow(til.getQ(), epsilon);
                     int sc = getScreenCol(til.getQ(), epsilon);
                     minr = Math.min(minr, sr);
                     minc = Math.min(minc, sc);
                     maxr = Math.max(maxr, sr);
                     maxc = Math.max(maxc, sc);
-//                    if (prc != null) {
-//                        minr = Math.min(prc.getRow(), minr);
-//                        maxr = Math.max(prc.getRow(), maxr);
-//                        minc = Math.min(prc.getCol(), minc);
-//                        maxc = Math.max(prc.getCol(), maxc);
-//                    }
-//                    if (qrc != null) {
-//                        minr = Math.min(qrc.getRow(), minr);
-//                        maxr = Math.max(qrc.getRow(), maxr);
-//                        minc = Math.min(qrc.getCol(), minc);
-//                        maxc = Math.max(qrc.getCol(), maxc);
-//                    }
-                    //if (minr < 0) {
+                    if (minr < 0) {
                         minr = 0;
-                    //}
-                    //if (minc < 0) {
+                    }
+                    if (minc < 0) {
                         minc = 0;
-                    //}
-                    //if (maxr >= nrows) {
+                    }
+                    if (maxr >= nrows) {
                         maxr = nrows - 1;
-                    //}
-                    //if (maxc >= ncols) {
+                    }
+                    if (maxc >= ncols) {
                         maxc = ncols - 1;
-                    //}
+                    }
                     for (int r = minr; r <= maxr; r++) {
                         for (int c = minc; c <= maxc; c++) {
-                            V3D_RectangleDouble pixel = getPixelBounds(r, c);
+                            V3D_RectangleDouble pixel = getPixel(screen.getPlane(), r, c);
                             //System.out.println("" + r + ", " + c);
                             if (pixel.getIntersection(t, epsilon) != null) {
                                 Grids_2D_ID_int id = new Grids_2D_ID_int(r, c);
@@ -542,11 +521,11 @@ public class CameraDouble extends V3D_PointDouble {
                                 }
                                 Double d2p = mind2s.get(id);
                                 if (d2p == null) {
-                                    //mind2s.put(id, d2); // For rendering axes so that one does not obscure another.
+                                    mind2s.put(id, d2); // For rendering axes so that one does not obscure another.
                                     render(pix, r, c, l.baseColor);
                                 } else {
                                     if (d2 < d2p) {
-                                        //mind2s.put(id, d2); // For rendering axes so that one does not obscure another.
+                                        mind2s.put(id, d2); // For rendering axes so that one does not obscure another.
                                         render(pix, r, c, l.baseColor);
                                     }
                                 }
@@ -581,11 +560,11 @@ public class CameraDouble extends V3D_PointDouble {
             double d2 = p.p.getDistanceSquared(this);
             Double d2p = mind2s.get(id);
             if (d2p == null) {
-                //mind2s.put(id, d2);
+                mind2s.put(id, d2);
                 render(pix, r, c, p.baseColor);
             } else {
                 if (d2 <= d2p + epsilon) {
-                    //mind2s.put(id, d2);
+                    mind2s.put(id, d2);
                     render(pix, r, c, p.baseColor);
                 }
             }
@@ -651,7 +630,7 @@ public class CameraDouble extends V3D_PointDouble {
             return;
         }
         V3D_PointDouble[] pts = i.getPoints();
-        V3D_PlaneDouble tpl = t.getPl(epsilon);
+        V3D_PlaneDouble tpl = t.pl;
         double mind2 = Double.MAX_VALUE;
         for (var pt : pts) {
             if (!pt.equals(this, epsilon)) {
@@ -694,39 +673,27 @@ public class CameraDouble extends V3D_PointDouble {
             int maxr = Integer.MIN_VALUE;
             int minc = Integer.MAX_VALUE;
             int maxc = Integer.MIN_VALUE;
-            Grids_2D_ID_int prc = getRC(t.getP(), epsilon);
-            if (prc != null) {
-                minr = Math.min(prc.getRow(), minr);
-                maxr = Math.max(prc.getRow(), maxr);
-                minc = Math.min(prc.getCol(), minc);
-                maxc = Math.max(prc.getCol(), maxc);
+            V3D_PointDouble[] tetraipts = tetrai.getPoints();
+            for (var pt : tetraipts) {
+                int r = getScreenRow(pt, epsilon);
+                int c = getScreenCol(pt, epsilon);
+                minr = Math.min(r, minr);
+                maxr = Math.max(r, maxr);
+                minc = Math.min(c, minc);
+                maxc = Math.max(c, maxc);
             }
-            Grids_2D_ID_int qrc = getRC(t.getQ(), epsilon);
-            if (qrc != null) {
-                minr = Math.min(qrc.getRow(), minr);
-                maxr = Math.max(qrc.getRow(), maxr);
-                minc = Math.min(qrc.getCol(), minc);
-                maxc = Math.max(qrc.getCol(), maxc);
-            }
-            Grids_2D_ID_int rrc = getRC(t.getR(), epsilon);
-            if (rrc != null) {
-                minr = Math.min(rrc.getRow(), minr);
-                maxr = Math.max(rrc.getRow(), maxr);
-                minc = Math.min(rrc.getCol(), minc);
-                maxc = Math.max(rrc.getCol(), maxc);
-            }
-            if (minr < 0) {
-                minr = 0;
-            }
-            if (minc < 0) {
-                minc = 0;
-            }
-            if (maxr >= nrows) {
-                maxr = nrows - 1;
-            }
-            if (maxc >= ncols) {
-                maxc = ncols - 1;
-            }
+//            if (minr < 0) {
+//                minr = 0;
+//            }
+//            if (minc < 0) {
+//                minc = 0;
+//            }
+//            if (maxr >= nrows) {
+//                maxr = nrows - 1;
+//            }
+//            if (maxc >= ncols) {
+//                maxc = ncols - 1;
+//            }
             /**
              * Loop over the extent, and where necessary, calculate the
              * intersection to determine if the triangle is in the pixel and if
@@ -793,7 +760,7 @@ public class CameraDouble extends V3D_PointDouble {
         }
         V3D_RayDouble ray = new V3D_RayDouble(this, p);
         //V3D_PointDouble px = (V3D_PointDouble) screen.getIntersection(ray, epsilon);
-        V3D_PointDouble px = (V3D_PointDouble) ray.getIntersection(screen.getPlane(epsilon), epsilon);
+        V3D_PointDouble px = (V3D_PointDouble) ray.getIntersection(screen.getPlane(), epsilon);
         if (px == null) {
             return null;
         } else {
@@ -856,7 +823,7 @@ public class CameraDouble extends V3D_PointDouble {
      * @param col The column index for the pixel returned.
      * @return The pixel rectangle.
      */
-    public V3D_RectangleDouble getPixelBounds(int row, int col) {
+    public V3D_RectangleDouble getPixel(V3D_PlaneDouble pl, int row, int col) {
         // p
         V3D_PointDouble pP = new V3D_PointDouble(p);
         pP.translate(pqv.multiply(row).add(qrv.multiply(col)));
