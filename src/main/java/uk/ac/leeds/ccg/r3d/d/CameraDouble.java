@@ -432,24 +432,30 @@ public class CameraDouble extends V3D_PointDouble {
                 LineDouble xAxis = new LineDouble(new V3D_LineSegmentDouble(x_min, x_max), Color.BLUE);
                 V3D_PointDouble xpoi = xAxis.l.l.getPointOfIntersection(this, epsilon);
                 V3D_VectorDouble xpoin = new V3D_VectorDouble(xpoi, this);
-                V3D_PlaneDouble xpoinpl = new V3D_PlaneDouble(xpoi, xpoin);
-                renderLine(epsilon, mind2s, xAxis, xpoinpl, pix);
+                if (!xpoin.isZero()) {
+                    V3D_PlaneDouble xpoinpl = new V3D_PlaneDouble(xpoi, xpoin);
+                    renderLine(epsilon, mind2s, xAxis, xpoinpl, pix);
+                }
                 // y axis                
                 V3D_PointDouble y_min = new V3D_PointDouble(new V3D_VectorDouble(0d, ymin, 0d));
                 V3D_PointDouble y_max = new V3D_PointDouble(new V3D_VectorDouble(0d, ymax, 0d));
                 LineDouble yAxis = new LineDouble(new V3D_LineSegmentDouble(y_min, y_max), Color.RED);
                 V3D_PointDouble ypoi = yAxis.l.l.getPointOfIntersection(this, epsilon);
                 V3D_VectorDouble ypoin = new V3D_VectorDouble(ypoi, this);
-                V3D_PlaneDouble ypoinpl = new V3D_PlaneDouble(ypoi, ypoin);
-                renderLine(epsilon, mind2s, yAxis, ypoinpl, pix);
+                if (!ypoin.isZero()) {
+                    V3D_PlaneDouble ypoinpl = new V3D_PlaneDouble(ypoi, ypoin);
+                    renderLine(epsilon, mind2s, yAxis, ypoinpl, pix);
+                }
                 // z axis
                 V3D_PointDouble z_min = new V3D_PointDouble(new V3D_VectorDouble(0d, 0d, zmin));
                 V3D_PointDouble z_max = new V3D_PointDouble(new V3D_VectorDouble(0d, 0d, zmax));
                 LineDouble zAxis = new LineDouble(new V3D_LineSegmentDouble(z_min, z_max), Color.GREEN);
                 V3D_PointDouble zpoi = zAxis.l.l.getPointOfIntersection(this, epsilon);
                 V3D_VectorDouble zpoin = new V3D_VectorDouble(zpoi, this);
-                V3D_PlaneDouble zpoinpl = new V3D_PlaneDouble(zpoi, zpoin);
-                renderLine(epsilon, mind2s, zAxis, zpoinpl, pix);
+                if (!zpoin.isZero()) {
+                    V3D_PlaneDouble zpoinpl = new V3D_PlaneDouble(zpoi, zpoin);
+                    renderLine(epsilon, mind2s, zAxis, zpoinpl, pix);
+                }
             }
 
             // Render corners

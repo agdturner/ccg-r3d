@@ -69,10 +69,10 @@ public class RenderImageDouble {
 
     public static void main(String[] args) {
         try {
-            boolean run0 = true;
-            //boolean run0 = false;
-            //boolean run1 = true;
-            boolean run1 = false;
+            //boolean run0 = true;
+            boolean run0 = false;
+            boolean run1 = true;
+            //boolean run1 = false;
             //boolean runUtah = true;
             boolean runUtah = false;
             //boolean runGeographos = true;
@@ -665,7 +665,7 @@ public class RenderImageDouble {
                 for (int angles = 1; angles < 6; angles ++){
                 double angle = (Math.PI/6) * angles;
                 V3D_RayDouble zAxis = new V3D_RayDouble(new V3D_PointDouble(0d, 0d, 0d), new V3D_PointDouble(0d,0d,1d));
-                screen = screen.rotate(zAxis, angle, epsilon);
+                screen = screen.rotate(zAxis, zAxis.l.v, angle, epsilon);
                 RenderImageDouble r = new RenderImageDouble(universe, pt, size, zoomFactor, screen, epsilon);
                 V3D_VectorDouble lighting = new V3D_VectorDouble(1, -2, 3).getUnitVector();
                 String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
