@@ -15,6 +15,7 @@
  */
 package uk.ac.leeds.ccg.r3d.entities;
 
+import java.awt.Color;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
 
 /**
@@ -24,12 +25,24 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
 public class Point extends Entity {
     
     /**
-     * Create a new instance.
+     * The point to render.
      */
-    public Point(){}
+    public V3D_Point p;
+    
     
     /**
-     * The point.
+     * @param p What {@link #p} is set to. 
      */
-    V3D_Point p;
+    public Point(V3D_Point p) {
+        this(p, Color.BLUE);
+    }
+
+    /**
+     * @param p What {@link #p} is set to. 
+     * @param baseColor What {@link #baseColor} is set to. 
+     */
+    public Point(V3D_Point p, Color baseColor) {
+        this.p = p;
+        this.baseColor = baseColor;
+    }
 }

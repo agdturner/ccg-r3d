@@ -55,7 +55,9 @@ public class Universe {
     /**
      * A single camera.
      */
-    public CameraOld camera;
+    //public CameraOld camera;
+    //public Camera camera;
+    public Camera1 camera;
 
     /**
      * Create a new instance.
@@ -222,7 +224,9 @@ public class Universe {
      *
      * @param camera What {@link #camera} is set to.
      */
-    public void setCamera(CameraOld camera) {
+    //public void setCamera(CameraOld camera) {
+    //public void setCamera(Camera camera) {
+    public void setCamera(Camera1 camera) {
         this.camera = camera;
     }
 

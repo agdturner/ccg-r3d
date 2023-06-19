@@ -33,7 +33,7 @@ public class PointDouble extends Entity {
     
     
     /**
-     * @param p What {@link l} is set to. 
+     * @param p What {@link #p} is set to. 
      */
     public PointDouble(V3D_PointDouble p) {
         this(p, Color.BLUE);

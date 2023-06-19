@@ -15,21 +15,32 @@
  */
 package uk.ac.leeds.ccg.r3d.entities;
 
+import java.awt.Color;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_LineSegment;
 
 /**
- *
  * @author Andy Turner
  */
 public class Line extends Entity {
     
     /**
-     * Create a new instance.
-     */
-    public Line(){}
-    
-    /**
      * The line to render.
      */
-    V3D_LineSegment l;
+    public V3D_LineSegment l;
+    
+    /**
+     * @param l What {@link l} is set to. 
+     */
+    public Line(V3D_LineSegment l) {
+        this(l, Color.BLUE);
+    }
+
+    /**
+     * @param l What {@link #l} is set to. 
+     * @param baseColor What {@link #baseColor} is set to. 
+     */
+    public Line(V3D_LineSegment l, Color baseColor) {
+        this.l = l;
+        this.baseColor = baseColor;
+    }
 }

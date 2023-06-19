@@ -87,11 +87,6 @@ public class CameraDouble extends V3D_PointDouble {
     public V3D_PointDouble p;
 
     /**
-     * The screen pqr triangle.
-     */
-    public V3D_TriangleDouble pqr;
-
-    /**
      * The screen pq.
      */
     public V3D_LineSegmentDouble pq;
@@ -167,8 +162,8 @@ public class CameraDouble extends V3D_PointDouble {
     }
 
     /**
-     * Create a new instance. (N.B. There is a lot of waste
-     *
+     * Create a new instance.
+     * 
      * @param p The camera observer location.
      * @param screen The screen.
      */
@@ -188,9 +183,8 @@ public class CameraDouble extends V3D_PointDouble {
 
     private void init() {
         p = screen.getP();
-        pqr = screen.pqr;
-        pq = pqr.getPQ();
-        //qr = pqr.getQR();
+        pq = screen.pqr.getPQ();
+        //qr = screen.pqr.getQR();
         qr = screen.rsp.getQR();
         screenPlane = screen.getPlane();
         pqv = pq.l.v.divide((double) nrows);
@@ -199,7 +193,6 @@ public class CameraDouble extends V3D_PointDouble {
         screenHeight = pq.getLength();
         pixelSize = screenWidth / (double) ncols;
         rays = new HashMap<>();
-
     }
 
     /**
@@ -789,6 +782,7 @@ public class CameraDouble extends V3D_PointDouble {
         //V3D_PointDouble px = qr.l.getPointOfIntersection(p, epsilon);
         //double d = px.getDistance(p);
         double d = qr.getDistance(p, epsilon);
+        //double d = pq.getDistance(p, epsilon);
         return (int) (d / pixelSize);
     }
 
@@ -802,6 +796,7 @@ public class CameraDouble extends V3D_PointDouble {
         //V3D_PointDouble py = pq.l.getPointOfIntersection(p, epsilon);
         //double d = py.getDistance(p);
         double d = pq.getDistance(p, epsilon);
+        //double d = qr.getDistance(p, epsilon);
         return (int) (d / pixelSize);
     }
 
