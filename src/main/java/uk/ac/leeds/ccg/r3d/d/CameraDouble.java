@@ -25,7 +25,6 @@ import uk.ac.leeds.ccg.grids.d2.Grids_2D_ID_int;
 import uk.ac.leeds.ccg.r3d.d.entities.LineDouble;
 import uk.ac.leeds.ccg.r3d.d.entities.PointDouble;
 import uk.ac.leeds.ccg.r3d.d.entities.TriangleDouble;
-import uk.ac.leeds.ccg.v3d.geometry.V3D_Tetrahedron;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_GeometryDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PointDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_RectangleDouble;
@@ -35,7 +34,6 @@ import uk.ac.leeds.ccg.v3d.geometry.d.V3D_EnvelopeDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_FiniteGeometryDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineSegmentDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineSegmentsCollinearDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PlaneDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_RayDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TetrahedronDouble;
@@ -163,7 +161,7 @@ public class CameraDouble extends V3D_PointDouble {
             V3D_EnvelopeDouble ve, double zoomFactor, double epsilon) {
         // Need something orthoganol to pt and ve centroid
         V3D_PlaneDouble pl = new V3D_PlaneDouble(p, new V3D_VectorDouble(p, ve.getCentroid()));
-        V3D_VectorDouble pv = pl.getPV(epsilon);
+        V3D_VectorDouble pv = pl.getPV();
         //return = ve.getViewport2(pt, pv);
         return ve.getViewport3(p, pv, zoomFactor, epsilon);
     }
@@ -557,7 +555,7 @@ public class CameraDouble extends V3D_PointDouble {
      * @return pix
      */
     public void renderPoint(double epsilon, HashMap<Grids_2D_ID_int, Double> mind2s, PointDouble p, int[] pix) {
-        if (!this.equals(p.p, epsilon)) {
+        if (!this.equals(epsilon, p.p)) {
             V3D_RayDouble ray = new V3D_RayDouble(this, p.p);
             V3D_PointDouble pt = (V3D_PointDouble) screen.getIntersection(ray, epsilon);
             if (pt != null) {
@@ -631,7 +629,7 @@ public class CameraDouble extends V3D_PointDouble {
         if (t.isIntersectedBy(this, epsilon)) {
             i = screen.getIntersection(t, epsilon);
         } else {
-            V3D_TetrahedronDouble tetra = new V3D_TetrahedronDouble(this, t);
+            V3D_TetrahedronDouble tetra = new V3D_TetrahedronDouble(this, t, epsilon);
             i = tetra.getIntersection(screen, epsilon);
         }
         if (i == null) {
@@ -641,7 +639,7 @@ public class CameraDouble extends V3D_PointDouble {
         V3D_PlaneDouble tpl = t.pl;
         double mind2 = Double.MAX_VALUE;
         for (var pt : pts) {
-            if (!pt.equals(this, epsilon)) {
+            if (!pt.equals(epsilon, this)) {
                 V3D_RayDouble tpr = new V3D_RayDouble(this, pt);
                 V3D_PointDouble poi = (V3D_PointDouble) tpr.getIntersection(tpl, epsilon);
                 double d2 = poi.getDistanceSquared(this);
@@ -673,7 +671,7 @@ public class CameraDouble extends V3D_PointDouble {
             HashMap<Grids_2D_ID_int, V3D_PointDouble> idPoint,
             double epsilon) {
 
-        V3D_TetrahedronDouble tetra = new V3D_TetrahedronDouble(this, t);
+        V3D_TetrahedronDouble tetra = new V3D_TetrahedronDouble(this, t, epsilon);
         V3D_FiniteGeometryDouble tetrai = tetra.getIntersection(screen, epsilon);
         if (tetrai != null) {
             // Calculate the extent of the rows and columns the triangle is in.
@@ -763,7 +761,7 @@ public class CameraDouble extends V3D_PointDouble {
      * or {@code null}.
      */
     protected Grids_2D_ID_int getRC(V3D_PointDouble p, double epsilon) {
-        if (this.equals(p, epsilon)) {
+        if (this.equals(epsilon, p)) {
             return new Grids_2D_ID_int(
                     getScreenRow(p, epsilon),
                     getScreenCol(p, epsilon));

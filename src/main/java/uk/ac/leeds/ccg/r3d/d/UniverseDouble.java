@@ -161,15 +161,15 @@ public class UniverseDouble {
     public void createCubeFrom5Tetrahedra(double epsilon,
             V3D_PointDouble lbf, V3D_PointDouble lba, V3D_PointDouble ltf, V3D_PointDouble lta,
             V3D_PointDouble rbf, V3D_PointDouble rba, V3D_PointDouble rtf, V3D_PointDouble rta) {
-        V3D_TetrahedronDouble t1 = new V3D_TetrahedronDouble(lbf, ltf, lta, rtf);
+        V3D_TetrahedronDouble t1 = new V3D_TetrahedronDouble(lbf, ltf, lta, rtf, epsilon);
         tetrahedra.add(new TetrahedronDouble(t1, Color.BLUE));
-        V3D_TetrahedronDouble t2 = new V3D_TetrahedronDouble(lta, lba, lbf, rba);
+        V3D_TetrahedronDouble t2 = new V3D_TetrahedronDouble(lta, lba, lbf, rba, epsilon);
         tetrahedra.add(new TetrahedronDouble(t2, Color.RED));
-        V3D_TetrahedronDouble t3 = new V3D_TetrahedronDouble(lta, rta, rba, rtf);
+        V3D_TetrahedronDouble t3 = new V3D_TetrahedronDouble(lta, rta, rba, rtf, epsilon);
         tetrahedra.add(new TetrahedronDouble(t3, Color.GREEN));
-        V3D_TetrahedronDouble t4 = new V3D_TetrahedronDouble(lbf, rbf, rtf, rba);
+        V3D_TetrahedronDouble t4 = new V3D_TetrahedronDouble(lbf, rbf, rtf, rba, epsilon);
         tetrahedra.add(new TetrahedronDouble(t4, Color.YELLOW));
-        V3D_TetrahedronDouble t5 = new V3D_TetrahedronDouble(lbf, rba, rtf, lta);
+        V3D_TetrahedronDouble t5 = new V3D_TetrahedronDouble(lbf, rba, rtf, lta, epsilon);
         tetrahedra.add(new TetrahedronDouble(t5, Color.CYAN));
         // Volume check
         System.out.println("t1 volume=" + t1.getVolume(epsilon));
@@ -183,18 +183,18 @@ public class UniverseDouble {
             V3D_PointDouble lbf, V3D_PointDouble lba, V3D_PointDouble ltf, V3D_PointDouble lta,
             V3D_PointDouble rbf, V3D_PointDouble rba, V3D_PointDouble rtf, V3D_PointDouble rta) {
         // Half - a triangular prism
-        V3D_TetrahedronDouble t1 = new V3D_TetrahedronDouble(ltf, rtf, rta, rba);
+        V3D_TetrahedronDouble t1 = new V3D_TetrahedronDouble(ltf, rtf, rta, rba, epsilon);
         tetrahedra.add(new TetrahedronDouble(t1, Color.BLUE));
-        V3D_TetrahedronDouble t2 = new V3D_TetrahedronDouble(rtf, rbf, lbf, rba);
+        V3D_TetrahedronDouble t2 = new V3D_TetrahedronDouble(rtf, rbf, lbf, rba, epsilon);
         tetrahedra.add(new TetrahedronDouble(t2, Color.RED));
-        V3D_TetrahedronDouble t3 = new V3D_TetrahedronDouble(lbf, rtf, rba, ltf);
+        V3D_TetrahedronDouble t3 = new V3D_TetrahedronDouble(lbf, rtf, rba, ltf, epsilon);
         tetrahedra.add(new TetrahedronDouble(t3, Color.GREEN));
         // Another Half - a triangular prism
-        V3D_TetrahedronDouble t4 = new V3D_TetrahedronDouble(ltf, lbf, lba, rta);
+        V3D_TetrahedronDouble t4 = new V3D_TetrahedronDouble(ltf, lbf, lba, rta, epsilon);
         tetrahedra.add(new TetrahedronDouble(t4, Color.YELLOW));
-        V3D_TetrahedronDouble t5 = new V3D_TetrahedronDouble(ltf, lta, rta, lba);
+        V3D_TetrahedronDouble t5 = new V3D_TetrahedronDouble(ltf, lta, rta, lba, epsilon);
         tetrahedra.add(new TetrahedronDouble(t5, Color.CYAN));
-        V3D_TetrahedronDouble t6 = new V3D_TetrahedronDouble(lbf, lba, rba, rta);
+        V3D_TetrahedronDouble t6 = new V3D_TetrahedronDouble(lbf, lba, rba, rta, epsilon);
         tetrahedra.add(new TetrahedronDouble(t6, Color.MAGENTA));
         // Volume check
         System.out.println("t1 volume=" + t1.getVolume(epsilon));
