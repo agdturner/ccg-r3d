@@ -138,7 +138,7 @@ public class RenderImage {
             }
 
             if (run1) {
-                int oom = -3;
+                int oom = -5;
                 int n = 1;
                 //n = 5;
                 int w = 100 * n;

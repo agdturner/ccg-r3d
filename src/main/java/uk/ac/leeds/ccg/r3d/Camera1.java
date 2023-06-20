@@ -345,9 +345,10 @@ public class Camera1 extends V3D_Point {
             // Render triangle edges
             // Render edges
             for (var t : universe.triangles) {
-                renderLine(mind2s, new Line(t.triangle.getPQ(oom, rm), Color.YELLOW), t.triangle.getPl(oom, rm), pix, oom, rm);
-                renderLine(mind2s, new Line(t.triangle.getQR(oom, rm), Color.CYAN), t.triangle.getPl(oom, rm), pix, oom, rm);
-                renderLine(mind2s, new Line(t.triangle.getRP(oom, rm), Color.MAGENTA), t.triangle.getPl(oom, rm), pix, oom, rm);
+                V3D_Plane tp = t.triangle.getPl(oom, rm);
+                renderLine(mind2s, new Line(t.triangle.getPQ(oom, rm), Color.YELLOW), tp, pix, oom, rm);
+                renderLine(mind2s, new Line(t.triangle.getQR(oom, rm), Color.CYAN), tp, pix, oom, rm);
+                renderLine(mind2s, new Line(t.triangle.getRP(oom, rm), Color.MAGENTA), tp, pix, oom, rm);
                 //renderLine(epsilon, mind2s, new LineDouble(t.triangle.getPQ(), Color.YELLOW), pix);
                 //renderLine(epsilon, mind2s, new LineDouble(t.triangle.getQR(), Color.CYAN), pix);
                 //renderLine(epsilon, mind2s, new LineDouble(t.triangle.getRP(), Color.MAGENTA), pix);
