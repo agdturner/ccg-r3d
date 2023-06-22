@@ -146,17 +146,17 @@ public class Camera1 extends V3D_Point {
         // Initialise the screen
         //screen = ve.getViewport2(pt, pv, oom, rm);
         screen = ve.getViewport3(pt, pv, oom, rm);
-        screenPlane = screen.getPlane(oom - 4, rm);
+        screenPlane = screen.getPlane();
         int dim = Math.max(width, height);
         nrows = dim;
         ncols = dim;
-        V3D_Triangle pqr = screen.getPQR(oom - 6, rm);
+        V3D_Triangle pqr = screen.getPQR();
         p = pqr.getPQ(oom, rm).l.getP();
         pq = pqr.getPQ(oom - 6, rm);
         pqv = new V3D_Vector(pq.l.v).divide(
                 BigRational.valueOf(nrows), oom, rm);
         screenHeight = pq.getLength(oom - 6, rm).getSqrt(oom - 6, rm);
-        V3D_Triangle rsp = screen.getRSP(oom - 6, rm);
+        V3D_Triangle rsp = screen.getRSP();
         qr = rsp.getQR(oom, rm);
         screenWidth = qr.getLength(oom - 6, rm).getSqrt(oom - 6, rm);
         pixelSize = screenWidth.divide(width);

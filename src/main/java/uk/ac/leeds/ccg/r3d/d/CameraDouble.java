@@ -183,9 +183,9 @@ public class CameraDouble extends V3D_PointDouble {
 
     private void init() {
         p = screen.getP();
-        pq = screen.pqr.getPQ();
+        pq = screen.getPQR().getPQ();
         //qr = screen.pqr.getQR();
-        qr = screen.rsp.getQR();
+        qr = screen.getRSP().getQR();
         screenPlane = screen.getPlane();
         pqv = pq.l.v.divide((double) nrows);
         qrv = qr.l.v.divide((double) ncols).reverse();
@@ -470,7 +470,7 @@ public class CameraDouble extends V3D_PointDouble {
      */
     public void renderLine(double epsilon,
             HashMap<Grids_2D_ID_int, Double> mind2s, LineDouble l, V3D_PlaneDouble plane, int[] pix) {
-        if (V3D_LineDouble.isCollinear(l.l.l, epsilon, this)) {
+        if (V3D_LineDouble.isCollinear(epsilon, l.l.l, this)) {
             // If the line segment is collinear with this, then render as a point.
             // Not sure which end is closer, so render both.
             renderPoint(epsilon, mind2s, new PointDouble(l.l.l.getP(), l.baseColor), pix);

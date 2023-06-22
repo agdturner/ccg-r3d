@@ -116,7 +116,7 @@ public class CameraOld extends V3D_Point {
         int dim = Math.max(width, height);
         nrows = dim;
         ncols = dim;
-        V3D_Triangle screenpqr = screen.getPQR(oom - 6, rm);
+        V3D_Triangle screenpqr = screen.getPQR();
         screenWidth = screenpqr.getPQ(oom - 6, rm).getLength(oom - 6, rm).getSqrt(oom - 6, rm);
         screenHeight = screenWidth;
         pixelSize = screenWidth.divide(width);
@@ -143,7 +143,7 @@ public class CameraOld extends V3D_Point {
     public void translate(V3D_Vector v, int oom, RoundingMode rm) {
         super.translate(v, oom, rm);
         screen.translate(v, oom, rm);
-        initVectors(screen.getPQR(oom, rm), oom, rm);
+        initVectors(screen.getPQR(), oom, rm);
         rays = new HashMap<>();
     }
 
@@ -231,9 +231,9 @@ public class CameraOld extends V3D_Point {
          */
         HashMap<Grids_2D_ID_int, V3D_Point> idPoint = new HashMap<>();
         int j = 0;
-        V3D_Triangle screenpqr = screen.getPQR(oomn4, rm);
+        V3D_Triangle screenpqr = screen.getPQR();
         V3D_LineSegment pq = screenpqr.getPQ(oomn4, rm);
-        V3D_LineSegment qr = screen.getRSP(oomn4, rm).getQR(oomn4, rm);
+        V3D_LineSegment qr = screen.getRSP().getQR(oomn4, rm);
         V3D_Plane screenPlane = screenpqr.getPl(oomn4, rm);
         for (BigRational mind2 : mindOrderedTriangles.keySet()) {
             Set<Integer> triangleIndexes = mindOrderedTriangles.get(mind2);

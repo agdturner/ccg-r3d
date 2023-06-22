@@ -198,10 +198,10 @@ public class Camera extends V3D_Point {
 
     private void init() {
         p = screen.getP();
-        pq = screen.getPQR(oom, rm).getPQ(oom, rm);
+        pq = screen.getPQR().getPQ(oom, rm);
         //qr = pqr.getQR();
-        qr = screen.getRSP(oom, rm).getQR(oom, rm);
-        screenPlane = screen.getPlane(oom, rm);
+        qr = screen.getRSP().getQR(oom, rm);
+        screenPlane = screen.getPlane();
         pqv = pq.l.v.divide(BigRational.valueOf(nrows), oom, rm);
         qrv = qr.l.v.divide(BigRational.valueOf(ncols), oom, rm).reverse();
         screenWidth = qr.getLength(oom, rm).getSqrt(oom, rm);
