@@ -22,7 +22,7 @@ This is a classic ["Hello World!"](https://en.wikipedia.org/wiki/%22Hello,_World
 
 Rendering of the asteroid [Geographos](https://en.wikipedia.org/wiki/1620_Geographos) using a [Geographos 3D Model provided by NASA](https://nasa3d.arc.nasa.gov/detail/geographos) with 16380 triangles (resolution 500x375, [Order of Magnitude](https://en.wikipedia.org/wiki/Order_of_magnitude) of precision -8):
 
-<img alt="A yellow scale rendering of Geographos" src="data/output/geographos/files/oom=-8/lighting(i=-0.2673_j=-0.5345_k=-0.8018)/1620geographos_500x500_pt(i=-3.3194_j=3.4588_k=-3.4339)_lighting(i=-0.2673_j=-0.5345_k=-0.8018)_oom=-8.png" />
+<img alt="A yellow scale rendering of Geographos" src="data/outputold/geographos/files/oom=-8/lighting(i=-0.2673_j=-0.5345_k=-0.8018)/1620geographos_500x500_pt(i=-3.3194_j=3.4588_k=-3.4339)_lighting(i=-0.2673_j=-0.5345_k=-0.8018)_oom=-8.png" />
 
 For both renderings it is possible to pick out triangular features and data artefacts. They are sort of unrealistic, but the 3D nature of the objects is apparent.
 
