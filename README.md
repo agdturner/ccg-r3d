@@ -30,13 +30,13 @@ The images of the Geographos and the Utah Teapot were produced by running [Rende
 
 For faster rendering, the implementation has been extended to alternatively use [IEEE double precision floating point format](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) numbers. This precision is often good enough. The image below is a rendering of [Hurricane Katrina](https://en.wikipedia.org/wiki/Hurricane_Katrina) using a [Hurricane_Katrina 3D Model provided by NASA](https://nasa3d.arc.nasa.gov/detail/hurricane-katrina). Instead of specifying an [Order of Magnitude](https://en.wikipedia.org/wiki/Order_of_magnitude) precision and a [RoundingMode](https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/math/RoundingMode.java), for floating point 3D calculations it is necessary to set a small number used to determine if two values are significantly different (epsilon). For the rendering of Hurricane Katrina below the epsilon used is 1.0E-7.
 
-<img alt="A yellow scale rendering of Hurricane Katrina" src="data/output/Hurricane_Katrina/files/epsilon=1.0E-7/lighting(i=-0.27_j=-0.53_k=-0.80)_ambientLight(0.05)/Katrina_1000x1000.png" />
+<img alt="A yellow scale rendering of Hurricane Katrina" src="data/outputold/Hurricane_Katrina/files/epsilon=1.0E-7/lighting(i=-0.27_j=-0.53_k=-0.80)_ambientLight(0.05)/Katrina_1000x1000.png" />
 
 The Hurricane Katrina image was produced by running [RenderImageDouble.java](https://github.com/agdturner/ccg-r3d/tree/main/src/main/java/uk/ac/leeds/ccg/r3d/d/RenderImageDouble.java). With some small edits to the source code it should be possible to reproduce it.
 
 Based on the simple complete [3D Model of Curiosity from NASA](https://nasa3d.arc.nasa.gov/detail/mars-rover-curiosity) below is another yellow scale image generated from 384942 Triangles in about a minute.
 
-<img alt="A yellow scale rendering of a Curiosity model" src="data/output/Curiosity Rover 3D Printed Model/files/epsilon=1.0E-7/lighting(i=-0.27_j=-0.53_k=-0.80)_ambientLight(0.05)/Curiosity SM (Complete Print 200uM)_1000x1000pt(i=123.83_j=108.92_k=143.96)_lighting(i=-0.27_j=-0.53_k=-0.80)_ambientLight(0.05)_epsilon=1.0E-7.png" />
+<img alt="A yellow scale rendering of a Curiosity model" src="data/outputold/Curiosity Rover 3D Printed Model/files/epsilon=1.0E-7/lighting(i=-0.27_j=-0.53_k=-0.80)_ambientLight(0.05)/Curiosity SM (Complete Print 200uM)_1000x1000pt(i=123.83_j=108.92_k=143.96)_lighting(i=-0.27_j=-0.53_k=-0.80)_ambientLight(0.05)_epsilon=1.0E-7.png" />
 
 Based on the [3D Model of the Apollo 17 Landing Site from NASA](https://nasa3d.arc.nasa.gov/detail/Apollo17-Landing)) below is a grey shade image generated from  533506 Triangles in about 3.5 minutes.
 
