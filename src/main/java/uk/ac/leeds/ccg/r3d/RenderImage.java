@@ -65,12 +65,12 @@ public class RenderImage {
         try {
             //boolean run0 = true;
             boolean run0 = false;
-            boolean run1 = true;
-            //boolean run1 = false;
+            //boolean run1 = true;
+            boolean run1 = false;
             //boolean runUtah = true;
             boolean runUtah = false;
-            //boolean runGeographos = true;
-            boolean runGeographos = false;
+            boolean runGeographos = true;
+            //boolean runGeographos = false;
             //boolean runKatrina = true;
             boolean runKatrina = false;
             Path inDataDir = Paths.get("data", "input");
@@ -264,71 +264,77 @@ public class RenderImage {
 ////                }
 //            }
 //
-//            if (runGeographos) {
-//                //int oom = -2;
-//                //int oom = -4;
-//                //int oom = -7;
-//                int oom = -8;
-//                int n = 1;
-//                n = 5;
-//                int w = 100 * n;
-//                int h = 75 * n;
-//                String name = "geographos";
-//                String filename = "1620geographos";
-//                boolean assessTopology = false;
-//                boolean castShadow = false;
-//                /**
-//                 * AmbientLight makes non black surfaces non black even if they
-//                 * are orientated opposite to the lighting vector.
-//                 */
-//                BigRational ambientLight = BigRational.ONE.divide(BigRational.valueOf(20));
-//                //BigRational ambientLight = BigRational.ONE.divide(BigRational.valueOf(5));
-//                Path input = Paths.get(inDataDir.toString(), name, filename + ".stl");
-//                Color color = Color.YELLOW;
-//                // Init universe
-//                Universe universe = new Universe(input, V3D_Vector.ZERO, color,
-//                        assessTopology, oom, rm);
-//                // Detail the camera
-//                Dimension size = new Dimension(w, h);
-//                V3D_Point centroid = universe.envelope.getCentroid(oom, rm);
-//                BigRational radius = universe.envelope.getPoints(oom, rm)[0]
-//                        .getDistance(centroid, oom, rm);
-//                for (int i = -1; i <= 1; i++) {
-//                    for (int j = -1; j <= 1; j++) {
-//                        for (int k = -1; k <= 1; k++) {
-//                            if (!(i == 0 && j == 0 && k == 0)) {
-//                                if (!(i == -1 && j == 1 && k == 1)) {
-////                int i = -1;
-////                int j = 1;
-////                int k = 1;
-//                                    V3D_Vector direction = new V3D_Vector(i, j, k).getUnitVector(oom, rm);
-//                                    V3D_Point pt = getCameraPt(centroid, direction,
-//                                            radius.multiply(2), oom, rm);
-//                                    // Render the image
-//                                    RenderImage r = new RenderImage(universe, pt, size, oom, rm);
-//                                    V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
-//                                    String ls = "lighting(i=" + lighting.getDX(oom, rm).round(-4, rm).getStringValue().trim()
-//                                            + "_j=" + lighting.getDY(oom, rm).round(-4, rm).getStringValue().trim()
-//                                            + "_k=" + lighting.getDZ(oom, rm).round(-4, rm).getStringValue().trim()
-//                                            + ")_ambientLight(" + ambientLight.round(-4, rm) + ")";
-//                                    Path dir = Paths.get(outDataDir.toString(), name, "files", "oom=" + oom, ls, "nset");
-//                                    if (castShadow) {
-//                                        dir = Paths.get(dir.toString(), "shadow");
-//                                    }
-//                                    r.output = Paths.get(dir.toString(),
-//                                            filename
-//                                            + "_" + r.size.width + "x" + r.size.height
-//                                            + "_pt(i=" + pt.getX(oom, rm).round(-4, rm).getStringValue().trim()
-//                                            + "_j=" + pt.getY(oom, rm).round(-4, rm).getStringValue().trim()
-//                                            + "_k=" + pt.getZ(oom, rm).round(-4, rm).getStringValue().trim()
-//                                            + ")_" + ls + "_oom=" + oom + ".png");
-//                                    r.run(lighting, ambientLight, castShadow);
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
+            if (runGeographos) {
+                //int oom = -2;
+                //int oom = -4;
+                //int oom = -7;
+                int oom = -8;
+                int n = 1;
+                n = 5;
+                int w = 100 * n;
+                int h = 75 * n;
+                String name = "geographos";
+                String filename = "1620geographos";
+                boolean assessTopology = false;
+                boolean castShadow = false;
+                BigRational zoomFactor = BigRational.ONE;
+                /**
+                 * AmbientLight makes non black surfaces non black even if they
+                 * are orientated opposite to the lighting vector.
+                 */
+                BigRational ambientLight = BigRational.ONE.divide(BigRational.valueOf(20));
+                //BigRational ambientLight = BigRational.ONE.divide(BigRational.valueOf(5));
+                Path input = Paths.get(inDataDir.toString(), name, filename + ".stl");
+                Color color = Color.YELLOW;
+                // Init universe
+                Universe universe = new Universe(input, V3D_Vector.ZERO, color,
+                        assessTopology, oom, rm);
+                // Detail the camera
+                Dimension size = new Dimension(w, h);
+                V3D_Point centroid = universe.envelope.getCentroid(oom, rm);
+                BigRational radius = universe.envelope.getPoints(oom)[0]
+                        .getDistance(centroid, oom, rm);
+                for (int i = -1; i <= 1; i++) {
+                    for (int j = -1; j <= 1; j++) {
+                        for (int k = -1; k <= 1; k++) {
+                            if (!(i == 0 && j == 0 && k == 0)) {
+                                if (!(i == -1 && j == 1 && k == 1)) {
+//                int i = -1;
+//                int j = 1;
+//                int k = 1;
+                                    V3D_Vector direction = new V3D_Vector(i, j, k).getUnitVector(oom, rm);
+                                    V3D_Point pt = getCameraPt(centroid, direction,
+                                            radius.multiply(2), oom, rm);
+                                    // Render the image
+                                    RenderImage r = new RenderImage(universe, pt, size, zoomFactor, oom, rm);
+                                    V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
+                                    
+                                    
+                                            
+                                    String ls = "lighting(i=" + Math_BigRational.round(lighting.getDX(oom, rm), -4, rm).toString()
+                                            + "_j=" + Math_BigRational.round(lighting.getDY(oom, rm), -4, rm).toString()
+                                            + "_k=" + Math_BigRational.round(lighting.getDZ(oom, rm), -4, rm).toString()
+                                            + ")_ambientLight(" + Math_BigRational.round(ambientLight, -4, rm).toString()
+                                            + ")";
+                                    Path dir = Paths.get(outDataDir.toString(), name, "files", "oom=" + oom, ls, "nset");
+                                    if (castShadow) {
+                                        dir = Paths.get(dir.toString(), "shadow");
+                                    }
+                                    r.output = Paths.get(dir.toString(),
+                                            filename
+                                            + "_" + size.width + "x" + size.height
+                                                    
+                                            + "_pt(i=" + Math_BigRational.round(pt.getX(oom, rm), -4, rm).toString()
+                                            + "_j=" + Math_BigRational.round(pt.getY(oom, rm), -4, rm).toString()
+                                            + "_k=" + Math_BigRational.round(pt.getZ(oom, rm), -4, rm).toString()
+                                            + ")_" + ls + "_oom=" + oom + ".png");
+                                    r.run(size, lighting, ambientLight, castShadow, oom, rm);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 //
 //            if (runKatrina) {
 //                int oom = -8; //int oom = -8; //int n = 1;
