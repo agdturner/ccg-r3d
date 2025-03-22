@@ -19,39 +19,17 @@
  */
 module uk.ac.leeds.ccg.r3d {
 
-    /**
-     * big-math
-     */
     requires transitive ch.obermuhlner.math.big;
-
-    /**
-     * ccg-grids
-     */
+    
+    requires transitive uk.ac.leeds.ccg.data;
     requires transitive uk.ac.leeds.ccg.grids;
-
-    /**
-     * ccg-generic
-     */
     requires transitive uk.ac.leeds.ccg.generic;
-
-    /**
-     * ccg-io
-     */
     requires transitive uk.ac.leeds.ccg.io;
-
-    /**
-     * ccg-math
-     */
     requires transitive uk.ac.leeds.ccg.math;
-
-    /**
-     * ccg-v3d
-     */
     requires transitive uk.ac.leeds.ccg.v3d;
-//    requires transitive uk.ac.leeds.ccg.v3d.geometrics;
-//    requires transitive uk.ac.leeds.ccg.v3d.geometry;
-//    requires transitive uk.ac.leeds.ccg.v3d.io;
-
+    
+    opens uk.ac.leeds.ccg.r3d to uk.ac.leeds.ccg.data;
+    
     /**
      * Exports.
      */

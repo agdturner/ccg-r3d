@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import uk.ac.leeds.ccg.math.arithmetic.Math_BigRational;
 import uk.ac.leeds.ccg.r3d.io.IO;
+import uk.ac.leeds.ccg.v3d.core.V3D_Environment;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 
@@ -52,12 +53,12 @@ public class RenderImage {
      * @param rm The RoundingMode for any rounding.
      * @throws Exception
      */
-    public RenderImage(Universe universe, V3D_Point pt, Dimension size, 
+    public RenderImage(Universe universe, V3D_Point pt, Dimension size,
             BigRational zoomFactor, int oom, RoundingMode rm) throws Exception {
         this.universe = universe;
-        //CameraOld c = new CameraOld(pt, universe.envelope, size.width, size.height, oom, rm);
-        //Camera c = new Camera(pt, universe.envelope, size, zoomFactor, oom, rm);
-        Camera1 c = new Camera1(pt, universe.envelope, size.width, size.height, oom, rm);
+        //CameraOld c = new CameraOld(pt, universe.aabb, size.width, size.height, oom, rm);
+        //Camera c = new Camera(pt, universe.aabb, size, zoomFactor, oom, rm);
+        Camera1 c = new Camera1(pt, universe.aabb, size.width, size.height, oom, rm);
         this.universe.setCamera(c);
     }
 
@@ -67,30 +68,33 @@ public class RenderImage {
             boolean run0 = false;
             //boolean run1 = true;
             boolean run1 = false;
+            boolean run2 = true;
+            //boolean run2 = false;
             //boolean runUtah = true;
             boolean runUtah = false;
-            boolean runGeographos = true;
-            //boolean runGeographos = false;
+            //boolean runGeographos = true;
+            boolean runGeographos = false;
             //boolean runKatrina = true;
             boolean runKatrina = false;
             Path inDataDir = Paths.get("data", "input");
             Path outDataDir = Paths.get("data", "output");
             RoundingMode rm = RoundingMode.HALF_UP;
-            
+
             if (run0) {
                 //int oom = -2;
                 int oom = -4;
+                V3D_Environment env = new V3D_Environment(oom, rm);
                 int n = 1;
                 //n = 5;
                 int w = 100 * n;
                 int h = 100 * n;
                 BigRational zoomFactor = BigRational.ONE;
                 // Init universe
-                Universe universe = new Universe(V3D_Vector.ZERO, oom, rm);
+                Universe universe = new Universe(V3D_Vector.ZERO, oom, rm, env);
                 // Detail the camera
                 Dimension size = new Dimension(w, h);
-                V3D_Point centroid = universe.envelope.getCentroid(oom, rm);
-                BigRational radius = universe.envelope.getPoints(oom)[0]
+                V3D_Point centroid = universe.aabb.getCentroid(oom, rm);
+                BigRational radius = universe.aabb.getPointsArray()[0]
                         .getDistance(centroid, oom, rm);
                 //String name = "tetras6";
                 //String name = "tetras5";
@@ -119,16 +123,16 @@ public class RenderImage {
                                 String ls = "lighting(i=" + Math_BigRational.round(lighting.getDX(oom, rm), -4, rm).toString()
                                         + "_j=" + Math_BigRational.round(lighting.getDY(oom, rm), -4, rm).toString()
                                         + "_k=" + Math_BigRational.round(lighting.getDZ(oom, rm), -4, rm).toString()
-                                            + ")_ambientLight(" + Math_BigRational.round(ambientLight, -4, rm) + ")";
+                                        + ")_ambientLight(" + Math_BigRational.round(ambientLight, -4, rm) + ")";
                                 Path dir = Paths.get(outDataDir.toString(), "test", name, "oom=" + oom, ls);
                                 if (castShadow) {
                                     dir = Paths.get(dir.toString(), "shadow");
                                 }
                                 r.output = Paths.get(dir.toString(),
                                         "test_" //+ r.size.width + "x" + r.size.height
-                                        + "_pt(i=" + Math_BigRational.round(pt.getX(oom, rm),-4, rm).toString()
-                                        + "_j=" + Math_BigRational.round(pt.getY(oom, rm),-4, rm).toString()
-                                        + "_k=" + Math_BigRational.round(pt.getZ(oom, rm),-4, rm).toString()
+                                        + "_pt(i=" + Math_BigRational.round(pt.getX(oom, rm), -4, rm).toString()
+                                        + "_j=" + Math_BigRational.round(pt.getY(oom, rm), -4, rm).toString()
+                                        + "_k=" + Math_BigRational.round(pt.getZ(oom, rm), -4, rm).toString()
                                         + ")_" + ls + "_oom=" + oom + ".png");
                                 r.run(size, lighting, ambientLight, castShadow, oom, rm);
                             }
@@ -139,6 +143,7 @@ public class RenderImage {
 
             if (run1) {
                 int oom = -5;
+                V3D_Environment env = new V3D_Environment(oom, rm);
                 int n = 1;
                 //n = 5;
                 int w = 100 * n;
@@ -160,11 +165,11 @@ public class RenderImage {
                 Color color = Color.YELLOW;
                 // Init universe
                 Universe universe = new Universe(input, V3D_Vector.ZERO, color,
-                        assessTopology, oom, rm);
+                        assessTopology, oom, rm, env);
                 // Detail the camera
                 Dimension size = new Dimension(w, h);
-                V3D_Point centroid = universe.envelope.getCentroid(oom, rm);
-                BigRational radius = universe.envelope.getPoints(oom)[0]
+                V3D_Point centroid = universe.aabb.getCentroid(oom, rm);
+                BigRational radius = universe.aabb.getPointsArray()[0]
                         .getDistance(centroid, oom, rm);
                 V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
                 for (int i = -1; i <= 1; i++) {
@@ -179,24 +184,89 @@ public class RenderImage {
                                 String ls = "lighting(i=" + Math_BigRational.round(lighting.getDX(oom, rm), -4, rm).toString()
                                         + "_j=" + Math_BigRational.round(lighting.getDY(oom, rm), -4, rm).toString()
                                         + "_k=" + Math_BigRational.round(lighting.getDZ(oom, rm), -4, rm).toString()
-                                            + ")_ambientLight(" + Math_BigRational.round(ambientLight, -4, rm) + ")";
+                                        + ")_ambientLight(" + Math_BigRational.round(ambientLight, -4, rm) + ")";
                                 Path dir = Paths.get(outDataDir.toString(), name, "files", "oom=" + oom, ls);
                                 if (castShadow) {
                                     dir = Paths.get(dir.toString(), "shadow");
                                 }
-                                
+
                                 r.output = Paths.get(dir.toString(),
                                         filename
                                         + "_" + size.width + "x" + size.height
-                                        + "_pt(i=" + Math_BigRational.round(pt.getX(oom, rm),-4, rm).toString()
-                                        + "_j=" + Math_BigRational.round(pt.getY(oom, rm),-4, rm).toString()
-                                        + "_k=" + Math_BigRational.round(pt.getZ(oom, rm),-4, rm).toString()
+                                        + "_pt(i=" + Math_BigRational.round(pt.getX(oom, rm), -4, rm).toString()
+                                        + "_j=" + Math_BigRational.round(pt.getY(oom, rm), -4, rm).toString()
+                                        + "_k=" + Math_BigRational.round(pt.getZ(oom, rm), -4, rm).toString()
                                         + ")_" + ls + "_oom=" + oom + ".png");
                                 r.run(size, lighting, ambientLight, castShadow, oom, rm);
                             }
                         }
                     }
                 }
+            }
+            
+            if (run2) {
+                String name = "testPoly";
+                String filename = "testPolygon";
+                int oom = -5;
+                V3D_Environment env = new V3D_Environment(oom, rm);
+                int n = 1;
+                //n = 5;
+                int w = 100 * n;
+                int h = 100 * n;
+                //int w = 100 * n;
+                //int h = 75 * n;
+                boolean assessTopology = false;
+                boolean castShadow = false;
+                BigRational zoomFactor = BigRational.ONE;
+                /**
+                 * AmbientLight makes non black surfaces non black even if they
+                 * are orientated opposite to the lighting vector.
+                 */
+                BigRational ambientLight = BigRational.ONE.divide(BigRational.valueOf(20));
+                //BigRational ambientLight = BigRational.ONE.divide(BigRational.valueOf(5));
+                Color color = Color.YELLOW;
+                // Init universe
+                Universe universe = new Universe(V3D_Vector.ZERO, oom, rm, env);
+                // Detail the camera
+                Dimension size = new Dimension(w, h);
+                V3D_Point centroid = universe.aabb.getCentroid(oom, rm);
+                BigRational radius = universe.aabb.getPointsArray()[0]
+                        .getDistance(centroid, oom, rm);
+                V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
+//                for (int i = -1; i <= 1; i++) {
+//                    for (int j = -1; j <= 1; j++) {
+//                        for (int k = -1; k <= 1; k++) {
+//                            if (!(i == 0 && j == 0 && k == 0)) {
+                                int i = 1;
+                                int j = 0;
+                                int k = 0;
+                                
+                                V3D_Vector direction = new V3D_Vector(i, j, k).getUnitVector(oom, rm);
+                                V3D_Point pt = getCameraPt(centroid, direction,
+                                        radius.multiply(2), oom, rm);
+                                // Render the image
+                                RenderImage r = new RenderImage(universe, pt, size, zoomFactor, oom, rm);
+                                String ls = "lighting(i=" + Math_BigRational.round(lighting.getDX(oom, rm), -4, rm).toString()
+                                        + "_j=" + Math_BigRational.round(lighting.getDY(oom, rm), -4, rm).toString()
+                                        + "_k=" + Math_BigRational.round(lighting.getDZ(oom, rm), -4, rm).toString()
+                                        + ")_ambientLight(" + Math_BigRational.round(ambientLight, -4, rm) + ")";
+                                Path dir = Paths.get(outDataDir.toString(), name, "files", "oom=" + oom, ls);
+                                if (castShadow) {
+                                    dir = Paths.get(dir.toString(), "shadow");
+                                }
+
+                                r.output = Paths.get(dir.toString(),
+                                        filename
+                                        + "_" + size.width + "x" + size.height
+                                        + "_pt(i=" + Math_BigRational.round(pt.getX(oom, rm), -4, rm).toString()
+                                        + "_j=" + Math_BigRational.round(pt.getY(oom, rm), -4, rm).toString()
+                                        + "_k=" + Math_BigRational.round(pt.getZ(oom, rm), -4, rm).toString()
+                                        + ")_" + ls + "_oom=" + oom + ".png");
+                                r.run(size, lighting, ambientLight, castShadow, oom, rm);
+//                            }
+//                        }
+//                    }
+//                }
             }
 
 //            if (runUtah) {
@@ -227,10 +297,10 @@ public class RenderImage {
 //                        assessTopology, oom, rm);
 //                // Detail the camera
 //                Dimension size = new Dimension(w, h);
-//                V3D_Point centroid = universe.envelope.getCentroid(oom, rm);
-//                BigRational radius = universe.envelope.getPoints(oom, rm)[0]
+//                V3D_Point centroid = universe.aabb.getCentroid(oom, rm);
+//                BigRational radius = universe.aabb.getPointsArray(oom, rm)[0]
 //                        .getDistance(centroid, oom, rm);
-////                for (int i = -1; i <= 1; i++) {
+            ////                for (int i = -1; i <= 1; i++) {
 ////                    for (int j = -1; j <= 1; j++) {
 ////                        for (int k = -1; k <= 1; k++) {
 ////                            if (!(i == 0 && j == 0 && k == 0)) {
@@ -269,6 +339,7 @@ public class RenderImage {
                 //int oom = -4;
                 //int oom = -7;
                 int oom = -8;
+                V3D_Environment env = new V3D_Environment(oom, rm);
                 int n = 1;
                 n = 5;
                 int w = 100 * n;
@@ -288,11 +359,11 @@ public class RenderImage {
                 Color color = Color.YELLOW;
                 // Init universe
                 Universe universe = new Universe(input, V3D_Vector.ZERO, color,
-                        assessTopology, oom, rm);
+                        assessTopology, oom, rm, env);
                 // Detail the camera
                 Dimension size = new Dimension(w, h);
-                V3D_Point centroid = universe.envelope.getCentroid(oom, rm);
-                BigRational radius = universe.envelope.getPoints(oom)[0]
+                V3D_Point centroid = universe.aabb.getCentroid(oom, rm);
+                BigRational radius = universe.aabb.getPointsArray()[0]
                         .getDistance(centroid, oom, rm);
                 for (int i = -1; i <= 1; i++) {
                     for (int j = -1; j <= 1; j++) {
@@ -308,9 +379,7 @@ public class RenderImage {
                                     // Render the image
                                     RenderImage r = new RenderImage(universe, pt, size, zoomFactor, oom, rm);
                                     V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
-                                    
-                                    
-                                            
+
                                     String ls = "lighting(i=" + Math_BigRational.round(lighting.getDX(oom, rm), -4, rm).toString()
                                             + "_j=" + Math_BigRational.round(lighting.getDY(oom, rm), -4, rm).toString()
                                             + "_k=" + Math_BigRational.round(lighting.getDZ(oom, rm), -4, rm).toString()
@@ -323,7 +392,6 @@ public class RenderImage {
                                     r.output = Paths.get(dir.toString(),
                                             filename
                                             + "_" + size.width + "x" + size.height
-                                                    
                                             + "_pt(i=" + Math_BigRational.round(pt.getX(oom, rm), -4, rm).toString()
                                             + "_j=" + Math_BigRational.round(pt.getY(oom, rm), -4, rm).toString()
                                             + "_k=" + Math_BigRational.round(pt.getZ(oom, rm), -4, rm).toString()
@@ -358,10 +426,10 @@ public class RenderImage {
 //                        assessTopology, oom, rm);
 //                // Detail the camera
 //                Dimension size = new Dimension(w, h);
-//                V3D_Point centroid = universe.envelope.getCentroid(oom, rm);
-//                BigRational radius = universe.envelope.getPoints(oom, rm)[0]
+//                V3D_Point centroid = universe.aabb.getCentroid(oom, rm);
+//                BigRational radius = universe.aabb.getPointsArray(oom, rm)[0]
 //                        .getDistance(centroid, oom, rm);
-////                for (int i = -1; i <= 1; i++) {
+         ////                for (int i = -1; i <= 1; i++) {
 ////                    for (int j = -1; j <= 1; j++) {
 ////                        for (int k = -1; k <= 1; k++) {
 ////                            if (!(i == 0 && j == 0 && k == 0)) {

@@ -29,7 +29,7 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Rectangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
-import uk.ac.leeds.ccg.v3d.geometry.V3D_Envelope;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_AABB;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_LineSegment;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Plane;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Ray;
@@ -103,7 +103,7 @@ public class CameraOld extends V3D_Point {
      * @param p The camera observer location.
      * @param screen The screen.
      */
-    public CameraOld(V3D_Point pt, V3D_Envelope ve, int width, int height, int oom,
+    public CameraOld(V3D_Point pt, V3D_AABB ve, int width, int height, int oom,
             RoundingMode rm) throws Exception {
         super(pt);
         System.out.println("Initialise Camera.");
@@ -198,7 +198,7 @@ public class CameraOld extends V3D_Point {
         TreeMap<BigRational, Set<Integer>> mindOrderedTriangles
                 = new TreeMap<>();
         BigRational[] mind2t = new BigRational[ts.length];
-        V3D_Point centroid = universe.envelope.getCentroid(oom, rm);
+        V3D_Point centroid = universe.aabb.getCentroid(oom, rm);
         process(centroid, 0, ts, lighting, ambientLight, mindOrderedTriangles, mind2t, oom, rm);
         for (int i = 1; i < ts.length; i++) {
             if (i % 100 == 0) {
@@ -301,7 +301,7 @@ public class CameraOld extends V3D_Point {
                 V3D_Ray ray = new V3D_Ray(idPoint.get(x), lightingr);
                 for (int i = 0; i < universe.triangles.size(); i++) {
                     if (i != ci) {
-                        if (universe.triangles.get(i).triangle.getIntersection(ray, oomn4, rm) != null) {
+                        if (universe.triangles.get(i).triangle.getIntersect(ray, oomn4, rm) != null) {
                             rgb = t.ambientColor.getRGB();
                             break;
                         }
@@ -353,11 +353,11 @@ public class CameraOld extends V3D_Point {
         //int oomn4 = oom - 4;
         // Calculate the extent of the rows and columns the triangle is in.
         V3D_Ray ray;
-        ray = new V3D_Ray(this, t.getP(), oom, rm);
+        ray = new V3D_Ray(this, t.getP(oom, rm), oom, rm);
         Grids_2D_ID_int prc = getRC(pl, ray, pq, qr, oom, rm);
-        ray = new V3D_Ray(this, t.getQ(), oom, rm);
+        ray = new V3D_Ray(this, t.getQ(oom, rm), oom, rm);
         Grids_2D_ID_int qrc = getRC(pl, ray, pq, qr, oom, rm);
-        ray = new V3D_Ray(this, t.getR(), oom, rm);
+        ray = new V3D_Ray(this, t.getR(oom, rm), oom, rm);
         Grids_2D_ID_int rrc = getRC(pl, ray, pq, qr, oom, rm);
         long minRowIndex = Math.min(Math.min(prc.getRow(), qrc.getRow()), rrc.getRow());
         long maxRowIndex = Math.max(Math.max(prc.getRow(), qrc.getRow()), rrc.getRow());
@@ -387,7 +387,7 @@ public class CameraOld extends V3D_Point {
                 BigRational mind2 = mind2s.get(id);
                 if (mind2 == null) {
                     try {
-                        V3D_Geometry ti = t.getIntersection(getRay(id, oom, rm), oom, rm);
+                        V3D_Geometry ti = t.getIntersect(getRay(id, oom, rm), oom, rm);
                         if (ti != null) {
                             // Only render triangles that intersect the ray at a point.
                             if (ti instanceof V3D_Point tip) {
@@ -404,7 +404,7 @@ public class CameraOld extends V3D_Point {
                 } else {
                     if (mind2t[tIndex].compareTo(mind2) != 1) {
                         try {
-                            V3D_Geometry ti = t.getIntersection(getRay(id, oom, rm), oom, rm);
+                            V3D_Geometry ti = t.getIntersect(getRay(id, oom, rm), oom, rm);
                             if (ti != null) {
                                 // Only render triangles that intersect the ray at a point.
                                 if (ti instanceof V3D_Point tip) {
@@ -439,11 +439,11 @@ public class CameraOld extends V3D_Point {
      */
     protected Grids_2D_ID_int getRC(V3D_Plane pl, V3D_Ray ray, V3D_LineSegment pq,
             V3D_LineSegment qr, int oom, RoundingMode rm) {
-//        V3D_Point pv = (V3D_Point) screen.getIntersection(ray, oom, rm);
+//        V3D_Point pv = (V3D_Point) screen.getIntersect(ray, oom, rm);
 //        if (pv == null) {
 //            return null;
 //        }
-        V3D_Point p = (V3D_Point) ray.getIntersection(pl, oom, rm);
+        V3D_Point p = (V3D_Point) ray.getIntersect(pl, oom, rm);
         return new Grids_2D_ID_int(getScreenRow(p, qr, oom, rm),
                 getScreenCol(p, pq, oom, rm));
     }
@@ -458,7 +458,7 @@ public class CameraOld extends V3D_Point {
      * @return The row index of the screen that ray passes through.
      */
     protected int getScreenRow(V3D_Point p, V3D_LineSegment pq, int oom, RoundingMode rm) {
-        V3D_Point px = pq.l.getPointOfIntersection(p, oom, rm);
+        V3D_Point px = pq.l.getPointOfIntersect(p, oom, rm);
         BigRational d = new Math_BigRationalSqrt(px.getDistanceSquared(
                 p, oom, rm), oom, rm).getSqrt(oom, rm);
         return d.divide(pixelSize).intValue();
@@ -474,7 +474,7 @@ public class CameraOld extends V3D_Point {
      * @return The column index of the screen that l passes through.
      */
     protected int getScreenCol(V3D_Point p, V3D_LineSegment qr, int oom, RoundingMode rm) {
-        V3D_Point py = qr.l.getPointOfIntersection(p, oom, rm);
+        V3D_Point py = qr.l.getPointOfIntersect(p, oom, rm);
         BigRational d = new Math_BigRationalSqrt(py.getDistanceSquared(
                 p, oom, rm), oom, rm).getSqrt(oom, rm);
         return d.divide(pixelSize).intValue();
@@ -495,7 +495,7 @@ public class CameraOld extends V3D_Point {
         if (r == null) {
             V3D_Vector rv = v2d.multiply(BigRational.valueOf(id.getRow()), oom, rm);
             V3D_Vector cv = vd.multiply(BigRational.valueOf(id.getCol()), oom, rm);
-            V3D_Point rcpt = new V3D_Point(screen.getP());
+            V3D_Point rcpt = new V3D_Point(screen.getP(oom, rm));
             rcpt.translate(rv.add(cv, oom, rm), oom, rm);
             r = new V3D_Ray(this, rcpt, oom, rm);
             rays.put(id, r);

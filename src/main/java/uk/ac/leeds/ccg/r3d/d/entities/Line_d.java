@@ -17,24 +17,26 @@ package uk.ac.leeds.ccg.r3d.d.entities;
 
 import java.awt.Color;
 import uk.ac.leeds.ccg.r3d.entities.Entity;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineSegmentDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineSegment_d;
 
 /**
  * A class for rendering lines.
  * 
  * @author Andy Turner
  */
-public class LineDouble extends Entity {
+public class Line_d extends Entity {
+
+    private static final long serialVersionUID = 1L;
     
     /**
      * The line to render.
      */
-    public V3D_LineSegmentDouble l;
+    public V3D_LineSegment_d l;
     
     /**
      * @param l What {@link l} is set to. 
      */
-    public LineDouble(V3D_LineSegmentDouble l) {
+    public Line_d(V3D_LineSegment_d l) {
         this(l, Color.BLUE);
     }
 
@@ -42,7 +44,7 @@ public class LineDouble extends Entity {
      * @param l What {@link #l} is set to. 
      * @param baseColor What {@link #baseColor} is set to. 
      */
-    public LineDouble(V3D_LineSegmentDouble l, Color baseColor) {
+    public Line_d(V3D_LineSegment_d l, Color baseColor) {
         this.l = l;
         this.baseColor = baseColor;
     }

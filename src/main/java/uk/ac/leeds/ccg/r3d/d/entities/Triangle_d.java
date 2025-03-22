@@ -17,22 +17,24 @@ package uk.ac.leeds.ccg.r3d.d.entities;
 
 import java.awt.Color;
 import uk.ac.leeds.ccg.r3d.entities.Entity;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PointDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TriangleDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_VectorDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.light.V3D_VDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Point_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Triangle_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Vector_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.light.V3D_V_d;
 
 /**
  * For visualising a triangle.
  *
  * @author Andy Turner
  */
-public class TriangleDouble extends Entity {
+public class Triangle_d extends Entity {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * The triangle geometry
      */
-    public V3D_TriangleDouble triangle;
+    public V3D_Triangle_d triangle;
 
     /**
      * The normal as read in from for example an STL file. The normal can be
@@ -41,28 +43,13 @@ public class TriangleDouble extends Entity {
      * normal vector allows us to specify sides of the triangle which can be
      * attributed with different properties e.g. colours.
      */
-    public V3D_VDouble normal;
+    public V3D_V_d normal;
 
     /**
      * An attribute as read in from for example an STL file. This could
      * represent the colour or texture or another property of the triangle.
      */
     public short attribute;
-
-    /**
-     * The base colour of the triangle.
-     */
-    public Color baseColor;
-
-    /**
-     * The colour of the triangle given some lighting conditions.
-     */
-    public Color lightingColor;
-
-    /**
-     * The colour of in ambient light.
-     */
-    public Color ambientColor;
     
     /**
      * Create a new instance.
@@ -71,7 +58,7 @@ public class TriangleDouble extends Entity {
      * @param normal What {@link #normal} is set to.
      * @param attribute What {@link #attribute} is set to.
      */
-    public TriangleDouble(V3D_TriangleDouble triangle, V3D_VDouble normal,
+    public Triangle_d(V3D_Triangle_d triangle, V3D_V_d normal,
             short attribute) {
         this.triangle = triangle;
         this.normal = normal;
@@ -84,7 +71,7 @@ public class TriangleDouble extends Entity {
      * @param triangle What {@link #triangle} is set to.
      * @param baseColor What {@link #baseColor} is set to.
      */
-    public TriangleDouble(V3D_TriangleDouble triangle, Color baseColor) {
+    public Triangle_d(V3D_Triangle_d triangle, Color baseColor) {
         this.triangle = triangle;
         this.baseColor = baseColor;
         this.lightingColor = baseColor;
@@ -101,16 +88,16 @@ public class TriangleDouble extends Entity {
      * @param oom The Order of Magnitude for the precision.
      * @param rm The RoundingMode for any rounding.
      */
-    public void setLighting(V3D_PointDouble pt, V3D_VectorDouble lightVector, 
+    public void setLighting(V3D_Point_d pt, V3D_Vector_d lightVector, 
             double ambientLight, double epsilon) {
-        V3D_VectorDouble n;
+        V3D_Vector_d n;
         if (normal == null) {
             n = initN(pt, epsilon);
         } else {
             if (normal.isZero()) {
                 n = initN(pt, epsilon);
             } else {
-                n = new V3D_VectorDouble(normal);
+                n = new V3D_Vector_d(normal);
             }
         }
         double dot = Math.abs(n.getDotProduct(lightVector));
@@ -133,7 +120,7 @@ public class TriangleDouble extends Entity {
         this.ambientColor = new Color(red, green, blue);
     }
     
-    private V3D_VectorDouble initN(V3D_PointDouble pt, double epsilon) {
+    private V3D_Vector_d initN(V3D_Point_d pt, double epsilon) {
         if (pt == null) {
             return triangle.pl.getN().getUnitVector();
         } else {

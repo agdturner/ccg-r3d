@@ -42,9 +42,9 @@ public class Tetrahedron {
     public Tetrahedron(V3D_Tetrahedron tetrahedron, Color baseColor, int oom, 
             RoundingMode rm) {
         triangles = new Triangle[4];
-        triangles[0] = new Triangle(tetrahedron.getPqr(oom, rm), baseColor);
-        triangles[1] = new Triangle(tetrahedron.getPsq(oom, rm), baseColor);
-        triangles[2] = new Triangle(tetrahedron.getQsr(oom, rm), baseColor);
-        triangles[3] = new Triangle(tetrahedron.getSpr(oom, rm), baseColor);
+        triangles[0] = new Triangle(tetrahedron.getPqr(), baseColor);
+        triangles[1] = new Triangle(tetrahedron.getPsq(), baseColor);
+        triangles[2] = new Triangle(tetrahedron.getQsr(), baseColor);
+        triangles[3] = new Triangle(tetrahedron.getSpr(), baseColor);
     }
 }

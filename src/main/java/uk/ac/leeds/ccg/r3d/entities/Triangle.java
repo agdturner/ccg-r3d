@@ -30,6 +30,8 @@ import uk.ac.leeds.ccg.v3d.geometry.light.V3D_V;
  */
 public class Triangle extends Entity {
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * The triangle geometry
      */

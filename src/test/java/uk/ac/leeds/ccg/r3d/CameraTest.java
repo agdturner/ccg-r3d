@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import uk.ac.leeds.ccg.grids.d2.Grids_2D_ID_long;
 import uk.ac.leeds.ccg.grids.d2.grid.i.Grids_GridInt;
 import uk.ac.leeds.ccg.v3d.core.V3D_Environment;
-import uk.ac.leeds.ccg.v3d.geometry.V3D_Envelope;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_AABB;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Line;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Rectangle;
@@ -96,7 +96,7 @@ public class CameraTest {
 //            Logger.getLogger(CameraTest.class.getName()).log(Level.SEVERE, null, ex);
 //        }
 //        universe.setCamera(instance);
-//        V3D_Envelope ve = universe.initCameraTest();
+//        V3D_AABB ve = universe.initCameraTest();
 //        V3D_Triangle t = universe.triangles.get(0).triangle;
 //        Set<Grids_2D_ID_long> expResult = new HashSet<>();
 //        expResult.add(new Grids_2D_ID_long(67, 6));

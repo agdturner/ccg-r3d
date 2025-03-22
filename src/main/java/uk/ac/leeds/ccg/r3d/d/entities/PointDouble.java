@@ -25,6 +25,8 @@ import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PointDouble;
  * @author Andy Turner
  */
 public class PointDouble extends Entity {
+
+    private static final long serialVersionUID = 1L;
     
     /**
      * The point to render.

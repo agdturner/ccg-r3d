@@ -17,26 +17,27 @@ package uk.ac.leeds.ccg.r3d.d;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeMap;
 import uk.ac.leeds.ccg.generic.util.Generic_Collections;
 import uk.ac.leeds.ccg.grids.d2.Grids_2D_ID_int;
-import uk.ac.leeds.ccg.r3d.d.entities.LineDouble;
-import uk.ac.leeds.ccg.r3d.d.entities.PointDouble;
-import uk.ac.leeds.ccg.r3d.d.entities.TriangleDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_GeometryDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PointDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_RectangleDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TriangleDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_VectorDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_EnvelopeDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_FiniteGeometryDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineSegmentDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PlaneDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_RayDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TetrahedronDouble;
+import uk.ac.leeds.ccg.r3d.d.entities.Line_d;
+import uk.ac.leeds.ccg.r3d.d.entities.Point_d;
+import uk.ac.leeds.ccg.r3d.d.entities.Triangle_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Geometry_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Point_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Rectangle_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Triangle_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Vector_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_AABB_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_FiniteGeometry_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Line_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineSegment_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Plane_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Ray_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Tetrahedron_d;
 
 /**
  * Camera instances are situated in the 3D Universe. They are a point behind the
@@ -66,14 +67,14 @@ import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TetrahedronDouble;
  *
  * @author Andy Turner
  */
-public class CameraDouble extends V3D_PointDouble {
+public class Camera_d extends V3D_Point_d {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * The screen.
      */
-    public final V3D_RectangleDouble screen;
+    public final V3D_Rectangle_d screen;
 
     /**
      * A small number used as a tolerance within which two vectors are regarded
@@ -84,32 +85,32 @@ public class CameraDouble extends V3D_PointDouble {
     /**
      * Lower left corner point of screen.
      */
-    public V3D_PointDouble p;
+    public V3D_Point_d p;
 
     /**
      * The screen pq.
      */
-    public V3D_LineSegmentDouble pq;
+    public V3D_LineSegment_d pq;
 
     /**
      * The screen qr.
      */
-    public V3D_LineSegmentDouble qr;
+    public V3D_LineSegment_d qr;
 
     /**
      * The screen plane.
      */
-    public V3D_PlaneDouble screenPlane;
+    public V3D_Plane_d screenPlane;
 
     /**
      * A vector of pixel magnitude in the direction to top of screen.
      */
-    public V3D_VectorDouble pqv;
+    public V3D_Vector_d pqv;
 
     /**
      * A vector of pixel magnitude in the direction to right of screen.
      */
-    public V3D_VectorDouble qrv;
+    public V3D_Vector_d qrv;
 
     /**
      * The screen height.
@@ -134,7 +135,7 @@ public class CameraDouble extends V3D_PointDouble {
     /**
      * For storing rays from the camera focal point through each pixel centre.
      */
-    public HashMap<Grids_2D_ID_int, V3D_RayDouble> rays;
+    public HashMap<Grids_2D_ID_int, V3D_Ray_d> rays;
 
     /**
      * For storing the length and width of a pixel (which is square).
@@ -147,38 +148,38 @@ public class CameraDouble extends V3D_PointDouble {
      * @param p The camera observer location.
      * @param screen The screen.
      */
-    public CameraDouble(V3D_PointDouble p, V3D_EnvelopeDouble ve,
+    public Camera_d(V3D_Point_d p, V3D_AABB_d ve,
             Dimension dim, double zoomFactor, double epsilon) throws Exception {
         this(p, ve, dim, initScreen(p, ve, zoomFactor, epsilon), epsilon);
     }
 
-    private static V3D_RectangleDouble initScreen(V3D_PointDouble p,
-            V3D_EnvelopeDouble ve, double zoomFactor, double epsilon) {
+    private static V3D_Rectangle_d initScreen(V3D_Point_d p,
+            V3D_AABB_d ve, double zoomFactor, double epsilon) {
         // Need something orthoganol to pt and ve centroid
-        V3D_PlaneDouble pl = new V3D_PlaneDouble(p, new V3D_VectorDouble(p, ve.getCentroid()));
-        V3D_VectorDouble pv = pl.getPV();
+        V3D_Plane_d pl = new V3D_Plane_d(p, new V3D_Vector_d(p, ve.getCentroid()));
+        V3D_Vector_d pv = pl.getPV();
         //return = ve.getViewport2(pt, pv);
         return ve.getViewport3(p, pv, zoomFactor, epsilon);
     }
 
     /**
      * Create a new instance.
-     * 
+     *
      * @param p The camera observer location.
      * @param screen The screen.
      */
-    public CameraDouble(V3D_PointDouble pt, V3D_EnvelopeDouble ve,
-            Dimension dim, V3D_RectangleDouble screen, double epsilon)
+    public Camera_d(V3D_Point_d pt, V3D_AABB_d ve,
+            Dimension dim, V3D_Rectangle_d screen, double epsilon)
             throws Exception {
         super(pt);
-        System.out.println("Initialise Camera.");
+        System.out.println("<Initialise Camera>");
         // Initialise the screen
         this.screen = screen;
         this.epsilon = epsilon;
         nrows = dim.height;
         ncols = dim.width;
         init();
-        System.out.println("Initialised Camera");
+        System.out.println("</Initialise Camera>");
     }
 
     private void init() {
@@ -201,7 +202,7 @@ public class CameraDouble extends V3D_PointDouble {
      * @param v The vector for the move.
      */
     @Override
-    public void translate(V3D_VectorDouble v) {
+    public void translate(V3D_Vector_d v) {
         super.translate(v);
         screen.translate(v);
         init();
@@ -215,23 +216,31 @@ public class CameraDouble extends V3D_PointDouble {
      * @return An image map.
      * @throws Exception
      */
-    int[] render(UniverseDouble universe, V3D_VectorDouble lighting,
+    int[] render(Universe_d universe, V3D_Vector_d lighting,
             double ambientLight, boolean castShadow, boolean addGraticules,
             double epsilon)
             throws Exception {
         int n = ncols * nrows;
         int[] pix = new int[n];
-        // Collect all the triangles from the triangles and tetrahedra.
+        // Collect all the triangles from the triangles and tetrahedra and polygons.
         int nTriangles = universe.triangles.size();
         int nt = nTriangles + (4 * universe.tetrahedra.size());
+        for (int i = 0; i < universe.pnih.size(); i ++) {
+            nt += universe.pnih.get(i).polygon.ch.triangles.size();
+        }
         if (nt > 0) {
-            TriangleDouble[] ts = new TriangleDouble[nt];
+            Triangle_d[] ts = new Triangle_d[nt];
             for (int i = 0; i < nTriangles; i++) {
                 ts[i] = universe.triangles.get(i);
             }
             for (int i = 0; i < universe.tetrahedra.size(); i++) {
                 System.arraycopy(universe.tetrahedra.get(i).triangles, 0, ts, (i * 4) + nTriangles, 4);
             }
+            for (int i = 0; i < universe.pnih.size(); i++) {
+                V3D_Triangle_d[] chts = universe.pnih.get(i).polygon.ch.triangles.values().toArray(new V3D_Triangle_d[0]);
+                System.arraycopy(chts, 0, ts, (i * chts.length) + nTriangles, chts.length);
+            }
+            
 
 //        /**
 //         * Currently, if a ray intersects a triangle, no matter how small, if 
@@ -264,7 +273,7 @@ public class CameraDouble extends V3D_PointDouble {
              * through the frustrum.
              */
             double[] mind2st = new double[ts.length];
-            V3D_PointDouble centroid = universe.envelope.getCentroid();
+            V3D_Point_d centroid = universe.aabb.getCentroid();
             process(centroid, 0, ts, lighting, ambientLight, mindOrderedTriangles, mind2st, epsilon);
             int nTriangles1PC = (nTriangles / 100);
             if (nTriangles1PC < 1) {
@@ -292,7 +301,7 @@ public class CameraDouble extends V3D_PointDouble {
              */
             System.out.println("Process each triangle working from the closest to "
                     + "the furthest.");
-            V3D_VectorDouble lightingr = lighting.reverse();
+            V3D_Vector_d lightingr = lighting.reverse();
             HashMap<Grids_2D_ID_int, Double> mind2s = new HashMap<>();
             HashMap<Grids_2D_ID_int, Integer> closestIndex = new HashMap<>();
             /**
@@ -300,7 +309,7 @@ public class CameraDouble extends V3D_PointDouble {
              * triangle closest to the camera. This is later used to see if that
              * point on the triangle is in shadow
              */
-            HashMap<Grids_2D_ID_int, V3D_PointDouble> idPoint = new HashMap<>();
+            HashMap<Grids_2D_ID_int, V3D_Point_d> idPoint = new HashMap<>();
 
             for (double mind2 : mindOrderedTriangles.keySet()) {
                 Set<Integer> triangleIndexes = mindOrderedTriangles.get(mind2);
@@ -321,7 +330,7 @@ public class CameraDouble extends V3D_PointDouble {
                     }
                     pixel++;
                     int ci = closestIndex.get(x);
-                    TriangleDouble t = ts[ci];
+                    Triangle_d t = ts[ci];
                     Color color = t.lightingColor;
                     /**
                      * Determine if parts of each triangle that are visible from
@@ -359,10 +368,10 @@ public class CameraDouble extends V3D_PointDouble {
                      * value judgement about whether the effort is worth it!
                      */
                     // Apply shadow
-                    V3D_RayDouble ray = new V3D_RayDouble(idPoint.get(x), lightingr);
+                    V3D_Ray_d ray = new V3D_Ray_d(idPoint.get(x), lightingr);
                     for (int i = 0; i < universe.triangles.size(); i++) {
                         if (i != ci) {
-                            if (universe.triangles.get(i).triangle.getIntersection(ray, epsilon) != null) {
+                            if (universe.triangles.get(i).triangle.getIntersect(ray, epsilon) != null) {
                                 //rgb = t.ambientColor.getRGB();
 //                            int red = (t.lightingColor.getRed() + t.ambientColor.getRed()) / 2;
 //                            int green = (t.lightingColor.getGreen() + t.ambientColor.getGreen()) / 2;
@@ -387,7 +396,7 @@ public class CameraDouble extends V3D_PointDouble {
                     }
                     pixel++;
                     int ci = closestIndex.get(x);
-                    TriangleDouble t = ts[ci];
+                    Triangle_d t = ts[ci];
                     render(pix, x.getRow(), x.getCol(), t.lightingColor);
                 }
             }
@@ -395,65 +404,65 @@ public class CameraDouble extends V3D_PointDouble {
             // Render triangle corners and edges
             // Render edges
             for (var t : universe.triangles) {
-                renderLine(epsilon, mind2s, new LineDouble(t.triangle.getPQ(), Color.YELLOW), t.triangle.pl, pix);
-                renderLine(epsilon, mind2s, new LineDouble(t.triangle.getQR(), Color.CYAN), t.triangle.pl, pix);
-                renderLine(epsilon, mind2s, new LineDouble(t.triangle.getRP(), Color.MAGENTA), t.triangle.pl, pix);
-                //renderLine(epsilon, mind2s, new LineDouble(t.triangle.getPQ(), Color.YELLOW), pix);
-                //renderLine(epsilon, mind2s, new LineDouble(t.triangle.getQR(), Color.CYAN), pix);
-                //renderLine(epsilon, mind2s, new LineDouble(t.triangle.getRP(), Color.MAGENTA), pix);
+                renderLine(epsilon, mind2s, new Line_d(t.triangle.getPQ(), Color.YELLOW), t.triangle.pl, pix);
+                renderLine(epsilon, mind2s, new Line_d(t.triangle.getQR(), Color.CYAN), t.triangle.pl, pix);
+                renderLine(epsilon, mind2s, new Line_d(t.triangle.getRP(), Color.MAGENTA), t.triangle.pl, pix);
+                //renderLine(epsilon, mind2s, new Line_d(t.triangle.getPQ(), Color.YELLOW), pix);
+                //renderLine(epsilon, mind2s, new Line_d(t.triangle.getQR(), Color.CYAN), pix);
+                //renderLine(epsilon, mind2s, new Line_d(t.triangle.getRP(), Color.MAGENTA), pix);
 
-                //renderLine(epsilon, new LineDouble(t.triangle.getPQ(), Color.BLACK), pix);
-                //renderLine(epsilon, new LineDouble(t.triangle.getQR(), Color.BLUE), pix);
-                //renderLine(epsilon, new LineDouble(t.triangle.getRP(), Color.GREEN), pix);
+                //renderLine(epsilon, new Line_d(t.triangle.getPQ(), Color.BLACK), pix);
+                //renderLine(epsilon, new Line_d(t.triangle.getQR(), Color.BLUE), pix);
+                //renderLine(epsilon, new Line_d(t.triangle.getRP(), Color.GREEN), pix);
             }
 
             if (addGraticules) {
 
-                double xmin = universe.envelope.getXMin();
-                double xmax = universe.envelope.getXMax();
-                double ymin = universe.envelope.getYMin();
-                double ymax = universe.envelope.getYMax();
-                double zmin = universe.envelope.getZMin();
-                double zmax = universe.envelope.getZMax();
+                double xmin = universe.aabb.getXMin();
+                double xmax = universe.aabb.getXMax();
+                double ymin = universe.aabb.getYMin();
+                double ymax = universe.aabb.getYMax();
+                double zmin = universe.aabb.getZMin();
+                double zmax = universe.aabb.getZMax();
 
                 // Render axes
                 // x axis
-                V3D_PointDouble x_min = new V3D_PointDouble(new V3D_VectorDouble(xmin, 0d, 0d));
-                V3D_PointDouble x_max = new V3D_PointDouble(new V3D_VectorDouble(xmax, 0d, 0d));
-                LineDouble xAxis = new LineDouble(new V3D_LineSegmentDouble(x_min, x_max), Color.BLUE);
-                V3D_PointDouble xpoi = xAxis.l.l.getPointOfIntersection(this, epsilon);
-                V3D_VectorDouble xpoin = new V3D_VectorDouble(xpoi, this);
+                V3D_Point_d x_min = new V3D_Point_d(env, new V3D_Vector_d(xmin, 0d, 0d));
+                V3D_Point_d x_max = new V3D_Point_d(env, new V3D_Vector_d(xmax, 0d, 0d));
+                Line_d xAxis = new Line_d(new V3D_LineSegment_d(x_min, x_max), Color.BLUE);
+                V3D_Point_d xpoi = xAxis.l.l.getPointOfIntersection(this, epsilon);
+                V3D_Vector_d xpoin = new V3D_Vector_d(xpoi, this);
                 if (!xpoin.isZero()) {
-                    V3D_PlaneDouble xpoinpl = new V3D_PlaneDouble(xpoi, xpoin);
+                    V3D_Plane_d xpoinpl = new V3D_Plane_d(xpoi, xpoin);
                     renderLine(epsilon, mind2s, xAxis, xpoinpl, pix);
                 }
                 // y axis                
-                V3D_PointDouble y_min = new V3D_PointDouble(new V3D_VectorDouble(0d, ymin, 0d));
-                V3D_PointDouble y_max = new V3D_PointDouble(new V3D_VectorDouble(0d, ymax, 0d));
-                LineDouble yAxis = new LineDouble(new V3D_LineSegmentDouble(y_min, y_max), Color.RED);
-                V3D_PointDouble ypoi = yAxis.l.l.getPointOfIntersection(this, epsilon);
-                V3D_VectorDouble ypoin = new V3D_VectorDouble(ypoi, this);
+                V3D_Point_d y_min = new V3D_Point_d(env, new V3D_Vector_d(0d, ymin, 0d));
+                V3D_Point_d y_max = new V3D_Point_d(env, new V3D_Vector_d(0d, ymax, 0d));
+                Line_d yAxis = new Line_d(new V3D_LineSegment_d(y_min, y_max), Color.RED);
+                V3D_Point_d ypoi = yAxis.l.l.getPointOfIntersection(this, epsilon);
+                V3D_Vector_d ypoin = new V3D_Vector_d(ypoi, this);
                 if (!ypoin.isZero()) {
-                    V3D_PlaneDouble ypoinpl = new V3D_PlaneDouble(ypoi, ypoin);
+                    V3D_Plane_d ypoinpl = new V3D_Plane_d(ypoi, ypoin);
                     renderLine(epsilon, mind2s, yAxis, ypoinpl, pix);
                 }
                 // z axis
-                V3D_PointDouble z_min = new V3D_PointDouble(new V3D_VectorDouble(0d, 0d, zmin));
-                V3D_PointDouble z_max = new V3D_PointDouble(new V3D_VectorDouble(0d, 0d, zmax));
-                LineDouble zAxis = new LineDouble(new V3D_LineSegmentDouble(z_min, z_max), Color.GREEN);
-                V3D_PointDouble zpoi = zAxis.l.l.getPointOfIntersection(this, epsilon);
-                V3D_VectorDouble zpoin = new V3D_VectorDouble(zpoi, this);
+                V3D_Point_d z_min = new V3D_Point_d(env, new V3D_Vector_d(0d, 0d, zmin));
+                V3D_Point_d z_max = new V3D_Point_d(env, new V3D_Vector_d(0d, 0d, zmax));
+                Line_d zAxis = new Line_d(new V3D_LineSegment_d(z_min, z_max), Color.GREEN);
+                V3D_Point_d zpoi = zAxis.l.l.getPointOfIntersection(this, epsilon);
+                V3D_Vector_d zpoin = new V3D_Vector_d(zpoi, this);
                 if (!zpoin.isZero()) {
-                    V3D_PlaneDouble zpoinpl = new V3D_PlaneDouble(zpoi, zpoin);
+                    V3D_Plane_d zpoinpl = new V3D_Plane_d(zpoi, zpoin);
                     renderLine(epsilon, mind2s, zAxis, zpoinpl, pix);
                 }
             }
 
             // Render corners
             for (var t : universe.triangles) {
-                renderPoint(epsilon, mind2s, new PointDouble(t.triangle.getP(), Color.LIGHT_GRAY), pix);
-                renderPoint(epsilon, mind2s, new PointDouble(t.triangle.getQ(), Color.LIGHT_GRAY), pix);
-                renderPoint(epsilon, mind2s, new PointDouble(t.triangle.getR(), Color.LIGHT_GRAY), pix);
+                renderPoint(epsilon, mind2s, new Point_d(t.triangle.getP(), Color.LIGHT_GRAY), pix);
+                renderPoint(epsilon, mind2s, new Point_d(t.triangle.getQ(), Color.LIGHT_GRAY), pix);
+                renderPoint(epsilon, mind2s, new Point_d(t.triangle.getR(), Color.LIGHT_GRAY), pix);
             }
         }
         //renderAxes(screenPlane, pq, qr, epsilon, universe, pix);
@@ -466,23 +475,24 @@ public class CameraDouble extends V3D_PointDouble {
      *
      * @param epsilon The tolerance for intersection.
      * @param l The line to render.
+     * @param plane A plane on which l.l is located. 
      * @param pix The image.
      */
     public void renderLine(double epsilon,
-            HashMap<Grids_2D_ID_int, Double> mind2s, LineDouble l, V3D_PlaneDouble plane, int[] pix) {
-        if (V3D_LineDouble.isCollinear(epsilon, l.l.l, this)) {
+            HashMap<Grids_2D_ID_int, Double> mind2s, Line_d l, V3D_Plane_d plane, int[] pix) {
+        if (V3D_Line_d.isCollinear(epsilon, l.l.l, this)) {
             // If the line segment is collinear with this, then render as a point.
             // Not sure which end is closer, so render both.
-            renderPoint(epsilon, mind2s, new PointDouble(l.l.l.getP(), l.baseColor), pix);
-            renderPoint(epsilon, mind2s, new PointDouble(l.l.l.getQ(), l.baseColor), pix);
+            renderPoint(epsilon, mind2s, new Point_d(l.l.l.getP(), l.baseColor), pix);
+            renderPoint(epsilon, mind2s, new Point_d(l.l.l.getQ(), l.baseColor), pix);
         } else {
-            V3D_TriangleDouble t = new V3D_TriangleDouble(l.l, this);
-            V3D_FiniteGeometryDouble ti = screen.getIntersection(t, epsilon);
+            V3D_Triangle_d t = new V3D_Triangle_d(l.l, this);
+            V3D_FiniteGeometry_d ti = screen.getIntersect(t, epsilon);
             if (ti != null) {
-                if (ti instanceof V3D_PointDouble tip) {
-                    renderPoint(epsilon, mind2s, new PointDouble(tip, l.baseColor), pix);
+                if (ti instanceof V3D_Point_d tip) {
+                    renderPoint(epsilon, mind2s, new Point_d(tip, l.baseColor), pix);
                 } else {
-                    V3D_LineSegmentDouble til = (V3D_LineSegmentDouble) ti;
+                    V3D_LineSegment_d til = (V3D_LineSegment_d) ti;
                     // Calculate the row and column bounds.
                     int minr = getScreenRow(til.getP(), epsilon);
                     int minc = getScreenCol(til.getP(), epsilon);
@@ -506,17 +516,18 @@ public class CameraDouble extends V3D_PointDouble {
                     if (maxc >= ncols) {
                         maxc = ncols - 1;
                     }
+                    V3D_Plane_d spl = screen.getPlane();
                     for (int r = minr; r <= maxr; r++) {
                         for (int c = minc; c <= maxc; c++) {
-                            V3D_RectangleDouble pixel = getPixel(screen.getPlane(), r, c);
+                            V3D_Rectangle_d pixel = getPixel(spl, r, c);
                             //System.out.println("" + r + ", "
-                            V3D_FiniteGeometryDouble pit = pixel.getIntersection(t, epsilon);
+                            V3D_FiniteGeometry_d pit = pixel.getIntersect(t, epsilon);
                             if (pit != null) {
                                 Grids_2D_ID_int id = new Grids_2D_ID_int(r, c);
-                                V3D_RayDouble ray = getRay(id);
-                                V3D_GeometryDouble ri = ray.getIntersection(plane, epsilon);
+                                V3D_Ray_d ray = getRay(id);
+                                V3D_Geometry_d ri = ray.getIntersect(plane, epsilon);
                                 double d2;
-                                if (ri instanceof V3D_PointDouble rip) {
+                                if (ri instanceof V3D_Point_d rip) {
                                     d2 = rip.getDistanceSquared(this);
                                     Double d2p = mind2s.get(id);
                                     if (d2p == null) {
@@ -547,10 +558,10 @@ public class CameraDouble extends V3D_PointDouble {
      * @param pix The image.
      * @return pix
      */
-    public void renderPoint(double epsilon, HashMap<Grids_2D_ID_int, Double> mind2s, PointDouble p, int[] pix) {
+    public void renderPoint(double epsilon, HashMap<Grids_2D_ID_int, Double> mind2s, Point_d p, int[] pix) {
         if (!this.equals(epsilon, p.p)) {
-            V3D_RayDouble ray = new V3D_RayDouble(this, p.p);
-            V3D_PointDouble pt = (V3D_PointDouble) screen.getIntersection(ray, epsilon);
+            V3D_Ray_d ray = new V3D_Ray_d(this, p.p);
+            V3D_Point_d pt = (V3D_Point_d) screen.getIntersect(ray, epsilon);
             if (pt != null) {
                 int r = getScreenRow(pt, epsilon);
                 int c = getScreenCol(pt, epsilon);
@@ -595,13 +606,12 @@ public class CameraDouble extends V3D_PointDouble {
      * @param mind2t
      * @param epsilon
      */
-    private void process(V3D_PointDouble centroid, int index, TriangleDouble[] ts,
-            V3D_VectorDouble lighting, double ambientLight,
+    private void process(V3D_Point_d centroid, int index, Triangle_d[] ts,
+            V3D_Vector_d lighting, double ambientLight,
             TreeMap<Double, Set<Integer>> mindOrderedTriangles,
             double[] mind2t, double epsilon) {
         ts[index].setLighting(centroid, lighting, ambientLight, epsilon);
-        V3D_TriangleDouble t = ts[index].triangle;
-
+        V3D_Triangle_d t = ts[index].triangle;
         /**
          * Algorithm:
          *
@@ -618,25 +628,40 @@ public class CameraDouble extends V3D_PointDouble {
          * 4. Calculate the distance from this to the points of intersection and
          * store the minimum of these distances
          */
-        V3D_FiniteGeometryDouble i;
-        if (t.isIntersectedBy(this, epsilon)) {
-            i = screen.getIntersection(t, epsilon);
+        V3D_FiniteGeometry_d i;
+        if (t.intersects(this, epsilon)) {
+            i = screen.getIntersect(t, epsilon);
         } else {
-            V3D_TetrahedronDouble tetra = new V3D_TetrahedronDouble(this, t, epsilon);
-            i = tetra.getIntersection(screen, epsilon);
+            V3D_Tetrahedron_d tetra = new V3D_Tetrahedron_d(this, t, epsilon);
+            
+            try {
+            
+            i = tetra.getIntersect(screen, epsilon);
+            
+            } catch(Exception e) {
+                tetra = new V3D_Tetrahedron_d(this, t, epsilon);
+                i = tetra.getIntersect(screen, epsilon);
+            }
         }
         if (i == null) {
             return;
         }
-        V3D_PointDouble[] pts = i.getPoints();
-        V3D_PlaneDouble tpl = t.pl;
+        V3D_Point_d[] pts = i.getPointsArray();
+        V3D_Plane_d tpl = t.pl;
         double mind2 = Double.MAX_VALUE;
         for (var pt : pts) {
             if (!pt.equals(epsilon, this)) {
-                V3D_RayDouble tpr = new V3D_RayDouble(this, pt);
-                V3D_PointDouble poi = (V3D_PointDouble) tpr.getIntersection(tpl, epsilon);
-                double d2 = poi.getDistanceSquared(this);
-                mind2 = Math.min(d2, mind2);
+                V3D_Ray_d tpr = new V3D_Ray_d(this, pt);
+                V3D_Geometry_d gi = tpr.getIntersect(tpl, epsilon);
+                if (gi != null) {
+                    double d2;
+                    if (gi instanceof V3D_Point_d gip) {
+                        d2 = gip.getDistanceSquared(this);
+                    } else {
+                        d2 = ((V3D_Ray_d) gi).l.getP().getDistanceSquared(this);
+                    }
+                    mind2 = Math.min(d2, mind2);
+                }
             }
         }
         mind2t[index] = mind2;
@@ -658,21 +683,21 @@ public class CameraDouble extends V3D_PointDouble {
      * each pixel.
      * @param epsilon The tolerance within which two vectors are equal.
      */
-    protected void processTriangle(int tIndex, V3D_TriangleDouble t,
+    protected void processTriangle(int tIndex, V3D_Triangle_d t,
             double[] mind2t, HashMap<Grids_2D_ID_int, Double> mind2s,
             HashMap<Grids_2D_ID_int, Integer> closestIndex,
-            HashMap<Grids_2D_ID_int, V3D_PointDouble> idPoint,
+            HashMap<Grids_2D_ID_int, V3D_Point_d> idPoint,
             double epsilon) {
 
-        V3D_TetrahedronDouble tetra = new V3D_TetrahedronDouble(this, t, epsilon);
-        V3D_FiniteGeometryDouble tetrai = tetra.getIntersection(screen, epsilon);
+        V3D_Tetrahedron_d tetra = new V3D_Tetrahedron_d(this, t, epsilon);
+        V3D_FiniteGeometry_d tetrai = tetra.getIntersect(screen, epsilon);
         if (tetrai != null) {
             // Calculate the extent of the rows and columns the triangle is in.
             int minr = Integer.MAX_VALUE;
             int maxr = Integer.MIN_VALUE;
             int minc = Integer.MAX_VALUE;
             int maxc = Integer.MIN_VALUE;
-            V3D_PointDouble[] tetraipts = tetrai.getPoints();
+            V3D_Point_d[] tetraipts = tetrai.getPointsArray();
             for (var pt : tetraipts) {
                 int r = getScreenRow(pt, epsilon);
                 int c = getScreenCol(pt, epsilon);
@@ -704,11 +729,11 @@ public class CameraDouble extends V3D_PointDouble {
                     Double mind2 = mind2s.get(id);
                     if (mind2 == null) {
                         try {
-                            V3D_RayDouble ray = getRay(id);
-                            V3D_GeometryDouble ti = t.getIntersection(ray, epsilon);
+                            V3D_Ray_d ray = getRay(id);
+                            V3D_Geometry_d ti = t.getIntersect(ray, epsilon);
                             if (ti != null) {
                                 // Only render triangles that intersect the ray at a point.
-                                if (ti instanceof V3D_PointDouble tip) {
+                                if (ti instanceof V3D_Point_d tip) {
                                     double d2 = tip.getDistanceSquared(this);
                                     mind2s.put(id, d2);
                                     closestIndex.put(id, tIndex);
@@ -722,11 +747,11 @@ public class CameraDouble extends V3D_PointDouble {
                     } else {
                         if (mind2t[tIndex] < mind2) {
                             try {
-                                V3D_RayDouble ray = getRay(id);
-                                V3D_GeometryDouble ti = t.getIntersection(ray, epsilon);
+                                V3D_Ray_d ray = getRay(id);
+                                V3D_Geometry_d ti = t.getIntersect(ray, epsilon);
                                 if (ti != null) {
                                     // Only render triangles that intersect the ray at a point and that are beyond the camera screen.
-                                    if (ti instanceof V3D_PointDouble tip) {
+                                    if (ti instanceof V3D_Point_d tip) {
                                         double d2 = tip.getDistanceSquared(this);
                                         if (d2 < mind2) {
                                             mind2s.put(id, d2);
@@ -753,15 +778,15 @@ public class CameraDouble extends V3D_PointDouble {
      * @return The ID of the screen cell that intersects a ray from this to p,
      * or {@code null}.
      */
-    protected Grids_2D_ID_int getRC(V3D_PointDouble p, double epsilon) {
+    protected Grids_2D_ID_int getRC(V3D_Point_d p, double epsilon) {
         if (this.equals(epsilon, p)) {
             return new Grids_2D_ID_int(
                     getScreenRow(p, epsilon),
                     getScreenCol(p, epsilon));
         }
-        V3D_RayDouble ray = new V3D_RayDouble(this, p);
-        //V3D_PointDouble px = (V3D_PointDouble) screen.getIntersection(ray, epsilon);
-        V3D_PointDouble px = (V3D_PointDouble) ray.getIntersection(screen.getPlane(), epsilon);
+        V3D_Ray_d ray = new V3D_Ray_d(this, p);
+        //V3D_Point_d px = (V3D_Point_d) screen.getIntersect(ray, epsilon);
+        V3D_Point_d px = (V3D_Point_d) ray.getIntersect(screen.getPlane(), epsilon);
         if (px == null) {
             return null;
         } else {
@@ -778,8 +803,8 @@ public class CameraDouble extends V3D_PointDouble {
      * @param qr The line segment that is the bottom of the screen.
      * @return The row index of the screen for the point p.
      */
-    protected int getScreenRow(V3D_PointDouble p, double epsilon) {
-        //V3D_PointDouble px = qr.l.getPointOfIntersection(p, epsilon);
+    protected int getScreenRow(V3D_Point_d p, double epsilon) {
+        //V3D_Point_d px = qr.l.getPointOfIntersection(p, epsilon);
         //double d = px.getDistance(p);
         double d = qr.getDistance(p, epsilon);
         //double d = pq.getDistance(p, epsilon);
@@ -792,8 +817,8 @@ public class CameraDouble extends V3D_PointDouble {
      * @param p A point on the screen.
      * @return The column index of the screen for the point p.
      */
-    protected int getScreenCol(V3D_PointDouble p, double epsilon) {
-        //V3D_PointDouble py = pq.l.getPointOfIntersection(p, epsilon);
+    protected int getScreenCol(V3D_Point_d p, double epsilon) {
+        //V3D_Point_d py = pq.l.getPointOfIntersection(p, epsilon);
         //double d = py.getDistance(p);
         double d = pq.getDistance(p, epsilon);
         //double d = qr.getDistance(p, epsilon);
@@ -808,14 +833,14 @@ public class CameraDouble extends V3D_PointDouble {
      * @return The ray from the camera focal point through the centre of the
      * screen pixel.
      */
-    protected V3D_RayDouble getRay(Grids_2D_ID_int id) {
-        V3D_RayDouble r = rays.get(id);
+    protected V3D_Ray_d getRay(Grids_2D_ID_int id) {
+        V3D_Ray_d r = rays.get(id);
         if (r == null) {
-            V3D_VectorDouble rv = pqv.multiply(id.getRow());
-            V3D_VectorDouble cv = qrv.multiply(id.getCol());
-            V3D_PointDouble rcpt = new V3D_PointDouble(p);
+            V3D_Vector_d rv = pqv.multiply(id.getRow());
+            V3D_Vector_d cv = qrv.multiply(id.getCol());
+            V3D_Point_d rcpt = new V3D_Point_d(p);
             rcpt.translate(rv.add(cv));
-            r = new V3D_RayDouble(this, rcpt);
+            r = new V3D_Ray_d(this, rcpt);
             rays.put(id, r);
         }
         return r;
@@ -826,19 +851,19 @@ public class CameraDouble extends V3D_PointDouble {
      * @param col The column index for the pixel returned.
      * @return The pixel rectangle.
      */
-    public V3D_RectangleDouble getPixel(V3D_PlaneDouble pl, int row, int col) {
+    public V3D_Rectangle_d getPixel(V3D_Plane_d pl, int row, int col) {
         // p
-        V3D_PointDouble pP = new V3D_PointDouble(p);
+        V3D_Point_d pP = new V3D_Point_d(p);
         pP.translate(pqv.multiply(row).add(qrv.multiply(col)));
         // q
-        V3D_PointDouble pQ = new V3D_PointDouble(p);
+        V3D_Point_d pQ = new V3D_Point_d(p);
         pQ.translate(pqv.multiply(row + 1).add(qrv.multiply(col)));
         // r
-        V3D_PointDouble pR = new V3D_PointDouble(p);
+        V3D_Point_d pR = new V3D_Point_d(p);
         pR.translate(pqv.multiply(row + 1).add(qrv.multiply(col + 1)));
         // s
-        V3D_PointDouble pS = new V3D_PointDouble(p);
+        V3D_Point_d pS = new V3D_Point_d(p);
         pS.translate(pqv.multiply(row).add(qrv.multiply(col + 1)));
-        return new V3D_RectangleDouble(pP, pQ, pR, pS);
+        return new V3D_Rectangle_d(pP, pQ, pR, pS);
     }
 }

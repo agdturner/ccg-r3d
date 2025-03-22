@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import uk.ac.leeds.ccg.generic.util.Generic_Collections;
 import uk.ac.leeds.ccg.r3d.entities.Triangle;
+import uk.ac.leeds.ccg.v3d.core.V3D_Environment;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 import uk.ac.leeds.ccg.v3d.geometry.light.V3D_V;
@@ -112,9 +113,10 @@ public class STL_Reader {
         Path p = Paths.get("data", "Utah_teapot_(solid).stl");
         int oom = -3;
         RoundingMode rm = RoundingMode.HALF_UP;
+        V3D_Environment env = new V3D_Environment(oom, rm);
         try {
             STL_Reader s = new STL_Reader(true);
-            s.readBinary(p, V3D_Vector.ZERO, oom, rm);
+            s.readBinary(p, V3D_Vector.ZERO, oom, rm, env);
             //System.out.println(ts.get(0));
             System.out.println("minx=" + s.stats.minx);
             System.out.println("maxx=" + s.stats.maxx);
@@ -140,7 +142,8 @@ public class STL_Reader {
      * @return An ArrayList of triangles read from the file.
      * @throws IOException
      */
-    public void readBinary(Path p, V3D_Vector offset, int oom, RoundingMode rm)
+    public void readBinary(Path p, V3D_Vector offset, int oom, RoundingMode rm, 
+        V3D_Environment env)
             throws IOException {
         DataInputStream dis = new DataInputStream(new FileInputStream(
                 p.toFile()));
@@ -174,7 +177,7 @@ public class STL_Reader {
         V3D_VLine qr = new V3D_VLine(qv, rv);
         V3D_VLine rp = new V3D_VLine(rv, pv);
         short attribute = Short.reverseBytes(dis.readShort());
-        process(offset, pv, qv, rv, pq, qr, rp, n, attribute, oom, rm);
+        process(offset, pv, qv, rv, pq, qr, rp, n, attribute, oom, rm, env);
         int i = 1;
         while (dis.available() > 0) {
             if (i % 100 == 0) {
@@ -200,7 +203,7 @@ public class STL_Reader {
             pq = new V3D_VLine(pv, qv);
             qr = new V3D_VLine(qv, rv);
             rp = new V3D_VLine(rv, pv);
-            process(offset, pv, qv, rv, pq, qr, rp, n, attribute, oom, rm);
+            process(offset, pv, qv, rv, pq, qr, rp, n, attribute, oom, rm, env);
             i++;
         }
         if (assessTopology) {
@@ -234,12 +237,12 @@ public class STL_Reader {
 
     private void process(V3D_Vector offset, V3D_V pv, V3D_V qv, V3D_V rv,
             V3D_VLine pq, V3D_VLine qr, V3D_VLine rp, V3D_V n, short attribute,
-            int oom, RoundingMode rm) {
+            int oom, RoundingMode rm, V3D_Environment env) {
         V3D_VTriangle vt = new V3D_VTriangle(pq, qr, rp);
         if (n.isZero()) {
             n = vt.getNormal().getUnitVector(oom, rm);
         }
-        Triangle t = new Triangle(new V3D_Triangle(offset, vt, oom, rm), n,
+        Triangle t = new Triangle(new V3D_Triangle(env, offset, vt), n,
                 attribute);
         triangles.add(t);
         if (assessTopology) {

@@ -23,6 +23,8 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
  * @author Andy Turner
  */
 public class Point extends Entity {
+
+    private static final long serialVersionUID = 1L;
     
     /**
      * The point to render.

@@ -26,12 +26,13 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import uk.ac.leeds.ccg.generic.util.Generic_Collections;
-import uk.ac.leeds.ccg.r3d.d.entities.TriangleDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TriangleDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_VectorDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.light.V3D_VDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.light.V3D_VLineDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.light.V3D_VTriangleDouble;
+import uk.ac.leeds.ccg.r3d.d.entities.Triangle_d;
+import uk.ac.leeds.ccg.v3d.core.d.V3D_Environment_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Triangle_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Vector_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.light.V3D_V_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.light.V3D_VLine_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.light.V3D_VTriangle_d;
 
 /**
  * For reading STL Files. An STL file is effectively a file of triangles. The
@@ -47,12 +48,17 @@ import uk.ac.leeds.ccg.v3d.geometry.d.light.V3D_VTriangleDouble;
  *
  * @author Andy Turner
  */
-public class STL_ReaderDouble {
+public class STL_Reader_d {
 
+    /**
+     * 
+     */
+    final V3D_Environment_d env;
+    
     /**
      * The set of triangles.
      */
-    public ArrayList<TriangleDouble> triangles;
+    public ArrayList<Triangle_d> triangles;
 
     /**
      * A switch set to true if topology is to be assessed.
@@ -66,7 +72,7 @@ public class STL_ReaderDouble {
     /**
      * Count of triangles with shared points.
      */
-    public HashMap<V3D_VDouble, Integer> pointCounts;
+    public HashMap<V3D_V_d, Integer> pointCounts;
 
     /**
      * Topology. (What triangles have shared edges). For simple closed surfaces,
@@ -83,7 +89,7 @@ public class STL_ReaderDouble {
     /**
      * Count of triangles with shared edges.
      */
-    public HashMap<V3D_VLineDouble, Integer> edgeCounts;
+    public HashMap<V3D_VLine_d, Integer> edgeCounts;
 
     /**
      * Stats
@@ -97,7 +103,8 @@ public class STL_ReaderDouble {
      * {@link #pointCounts}, {@link #edge} and {@link #edgeCounts} are
      * initialised and topology will be assessed.
      */
-    public STL_ReaderDouble(boolean assessTopology) {
+    public STL_Reader_d(V3D_Environment_d env, boolean assessTopology) {
+        this.env = env;
         triangles = new ArrayList<>();
         this.assessTopology = assessTopology;
         if (assessTopology) {
@@ -111,8 +118,9 @@ public class STL_ReaderDouble {
     public static void main(String[] args) {
         Path p = Paths.get("data", "Utah_teapot_(solid).stl");
         try {
-            STL_ReaderDouble s = new STL_ReaderDouble(true);
-            s.readBinary(p, V3D_VectorDouble.ZERO, false);
+            V3D_Environment_d env = new V3D_Environment_d();
+            STL_Reader_d s = new STL_Reader_d(env, true);
+            s.readBinary(p, V3D_Vector_d.ZERO, false);
             //System.out.println(ts.get(0));
             System.out.println("minx=" + s.stats.minx);
             System.out.println("maxx=" + s.stats.maxx);
@@ -121,7 +129,7 @@ public class STL_ReaderDouble {
             System.out.println("minz=" + s.stats.minz);
             System.out.println("maxz=" + s.stats.maxz);
         } catch (IOException ex) {
-            Logger.getLogger(STL_ReaderDouble.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(STL_Reader_d.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -139,7 +147,7 @@ public class STL_ReaderDouble {
      * @return An ArrayList of triangles read from the file.
      * @throws IOException
      */
-    public void readBinary(Path p, V3D_VectorDouble offset, boolean initNormal)
+    public void readBinary(Path p, V3D_Vector_d offset, boolean initNormal)
             throws IOException {
         DataInputStream dis = new DataInputStream(new FileInputStream(
                 p.toFile()));
@@ -153,25 +161,25 @@ public class STL_ReaderDouble {
         x = readFloat(dis);
         y = readFloat(dis);
         z = readFloat(dis);
-        V3D_VDouble n = new V3D_VDouble(x, y, z);
+        V3D_V_d n = new V3D_V_d(x, y, z);
         x = readFloat(dis);
         y = readFloat(dis);
         z = readFloat(dis);
         stats = new Stats(x, y, z);
-        V3D_VDouble pv = new V3D_VDouble(x, y, z);
+        V3D_V_d pv = new V3D_V_d(x, y, z);
         x = readFloat(dis);
         y = readFloat(dis);
         z = readFloat(dis);
         stats.update(x, y, z);
-        V3D_VDouble qv = new V3D_VDouble(x, y, z);
+        V3D_V_d qv = new V3D_V_d(x, y, z);
         x = readFloat(dis);
         y = readFloat(dis);
         z = readFloat(dis);
         stats.update(x, y, z);
-        V3D_VDouble rv = new V3D_VDouble(x, y, z);
-        V3D_VLineDouble pq = new V3D_VLineDouble(pv, qv);
-        V3D_VLineDouble qr = new V3D_VLineDouble(qv, rv);
-        V3D_VLineDouble rp = new V3D_VLineDouble(rv, pv);
+        V3D_V_d rv = new V3D_V_d(x, y, z);
+        V3D_VLine_d pq = new V3D_VLine_d(pv, qv);
+        V3D_VLine_d qr = new V3D_VLine_d(qv, rv);
+        V3D_VLine_d rp = new V3D_VLine_d(rv, pv);
         short attribute = Short.reverseBytes(dis.readShort());
         process(offset, pv, qv, rv, pq, qr, rp, n, attribute, initNormal);
         int i = 1;
@@ -184,28 +192,28 @@ public class STL_ReaderDouble {
             if (i % nTriangles1PC == 0) {
                 System.out.println("Reading " + i + " out of " + nTriangles + " triangles.");
             }
-            n = new V3D_VDouble(readFloat(dis), readFloat(dis), readFloat(dis));
+            n = new V3D_V_d(readFloat(dis), readFloat(dis), readFloat(dis));
             // Turn n into a unit normal.
             n = n.getUnitVector();
             x = readFloat(dis);
             y = readFloat(dis);
             z = readFloat(dis);
             stats.update(x, y, z);
-            pv = new V3D_VDouble(x, y, z);
+            pv = new V3D_V_d(x, y, z);
             x = readFloat(dis);
             y = readFloat(dis);
             z = readFloat(dis);
             stats.update(x, y, z);
-            qv = new V3D_VDouble(x, y, z);
+            qv = new V3D_V_d(x, y, z);
             x = readFloat(dis);
             y = readFloat(dis);
             z = readFloat(dis);
-            rv = new V3D_VDouble(x, y, z);
+            rv = new V3D_V_d(x, y, z);
             stats.update(x, y, z);
             attribute = Short.reverseBytes(dis.readShort());
-            pq = new V3D_VLineDouble(pv, qv);
-            qr = new V3D_VLineDouble(qv, rv);
-            rp = new V3D_VLineDouble(rv, pv);
+            pq = new V3D_VLine_d(pv, qv);
+            qr = new V3D_VLine_d(qv, rv);
+            rp = new V3D_VLine_d(rv, pv);
             process(offset, pv, qv, rv, pq, qr, rp, n, attribute, initNormal);
             i++;
             } catch (EOFException ex) {
@@ -241,16 +249,16 @@ public class STL_ReaderDouble {
         }
     }
 
-    private void process(V3D_VectorDouble offset, V3D_VDouble pv, 
-            V3D_VDouble qv, V3D_VDouble rv, V3D_VLineDouble pq, 
-            V3D_VLineDouble qr, V3D_VLineDouble rp, V3D_VDouble n, 
+    private void process(V3D_Vector_d offset, V3D_V_d pv, 
+            V3D_V_d qv, V3D_V_d rv, V3D_VLine_d pq, 
+            V3D_VLine_d qr, V3D_VLine_d rp, V3D_V_d n, 
             short attribute, boolean initNormal) {
-        V3D_VTriangleDouble vt = new V3D_VTriangleDouble(pq, qr, rp);
+        V3D_VTriangle_d vt = new V3D_VTriangle_d(pq, qr, rp);
         if (n.isZero() || initNormal) {
             n = vt.getNormal().getUnitVector();
         }
-        TriangleDouble t = new TriangleDouble(
-                new V3D_TriangleDouble(offset, vt), n, attribute);
+        Triangle_d t = new Triangle_d(
+                new V3D_Triangle_d(env, offset, vt), n, attribute);
         triangles.add(t);
         if (assessTopology) {
 //        Generic_Collections.addToMap(points, pv, t);

@@ -25,6 +25,8 @@ import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineSegmentDouble;
  * @author Andy Turner
  */
 public class LineDouble extends Entity {
+
+    private static final long serialVersionUID = 1L;
     
     /**
      * The line to render.

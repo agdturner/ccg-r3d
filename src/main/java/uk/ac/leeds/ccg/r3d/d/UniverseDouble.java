@@ -30,7 +30,7 @@ import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineSegmentDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PointDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_RectangleDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TetrahedronDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TetrahedraDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TriangleDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_VectorDouble;
 
@@ -161,15 +161,15 @@ public class UniverseDouble {
     public void createCubeFrom5Tetrahedra(double epsilon,
             V3D_PointDouble lbf, V3D_PointDouble lba, V3D_PointDouble ltf, V3D_PointDouble lta,
             V3D_PointDouble rbf, V3D_PointDouble rba, V3D_PointDouble rtf, V3D_PointDouble rta) {
-        V3D_TetrahedronDouble t1 = new V3D_TetrahedronDouble(lbf, ltf, lta, rtf, epsilon);
+        V3D_TetrahedraDouble t1 = new V3D_TetrahedraDouble(lbf, ltf, lta, rtf, epsilon);
         tetrahedra.add(new TetrahedronDouble(t1, Color.BLUE));
-        V3D_TetrahedronDouble t2 = new V3D_TetrahedronDouble(lta, lba, lbf, rba, epsilon);
+        V3D_TetrahedraDouble t2 = new V3D_TetrahedraDouble(lta, lba, lbf, rba, epsilon);
         tetrahedra.add(new TetrahedronDouble(t2, Color.RED));
-        V3D_TetrahedronDouble t3 = new V3D_TetrahedronDouble(lta, rta, rba, rtf, epsilon);
+        V3D_TetrahedraDouble t3 = new V3D_TetrahedraDouble(lta, rta, rba, rtf, epsilon);
         tetrahedra.add(new TetrahedronDouble(t3, Color.GREEN));
-        V3D_TetrahedronDouble t4 = new V3D_TetrahedronDouble(lbf, rbf, rtf, rba, epsilon);
+        V3D_TetrahedraDouble t4 = new V3D_TetrahedraDouble(lbf, rbf, rtf, rba, epsilon);
         tetrahedra.add(new TetrahedronDouble(t4, Color.YELLOW));
-        V3D_TetrahedronDouble t5 = new V3D_TetrahedronDouble(lbf, rba, rtf, lta, epsilon);
+        V3D_TetrahedraDouble t5 = new V3D_TetrahedraDouble(lbf, rba, rtf, lta, epsilon);
         tetrahedra.add(new TetrahedronDouble(t5, Color.CYAN));
         // Volume check
         System.out.println("t1 volume=" + t1.getVolume(epsilon));
@@ -183,18 +183,18 @@ public class UniverseDouble {
             V3D_PointDouble lbf, V3D_PointDouble lba, V3D_PointDouble ltf, V3D_PointDouble lta,
             V3D_PointDouble rbf, V3D_PointDouble rba, V3D_PointDouble rtf, V3D_PointDouble rta) {
         // Half - a triangular prism
-        V3D_TetrahedronDouble t1 = new V3D_TetrahedronDouble(ltf, rtf, rta, rba, epsilon);
+        V3D_TetrahedraDouble t1 = new V3D_TetrahedraDouble(ltf, rtf, rta, rba, epsilon);
         tetrahedra.add(new TetrahedronDouble(t1, Color.BLUE));
-        V3D_TetrahedronDouble t2 = new V3D_TetrahedronDouble(rtf, rbf, lbf, rba, epsilon);
+        V3D_TetrahedraDouble t2 = new V3D_TetrahedraDouble(rtf, rbf, lbf, rba, epsilon);
         tetrahedra.add(new TetrahedronDouble(t2, Color.RED));
-        V3D_TetrahedronDouble t3 = new V3D_TetrahedronDouble(lbf, rtf, rba, ltf, epsilon);
+        V3D_TetrahedraDouble t3 = new V3D_TetrahedraDouble(lbf, rtf, rba, ltf, epsilon);
         tetrahedra.add(new TetrahedronDouble(t3, Color.GREEN));
         // Another Half - a triangular prism
-        V3D_TetrahedronDouble t4 = new V3D_TetrahedronDouble(ltf, lbf, lba, rta, epsilon);
+        V3D_TetrahedraDouble t4 = new V3D_TetrahedraDouble(ltf, lbf, lba, rta, epsilon);
         tetrahedra.add(new TetrahedronDouble(t4, Color.YELLOW));
-        V3D_TetrahedronDouble t5 = new V3D_TetrahedronDouble(ltf, lta, rta, lba, epsilon);
+        V3D_TetrahedraDouble t5 = new V3D_TetrahedraDouble(ltf, lta, rta, lba, epsilon);
         tetrahedra.add(new TetrahedronDouble(t5, Color.CYAN));
-        V3D_TetrahedronDouble t6 = new V3D_TetrahedronDouble(lbf, lba, rba, rta, epsilon);
+        V3D_TetrahedraDouble t6 = new V3D_TetrahedraDouble(lbf, lba, rba, rta, epsilon);
         tetrahedra.add(new TetrahedronDouble(t6, Color.MAGENTA));
         // Volume check
         System.out.println("t1 volume=" + t1.getVolume(epsilon));
@@ -261,7 +261,7 @@ public class UniverseDouble {
             t.baseColor = color;
             t.lightingColor = color;
             triangles.add(t);
-            for (var pt : t.triangle.getPoints()) {
+            for (var pt : t.triangle.getPointsArray()) {
                 double x = pt.getX();
                 double y = pt.getY();
                 double z = pt.getZ();

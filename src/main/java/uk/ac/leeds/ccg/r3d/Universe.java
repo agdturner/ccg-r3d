@@ -24,7 +24,8 @@ import java.util.ArrayList;
 import uk.ac.leeds.ccg.r3d.entities.Tetrahedron;
 import uk.ac.leeds.ccg.r3d.entities.Triangle;
 import uk.ac.leeds.ccg.r3d.io.STL_Reader;
-import uk.ac.leeds.ccg.v3d.geometry.V3D_Envelope;
+import uk.ac.leeds.ccg.v3d.core.V3D_Environment;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_AABB;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Tetrahedron;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
@@ -38,9 +39,9 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 public class Universe {
 
     /**
-     * Envelope
+     * AABB
      */
-    V3D_Envelope envelope;
+    V3D_AABB aabb;
 
     /**
      * The triangles to render.
@@ -66,7 +67,8 @@ public class Universe {
      * @param oom The Order of Magnitude for the precision.
      * @param rm The RoundingMode for any rounding.
      */
-    public Universe(V3D_Vector offset, int oom, RoundingMode rm) {
+    public Universe(V3D_Vector offset, int oom, RoundingMode rm, 
+        V3D_Environment env) {
         triangles = new ArrayList<>();
         tetrahedra = new ArrayList<>();
         /**
@@ -75,17 +77,17 @@ public class Universe {
         V3D_Point[] points = new V3D_Point[8];
         // multiplication factor
         long m = 100;
-        V3D_Point lbf = new V3D_Point(offset, new V3D_Vector(-1 * m, -1 * m, -1 * m));
-        V3D_Point lba = new V3D_Point(offset, new V3D_Vector(-1 * m, -1 * m, 1 * m));
-        V3D_Point ltf = new V3D_Point(offset, new V3D_Vector(-1 * m, 1 * m, -1 * m));
-        V3D_Point lta = new V3D_Point(offset, new V3D_Vector(-1 * m, 1 * m, 1 * m));
-        V3D_Point rbf = new V3D_Point(offset, new V3D_Vector(1 * m, -1 * m, -1 * m));
-        V3D_Point rba = new V3D_Point(offset, new V3D_Vector(1 * m, -1 * m, 1 * m));
-        V3D_Point rtf = new V3D_Point(offset, new V3D_Vector(1 * m, 1 * m, -1 * m));
-        V3D_Point rta = new V3D_Point(offset, new V3D_Vector(1 * m, 1 * m, 1 * m));
+        V3D_Point lbf = new V3D_Point(env, offset, new V3D_Vector(-1 * m, -1 * m, -1 * m));
+        V3D_Point lba = new V3D_Point(env, offset, new V3D_Vector(-1 * m, -1 * m, 1 * m));
+        V3D_Point ltf = new V3D_Point(env, offset, new V3D_Vector(-1 * m, 1 * m, -1 * m));
+        V3D_Point lta = new V3D_Point(env, offset, new V3D_Vector(-1 * m, 1 * m, 1 * m));
+        V3D_Point rbf = new V3D_Point(env, offset, new V3D_Vector(1 * m, -1 * m, -1 * m));
+        V3D_Point rba = new V3D_Point(env, offset, new V3D_Vector(1 * m, -1 * m, 1 * m));
+        V3D_Point rtf = new V3D_Point(env, offset, new V3D_Vector(1 * m, 1 * m, -1 * m));
+        V3D_Point rta = new V3D_Point(env, offset, new V3D_Vector(1 * m, 1 * m, 1 * m));
         //createCubeFrom5Tetrahedra(oom, rm, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
         //createCubeFrom6Tetrahedra(oom, rm, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
-        createCubeSurfaceFromTriangles(oom, rm, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
+        createCubeSurfaceFromTriangles(oom, rm, env,  lbf, lba, ltf, lta, rbf, rba, rtf, rta);
         points[0] = lbf;
         points[1] = lba;
         points[2] = ltf;
@@ -94,7 +96,7 @@ public class Universe {
         points[5] = rba;
         points[6] = rtf;
         points[7] = rta;
-        this.envelope = new V3D_Envelope(oom, points);
+        this.aabb = new V3D_AABB(oom, points);
     }
 
     /**
@@ -148,9 +150,11 @@ public class Universe {
     }
 
     public void createCubeSurfaceFromTriangles(int oom, RoundingMode rm,
+            V3D_Environment env,
             V3D_Point lbf, V3D_Point lba, V3D_Point ltf, V3D_Point lta,
             V3D_Point rbf, V3D_Point rba, V3D_Point rtf, V3D_Point rta) {
         V3D_Point centroid = V3D_Point.ORIGIN;
+        centroid.env = env;
 //        triangles.add(new Triangle(new V3D_Triangle(lbf, ltf, rtf, oom, rm), Color.WHITE));
 //        triangles.add(new Triangle(new V3D_Triangle(lbf, rbf, rtf, oom, rm), Color.WHITE));
 //        triangles.add(new Triangle(new V3D_Triangle(lbf, ltf, lta, oom, rm), Color.WHITE));
@@ -188,11 +192,12 @@ public class Universe {
      * @param rm The RoundingMode for any rounding.
      */
     public Universe(Path path, V3D_Vector offset, Color color,
-            boolean assessTopology, int oom, RoundingMode rm) throws IOException {
+            boolean assessTopology, int oom, RoundingMode rm, 
+        V3D_Environment env) throws IOException {
         triangles = new ArrayList<>();
         tetrahedra = new ArrayList<>();
         STL_Reader data = new STL_Reader(assessTopology);
-        data.readBinary(path, offset, oom, rm);
+        data.readBinary(path, offset, oom, rm, env);
         V3D_Point p = data.triangles.get(0).triangle.getPl(oom, rm).getP();
         BigRational xmin = p.getX(oom, rm);
         BigRational xmax = p.getX(oom, rm);
@@ -204,7 +209,7 @@ public class Universe {
             t.baseColor = color;
             t.lightingColor = color;
             triangles.add(t);
-            for (var pt : t.triangle.getPoints()) {
+            for (var pt : t.triangle.getPoints(oom, rm).values()) {
                 BigRational x = pt.getX(oom, rm);
                 BigRational y = pt.getY(oom, rm);
                 BigRational z = pt.getZ(oom, rm);
@@ -216,7 +221,7 @@ public class Universe {
                 zmax = BigRational.max(zmax, z);
             }
         }
-        envelope = new V3D_Envelope(oom, xmin, xmax, ymin, ymax, zmin, zmax);
+        aabb = new V3D_AABB(env, oom, xmin, xmax, ymin, ymax, zmin, zmax);
     }
 
     /**

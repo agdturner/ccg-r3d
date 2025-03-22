@@ -16,19 +16,19 @@
 package uk.ac.leeds.ccg.r3d.d.entities;
 
 import java.awt.Color;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TetrahedronDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Tetrahedron_d;
 
 /**
  * For visualising a tetrahedron.
  * 
  * @author Andy Turner
  */
-public class TetrahedronDouble {
+public class Tetrahedron_d {
 
     /**
      * The triangles that comprise the edge surface of the tetrahedron.
      */
-    public TriangleDouble[] triangles;
+    public Triangle_d[] triangles;
 
     /**
      * Creates a new instance.
@@ -36,11 +36,11 @@ public class TetrahedronDouble {
      * @param baseColor What the base colour of each triangle is set to.
      * @param lightVector The direction that light is coming from.
      */
-    public TetrahedronDouble(V3D_TetrahedronDouble tetrahedron, Color baseColor) {
-        triangles = new TriangleDouble[4];
-        triangles[0] = new TriangleDouble(tetrahedron.getPqr(), baseColor);
-        triangles[1] = new TriangleDouble(tetrahedron.getPsq(), baseColor);
-        triangles[2] = new TriangleDouble(tetrahedron.getQsr(), baseColor);
-        triangles[3] = new TriangleDouble(tetrahedron.getSpr(), baseColor);
+    public Tetrahedron_d(V3D_Tetrahedron_d tetrahedron, Color baseColor) {
+        triangles = new Triangle_d[4];
+        triangles[0] = new Triangle_d(tetrahedron.getPqr(), baseColor);
+        triangles[1] = new Triangle_d(tetrahedron.getPsq(), baseColor);
+        triangles[2] = new Triangle_d(tetrahedron.getQsr(), baseColor);
+        triangles[3] = new Triangle_d(tetrahedron.getSpr(), baseColor);
     }
 }

@@ -71,12 +71,12 @@ public class RenderImageDouble {
         try {
             //boolean run0 = true;
             boolean run0 = false;
-            //boolean run1 = true;
-            boolean run1 = false;
+            boolean run1 = true;
+            //boolean run1 = false;
             //boolean runUtah = true;
             boolean runUtah = false;
-            boolean runGeographos = true;
-            //boolean runGeographos = false;
+            //boolean runGeographos = true;
+            boolean runGeographos = false;
             //boolean runKatrina = true;
             boolean runKatrina = false;
             //boolean runCuriosity = true;

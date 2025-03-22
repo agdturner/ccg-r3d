@@ -20,7 +20,7 @@ import uk.ac.leeds.ccg.r3d.entities.Entity;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PointDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TriangleDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_VectorDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.light.V3D_VDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.light.V3D_V_d;
 
 /**
  * For visualising a triangle.
@@ -28,6 +28,8 @@ import uk.ac.leeds.ccg.v3d.geometry.d.light.V3D_VDouble;
  * @author Andy Turner
  */
 public class TriangleDouble extends Entity {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * The triangle geometry
@@ -41,7 +43,7 @@ public class TriangleDouble extends Entity {
      * normal vector allows us to specify sides of the triangle which can be
      * attributed with different properties e.g. colours.
      */
-    public V3D_VDouble normal;
+    public V3D_V_d normal;
 
     /**
      * An attribute as read in from for example an STL file. This could
@@ -71,7 +73,7 @@ public class TriangleDouble extends Entity {
      * @param normal What {@link #normal} is set to.
      * @param attribute What {@link #attribute} is set to.
      */
-    public TriangleDouble(V3D_TriangleDouble triangle, V3D_VDouble normal,
+    public TriangleDouble(V3D_TriangleDouble triangle, V3D_V_d normal,
             short attribute) {
         this.triangle = triangle;
         this.normal = normal;

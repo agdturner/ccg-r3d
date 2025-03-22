@@ -17,25 +17,27 @@ package uk.ac.leeds.ccg.r3d.d.entities;
 
 import java.awt.Color;
 import uk.ac.leeds.ccg.r3d.entities.Entity;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PointDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Point_d;
 
 /**
  * A class for rendering points.
  * 
  * @author Andy Turner
  */
-public class PointDouble extends Entity {
+public class Point_d extends Entity {
+
+    private static final long serialVersionUID = 1L;
     
     /**
      * The point to render.
      */
-    public V3D_PointDouble p;
+    public V3D_Point_d p;
     
     
     /**
      * @param p What {@link #p} is set to. 
      */
-    public PointDouble(V3D_PointDouble p) {
+    public Point_d(V3D_Point_d p) {
         this(p, Color.BLUE);
     }
 
@@ -43,7 +45,7 @@ public class PointDouble extends Entity {
      * @param p What {@link #p} is set to. 
      * @param baseColor What {@link #baseColor} is set to. 
      */
-    public PointDouble(V3D_PointDouble p, Color baseColor) {
+    public Point_d(V3D_Point_d p, Color baseColor) {
         this.p = p;
         this.baseColor = baseColor;
     }

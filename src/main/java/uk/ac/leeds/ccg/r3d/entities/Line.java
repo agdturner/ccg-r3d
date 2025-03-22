@@ -22,6 +22,8 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_LineSegment;
  * @author Andy Turner
  */
 public class Line extends Entity {
+
+    private static final long serialVersionUID = 1L;
     
     /**
      * The line to render.

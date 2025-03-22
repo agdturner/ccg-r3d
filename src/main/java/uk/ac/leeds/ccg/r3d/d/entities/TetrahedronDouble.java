@@ -16,7 +16,7 @@
 package uk.ac.leeds.ccg.r3d.d.entities;
 
 import java.awt.Color;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TetrahedronDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TetrahedraDouble;
 
 /**
  * For visualising a tetrahedron.
@@ -36,7 +36,7 @@ public class TetrahedronDouble {
      * @param baseColor What the base colour of each triangle is set to.
      * @param lightVector The direction that light is coming from.
      */
-    public TetrahedronDouble(V3D_TetrahedronDouble tetrahedron, Color baseColor) {
+    public TetrahedronDouble(V3D_TetrahedraDouble tetrahedron, Color baseColor) {
         triangles = new TriangleDouble[4];
         triangles[0] = new TriangleDouble(tetrahedron.getPqr(), baseColor);
         triangles[1] = new TriangleDouble(tetrahedron.getPsq(), baseColor);

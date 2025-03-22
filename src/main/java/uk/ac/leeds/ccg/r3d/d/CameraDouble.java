@@ -36,7 +36,7 @@ import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineSegmentDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PlaneDouble;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_RayDouble;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TetrahedronDouble;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_TetrahedraDouble;
 
 /**
  * Camera instances are situated in the 3D Universe. They are a point behind the
@@ -163,7 +163,7 @@ public class CameraDouble extends V3D_PointDouble {
 
     /**
      * Create a new instance.
-     * 
+     *
      * @param p The camera observer location.
      * @param screen The screen.
      */
@@ -466,6 +466,7 @@ public class CameraDouble extends V3D_PointDouble {
      *
      * @param epsilon The tolerance for intersection.
      * @param l The line to render.
+     * @param plane A plane on which l.l is located. 
      * @param pix The image.
      */
     public void renderLine(double epsilon,
@@ -506,9 +507,10 @@ public class CameraDouble extends V3D_PointDouble {
                     if (maxc >= ncols) {
                         maxc = ncols - 1;
                     }
+                    V3D_PlaneDouble spl = screen.getPlane();
                     for (int r = minr; r <= maxr; r++) {
                         for (int c = minc; c <= maxc; c++) {
-                            V3D_RectangleDouble pixel = getPixel(screen.getPlane(), r, c);
+                            V3D_RectangleDouble pixel = getPixel(spl, r, c);
                             //System.out.println("" + r + ", "
                             V3D_FiniteGeometryDouble pit = pixel.getIntersection(t, epsilon);
                             if (pit != null) {
@@ -601,7 +603,6 @@ public class CameraDouble extends V3D_PointDouble {
             double[] mind2t, double epsilon) {
         ts[index].setLighting(centroid, lighting, ambientLight, epsilon);
         V3D_TriangleDouble t = ts[index].triangle;
-
         /**
          * Algorithm:
          *
@@ -622,21 +623,28 @@ public class CameraDouble extends V3D_PointDouble {
         if (t.isIntersectedBy(this, epsilon)) {
             i = screen.getIntersection(t, epsilon);
         } else {
-            V3D_TetrahedronDouble tetra = new V3D_TetrahedronDouble(this, t, epsilon);
+            V3D_TetrahedraDouble tetra = new V3D_TetrahedraDouble(this, t, epsilon);
             i = tetra.getIntersection(screen, epsilon);
         }
         if (i == null) {
             return;
         }
-        V3D_PointDouble[] pts = i.getPoints();
+        V3D_PointDouble[] pts = i.getPointsArray();
         V3D_PlaneDouble tpl = t.pl;
         double mind2 = Double.MAX_VALUE;
         for (var pt : pts) {
             if (!pt.equals(epsilon, this)) {
                 V3D_RayDouble tpr = new V3D_RayDouble(this, pt);
-                V3D_PointDouble poi = (V3D_PointDouble) tpr.getIntersection(tpl, epsilon);
-                double d2 = poi.getDistanceSquared(this);
-                mind2 = Math.min(d2, mind2);
+                V3D_GeometryDouble gi = tpr.getIntersection(tpl, epsilon);
+                if (gi != null) {
+                    double d2;
+                    if (gi instanceof V3D_PointDouble gip) {
+                        d2 = gip.getDistanceSquared(this);
+                    } else {
+                        d2 = ((V3D_RayDouble) gi).l.getP().getDistanceSquared(this);
+                    }
+                    mind2 = Math.min(d2, mind2);
+                }
             }
         }
         mind2t[index] = mind2;
@@ -664,7 +672,7 @@ public class CameraDouble extends V3D_PointDouble {
             HashMap<Grids_2D_ID_int, V3D_PointDouble> idPoint,
             double epsilon) {
 
-        V3D_TetrahedronDouble tetra = new V3D_TetrahedronDouble(this, t, epsilon);
+        V3D_TetrahedraDouble tetra = new V3D_TetrahedraDouble(this, t, epsilon);
         V3D_FiniteGeometryDouble tetrai = tetra.getIntersection(screen, epsilon);
         if (tetrai != null) {
             // Calculate the extent of the rows and columns the triangle is in.
@@ -672,7 +680,7 @@ public class CameraDouble extends V3D_PointDouble {
             int maxr = Integer.MIN_VALUE;
             int minc = Integer.MAX_VALUE;
             int maxc = Integer.MIN_VALUE;
-            V3D_PointDouble[] tetraipts = tetrai.getPoints();
+            V3D_PointDouble[] tetraipts = tetrai.getPointsArray();
             for (var pt : tetraipts) {
                 int r = getScreenRow(pt, epsilon);
                 int c = getScreenCol(pt, epsilon);
