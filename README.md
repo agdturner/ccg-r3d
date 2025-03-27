@@ -13,7 +13,7 @@ The focus is not on realistic rendering, but rendering geometry.
 
 Render of a grey polygon with no internal holes in a cube box for which white edges are rendered as lines. This is looking down the Z axis with the axes coloured (X blue, Y red, Z green):
 
-<img alt="A polygon with no internal holes in a box." src="data/output/axes/test.png" />
+<img alt="A polygon with no internal holes in a box." src="data/output/test/axes/test.png" />
 
 Rendering of [Utah Teapot](https://en.wikipedia.org/wiki/Utah_teapot) using [Utah_teapot_(solid).stl](data/Utah_teapot_(solid).stl) with 9438 triangles (resolution 500x375, [Order of Magnitude](https://en.wikipedia.org/wiki/Order_of_magnitude) of precision -10), there is no shadow, there is effectively a low ambient light and a vector for a general light:
 
