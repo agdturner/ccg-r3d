@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Centre for Computational Geography.
+ * Copyright 2022-2025 Andy Turner, University of Leeds.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +16,31 @@
 package uk.ac.leeds.ccg.r3d.entities;
 
 import java.awt.Color;
-import uk.ac.leeds.ccg.v3d.geometry.V3D_LineSegment;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Volume;
 
 /**
+ * A volume.
+ * 
  * @author Andy Turner
  */
-public class Line extends Entity {
+public class Volume extends Entity {
 
     private static final long serialVersionUID = 1L;
-    
-    /**
-     * The line to render.
-     */
-    public V3D_LineSegment l;
-    
-    /**
-     * Create a new instance with {@link #baseColor} and {@link #colorEdge} set 
-     * to {@code Color.BLUE}.
-     * 
-     * @param l What {@link l} is set to. 
-     */
-    public Line(V3D_LineSegment l) {
-        this(l, Color.BLUE);
-    }
 
     /**
-     * @param l What {@link #l} is set to. 
-     * @param c What {@link #baseColor} and {@link #colorEdge} are set to. 
+     * The volume geometry.
      */
-    public Line(V3D_LineSegment l, Color c) {
-        super(c);
-        this.l = l;
+    public V3D_Volume volume;
+
+    /**
+     * Creates a new instance.
+     * 
+     * @param v What {@link #volume} is set to.
+     * @param c What {@link #color} and {@link #lightingColor} are set to.
+     */
+    public Volume(V3D_Volume v, Color c) {
+        this.volume = v;
+        this.color = c;
+        this.lightingColor = c;
     }
 }

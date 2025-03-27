@@ -42,10 +42,10 @@ public class Line_d extends Entity {
 
     /**
      * @param l What {@link #l} is set to. 
-     * @param baseColor What {@link #baseColor} is set to. 
+     * @param color What {@link #color} is set to. 
      */
-    public Line_d(V3D_LineSegment_d l, Color baseColor) {
+    public Line_d(V3D_LineSegment_d l, Color color) {
         this.l = l;
-        this.baseColor = baseColor;
+        this.color = color;
     }
 }

@@ -43,10 +43,10 @@ public class PointDouble extends Entity {
 
     /**
      * @param p What {@link #p} is set to. 
-     * @param baseColor What {@link #baseColor} is set to. 
+     * @param color What {@link #color} is set to. 
      */
-    public PointDouble(V3D_PointDouble p, Color baseColor) {
+    public PointDouble(V3D_PointDouble p, Color color) {
         this.p = p;
-        this.baseColor = baseColor;
+        this.color = color;
     }
 }

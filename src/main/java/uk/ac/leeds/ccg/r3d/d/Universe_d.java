@@ -22,13 +22,15 @@ import java.util.ArrayList;
 import uk.ac.leeds.ccg.data.id.Data_ID_long;
 import uk.ac.leeds.ccg.r3d.d.entities.Line_d;
 import uk.ac.leeds.ccg.r3d.d.entities.Point_d;
-import uk.ac.leeds.ccg.r3d.d.entities.PolygonNoInternalHoles_d;
+import uk.ac.leeds.ccg.r3d.d.entities.Area_d;
 import uk.ac.leeds.ccg.r3d.d.entities.Tetrahedron_d;
 import uk.ac.leeds.ccg.r3d.d.entities.Triangle_d;
 import uk.ac.leeds.ccg.r3d.io.d.STL_Reader_d;
 import uk.ac.leeds.ccg.v3d.core.d.V3D_Environment_d;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_AABB_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Area_d;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineSegment_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Line_d;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Point_d;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PolygonNoInternalHoles_d;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Tetrahedron_d;
@@ -41,47 +43,41 @@ import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Vector_d;
  * @author Andy Turner
  */
 public class Universe_d {
-    
+
     /**
      * Environment
      */
     public final V3D_Environment_d env;
-    
-    /**
-     * Envelope
-     */
-    V3D_AABB_d aabb;
 
     /**
-     * The triangles to render.
+     * The aabb of all finite geometries.
+     */
+    public V3D_AABB_d aabb;
+
+    /**
+     * The points.
      */
     public ArrayList<Point_d> points;
 
     /**
-     * The triangles to render.
+     * The lines.
      */
     public ArrayList<Line_d> lines;
 
     /**
-     * The triangles to render.
+     * The areas.
      */
-    public ArrayList<Triangle_d> triangles;
+    public ArrayList<Area_d> areas;
 
     /**
-     * The polygons with no internal holes.
+     * The volumes.
      */
-    public ArrayList<PolygonNoInternalHoles_d> pnih;
-    
-    /**
-     * The tetrahedra to render.
-     */
-    public ArrayList<Tetrahedron_d> tetrahedra;
-
+    //public ArrayList<Volume_d> volume;
     /**
      * A single camera.
      */
     public Camera_d camera;
-        
+
     /**
      * long
      */
@@ -98,11 +94,9 @@ public class Universe_d {
         this.env = env;
         points = new ArrayList<>();
         lines = new ArrayList<>();
-        triangles = new ArrayList<>();
-        pnih = new ArrayList<>();
-        tetrahedra = new ArrayList<>();
+        areas = new ArrayList<>();
         /**
-         * Create a AABox centred at 0,0,0
+         * Create a AABB centred at 0,0,0
          */
         V3D_Point_d[] points = new V3D_Point_d[8];
         // multiplication factor
@@ -119,7 +113,7 @@ public class Universe_d {
         //createCubeFrom6Tetrahedra(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
         //createCubeSurfaceFromTriangles(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
         //createAxes(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
-        createTriangle(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
+        //createTriangle(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
         points[0] = lbf;
         points[1] = lba;
         points[2] = ltf;
@@ -130,7 +124,8 @@ public class Universe_d {
         points[7] = rta;
         this.aabb = new V3D_AABB_d(points);
     }
-/**
+
+    /**
      * Create a new instance.
      *
      * @param path The path of the STL binary file to be read.
@@ -141,23 +136,23 @@ public class Universe_d {
     public Universe_d(V3D_Environment_d env, Path path, V3D_Vector_d offset, Color color,
             boolean assessTopology, double epsilon, boolean initNormal) throws IOException {
         this.env = env;
-        triangles = new ArrayList<>();
-        pnih = new ArrayList<>();
-        tetrahedra = new ArrayList<>();
+        points = new ArrayList<>();
+        lines = new ArrayList<>();
+        areas = new ArrayList<>();
         STL_Reader_d data = new STL_Reader_d(env, assessTopology);
         data.readBinary(path, offset, initNormal);
-        V3D_Point_d p = data.triangles.get(0).triangle.pl.getP();
+        V3D_Point_d p = data.triangles.get(0).area.pl.getP();
         double xmin = p.getX();
         double xmax = p.getX();
         double ymin = p.getY();
         double ymax = p.getY();
         double zmin = p.getZ();
         double zmax = p.getZ();
-        for (Triangle_d t : data.triangles) {
-            t.baseColor = color;
+        for (Area_d t : data.triangles) {
+            t.color = color;
             t.lightingColor = color;
-            triangles.add(t);
-            for (var pt : t.triangle.getPoints().values()) {
+            areas.add(t);
+            for (var pt : t.area.getPoints().values()) {
                 double x = pt.getX();
                 double y = pt.getY();
                 double z = pt.getZ();
@@ -172,17 +167,16 @@ public class Universe_d {
         aabb = new V3D_AABB_d(env, xmin, xmax, ymin, ymax, zmin, zmax);
         System.out.println(aabb.toString());
     }
-    
 
     /**
-     * @return The next id. 
+     * @return The next id.
      */
-    private Data_ID_long getNextID(){
+    private Data_ID_long getNextID() {
         Data_ID_long id = new Data_ID_long(nextID);
-        nextID ++;
+        nextID++;
         return id;
     }
-    
+
     /**
      *
      */
@@ -195,12 +189,12 @@ public class Universe_d {
         //V3D_Point_d p = new V3D_Point_d(e.getXMin(), 0d, -1d);
         V3D_Point_d p = new V3D_Point_d(env, e.getXMin(), 0d, e.getZMin());
         //V3D_Point_d q = new V3D_Point_d(e.getXMax(), e.getYMax(), -1d);
-        V3D_Point_d q = new V3D_Point_d(env, e.getXMax(), e.getYMax(),  e.getZMin());
+        V3D_Point_d q = new V3D_Point_d(env, e.getXMax(), e.getYMax(), e.getZMin());
         //V3D_Point_d r = new V3D_Point_d(e.getXMax(), 0d, -1d);
         V3D_Point_d r = new V3D_Point_d(env, e.getXMax(), 0d, e.getZMin());
-        triangles.add(new Triangle_d(new V3D_Triangle_d(p, q, r), Color.PINK));
+        areas.add(new Area_d(new V3D_Triangle_d(p, q, r), Color.PINK));
     }
-    
+
     /**
      *
      */
@@ -222,91 +216,88 @@ public class Universe_d {
         V3D_Point_d zMax = new V3D_Point_d(env, 0d, 0d, e.getZMax());
         lines.add(new Line_d(new V3D_LineSegment_d(zMin, zMax), Color.BLUE));
 
-
     }
 
-    /**
-     * The central Tetrahedra is regular and different to the others.
-     */
-    public void createCubeFrom5Tetrahedra(double epsilon,
-            V3D_Point_d lbf, V3D_Point_d lba, V3D_Point_d ltf, V3D_Point_d lta,
-            V3D_Point_d rbf, V3D_Point_d rba, V3D_Point_d rtf, V3D_Point_d rta) {
-        V3D_Tetrahedron_d t1 = new V3D_Tetrahedron_d(lbf, ltf, lta, rtf, epsilon);
-        tetrahedra.add(new Tetrahedron_d(t1, Color.BLUE));
-        V3D_Tetrahedron_d t2 = new V3D_Tetrahedron_d(lta, lba, lbf, rba, epsilon);
-        tetrahedra.add(new Tetrahedron_d(t2, Color.RED));
-        V3D_Tetrahedron_d t3 = new V3D_Tetrahedron_d(lta, rta, rba, rtf, epsilon);
-        tetrahedra.add(new Tetrahedron_d(t3, Color.GREEN));
-        V3D_Tetrahedron_d t4 = new V3D_Tetrahedron_d(lbf, rbf, rtf, rba, epsilon);
-        tetrahedra.add(new Tetrahedron_d(t4, Color.YELLOW));
-        V3D_Tetrahedron_d t5 = new V3D_Tetrahedron_d(lbf, rba, rtf, lta, epsilon);
-        tetrahedra.add(new Tetrahedron_d(t5, Color.CYAN));
-        // Volume check
-        System.out.println("t1 volume=" + t1.getVolume());
-        System.out.println("t2 volume=" + t2.getVolume());
-        System.out.println("t3 volume=" + t3.getVolume());
-        System.out.println("t4 volume=" + t4.getVolume());
-        System.out.println("t5 volume=" + t5.getVolume());
-    }
-
-    public void createCubeFrom6Tetrahedra(double epsilon,
-            V3D_Point_d lbf, V3D_Point_d lba, V3D_Point_d ltf, V3D_Point_d lta,
-            V3D_Point_d rbf, V3D_Point_d rba, V3D_Point_d rtf, V3D_Point_d rta) {
-        // Half - a triangular prism
-        V3D_Tetrahedron_d t1 = new V3D_Tetrahedron_d(ltf, rtf, rta, rba, epsilon);
-        tetrahedra.add(new Tetrahedron_d(t1, Color.BLUE));
-        V3D_Tetrahedron_d t2 = new V3D_Tetrahedron_d(rtf, rbf, lbf, rba, epsilon);
-        tetrahedra.add(new Tetrahedron_d(t2, Color.RED));
-        V3D_Tetrahedron_d t3 = new V3D_Tetrahedron_d(lbf, rtf, rba, ltf, epsilon);
-        tetrahedra.add(new Tetrahedron_d(t3, Color.GREEN));
-        // Another Half - a triangular prism
-        V3D_Tetrahedron_d t4 = new V3D_Tetrahedron_d(ltf, lbf, lba, rta, epsilon);
-        tetrahedra.add(new Tetrahedron_d(t4, Color.YELLOW));
-        V3D_Tetrahedron_d t5 = new V3D_Tetrahedron_d(ltf, lta, rta, lba, epsilon);
-        tetrahedra.add(new Tetrahedron_d(t5, Color.CYAN));
-        V3D_Tetrahedron_d t6 = new V3D_Tetrahedron_d(lbf, lba, rba, rta, epsilon);
-        tetrahedra.add(new Tetrahedron_d(t6, Color.MAGENTA));
-        // Volume check
-        System.out.println("t1 volume=" + t1.getVolume());
-        System.out.println("t2 volume=" + t2.getVolume());
-        System.out.println("t3 volume=" + t3.getVolume());
-        System.out.println("t4 volume=" + t4.getVolume());
-        System.out.println("t5 volume=" + t5.getVolume());
-        System.out.println("t6 volume=" + t6.getVolume());
-    }
-
-    public void createCubeSurfaceFromTriangles(double epsilon,
-            V3D_Point_d lbf, V3D_Point_d lba, V3D_Point_d ltf, V3D_Point_d lta,
-            V3D_Point_d rbf, V3D_Point_d rba, V3D_Point_d rtf, V3D_Point_d rta) {
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, ltf, rtf), Color.WHITE));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, rbf, rtf), Color.WHITE));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, ltf, lta), Color.WHITE));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, lba, lta), Color.WHITE));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lba, lta, rta), Color.WHITE));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lba, rba, rta), Color.WHITE));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(rbf, rtf, rta), Color.WHITE));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(rbf, rta, rba), Color.WHITE));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(ltf, lta, rta), Color.WHITE));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(rtf, ltf, rta), Color.WHITE));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, rbf, rba), Color.WHITE));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, lba, rba), Color.WHITE));
-        // Coloured triangles
-        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, ltf, rtf), Color.BLUE));
-        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, rbf, rtf), Color.BLUE));
-        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, ltf, lta), Color.RED));
-        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, lba, lta), Color.RED));
-        triangles.add(new Triangle_d(new V3D_Triangle_d(lba, lta, rta), Color.YELLOW));
-        triangles.add(new Triangle_d(new V3D_Triangle_d(lba, rba, rta), Color.YELLOW));
-        triangles.add(new Triangle_d(new V3D_Triangle_d(rbf, rtf, rta), Color.GREEN));
-        triangles.add(new Triangle_d(new V3D_Triangle_d(rbf, rta, rba), Color.GREEN));
-        triangles.add(new Triangle_d(new V3D_Triangle_d(ltf, lta, rta), Color.ORANGE));
-        triangles.add(new Triangle_d(new V3D_Triangle_d(rtf, ltf, rta), Color.ORANGE));
-        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, rbf, rba), Color.PINK));
-        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, lba, rba), Color.PINK));
-
-    }
-
-    
+//    /**
+//     * The central Tetrahedra is regular and different to the others.
+//     */
+//    public void createCubeFrom5Tetrahedra(double epsilon,
+//            V3D_Point_d lbf, V3D_Point_d lba, V3D_Point_d ltf, V3D_Point_d lta,
+//            V3D_Point_d rbf, V3D_Point_d rba, V3D_Point_d rtf, V3D_Point_d rta) {
+//        V3D_Tetrahedron_d t1 = new V3D_Tetrahedron_d(lbf, ltf, lta, rtf, epsilon);
+//        volumes.add(new Tetrahedron_d(t1, Color.BLUE));
+//        V3D_Tetrahedron_d t2 = new V3D_Tetrahedron_d(lta, lba, lbf, rba, epsilon);
+//        tetrahedra.add(new Tetrahedron_d(t2, Color.RED));
+//        V3D_Tetrahedron_d t3 = new V3D_Tetrahedron_d(lta, rta, rba, rtf, epsilon);
+//        tetrahedra.add(new Tetrahedron_d(t3, Color.GREEN));
+//        V3D_Tetrahedron_d t4 = new V3D_Tetrahedron_d(lbf, rbf, rtf, rba, epsilon);
+//        tetrahedra.add(new Tetrahedron_d(t4, Color.YELLOW));
+//        V3D_Tetrahedron_d t5 = new V3D_Tetrahedron_d(lbf, rba, rtf, lta, epsilon);
+//        tetrahedra.add(new Tetrahedron_d(t5, Color.CYAN));
+//        // Volume check
+//        System.out.println("t1 volume=" + t1.getVolume());
+//        System.out.println("t2 volume=" + t2.getVolume());
+//        System.out.println("t3 volume=" + t3.getVolume());
+//        System.out.println("t4 volume=" + t4.getVolume());
+//        System.out.println("t5 volume=" + t5.getVolume());
+//    }
+//
+//    public void createCubeFrom6Tetrahedra(double epsilon,
+//            V3D_Point_d lbf, V3D_Point_d lba, V3D_Point_d ltf, V3D_Point_d lta,
+//            V3D_Point_d rbf, V3D_Point_d rba, V3D_Point_d rtf, V3D_Point_d rta) {
+//        // Half - a triangular prism
+//        V3D_Tetrahedron_d t1 = new V3D_Tetrahedron_d(ltf, rtf, rta, rba, epsilon);
+//        tetrahedra.add(new Tetrahedron_d(t1, Color.BLUE));
+//        V3D_Tetrahedron_d t2 = new V3D_Tetrahedron_d(rtf, rbf, lbf, rba, epsilon);
+//        tetrahedra.add(new Tetrahedron_d(t2, Color.RED));
+//        V3D_Tetrahedron_d t3 = new V3D_Tetrahedron_d(lbf, rtf, rba, ltf, epsilon);
+//        tetrahedra.add(new Tetrahedron_d(t3, Color.GREEN));
+//        // Another Half - a triangular prism
+//        V3D_Tetrahedron_d t4 = new V3D_Tetrahedron_d(ltf, lbf, lba, rta, epsilon);
+//        tetrahedra.add(new Tetrahedron_d(t4, Color.YELLOW));
+//        V3D_Tetrahedron_d t5 = new V3D_Tetrahedron_d(ltf, lta, rta, lba, epsilon);
+//        tetrahedra.add(new Tetrahedron_d(t5, Color.CYAN));
+//        V3D_Tetrahedron_d t6 = new V3D_Tetrahedron_d(lbf, lba, rba, rta, epsilon);
+//        tetrahedra.add(new Tetrahedron_d(t6, Color.MAGENTA));
+//        // Volume check
+//        System.out.println("t1 volume=" + t1.getVolume());
+//        System.out.println("t2 volume=" + t2.getVolume());
+//        System.out.println("t3 volume=" + t3.getVolume());
+//        System.out.println("t4 volume=" + t4.getVolume());
+//        System.out.println("t5 volume=" + t5.getVolume());
+//        System.out.println("t6 volume=" + t6.getVolume());
+//    }
+//
+//    public void createCubeSurfaceFromTriangles(double epsilon,
+//            V3D_Point_d lbf, V3D_Point_d lba, V3D_Point_d ltf, V3D_Point_d lta,
+//            V3D_Point_d rbf, V3D_Point_d rba, V3D_Point_d rtf, V3D_Point_d rta) {
+    ////        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, ltf, rtf), Color.WHITE));
+////        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, rbf, rtf), Color.WHITE));
+////        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, ltf, lta), Color.WHITE));
+////        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, lba, lta), Color.WHITE));
+////        triangles.add(new Triangle_d(new V3D_Triangle_d(lba, lta, rta), Color.WHITE));
+////        triangles.add(new Triangle_d(new V3D_Triangle_d(lba, rba, rta), Color.WHITE));
+////        triangles.add(new Triangle_d(new V3D_Triangle_d(rbf, rtf, rta), Color.WHITE));
+////        triangles.add(new Triangle_d(new V3D_Triangle_d(rbf, rta, rba), Color.WHITE));
+////        triangles.add(new Triangle_d(new V3D_Triangle_d(ltf, lta, rta), Color.WHITE));
+////        triangles.add(new Triangle_d(new V3D_Triangle_d(rtf, ltf, rta), Color.WHITE));
+////        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, rbf, rba), Color.WHITE));
+////        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, lba, rba), Color.WHITE));
+//        // Coloured triangles
+//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, ltf, rtf), Color.BLUE));
+//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, rbf, rtf), Color.BLUE));
+//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, ltf, lta), Color.RED));
+//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, lba, lta), Color.RED));
+//        triangles.add(new Triangle_d(new V3D_Triangle_d(lba, lta, rta), Color.YELLOW));
+//        triangles.add(new Triangle_d(new V3D_Triangle_d(lba, rba, rta), Color.YELLOW));
+//        triangles.add(new Triangle_d(new V3D_Triangle_d(rbf, rtf, rta), Color.GREEN));
+//        triangles.add(new Triangle_d(new V3D_Triangle_d(rbf, rta, rba), Color.GREEN));
+//        triangles.add(new Triangle_d(new V3D_Triangle_d(ltf, lta, rta), Color.ORANGE));
+//        triangles.add(new Triangle_d(new V3D_Triangle_d(rtf, ltf, rta), Color.ORANGE));
+//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, rbf, rba), Color.PINK));
+//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, lba, rba), Color.PINK));
+//
+//    }
 
     /**
      * Set the camera.
@@ -322,18 +313,48 @@ public class Universe_d {
      */
     public void update() {
     }
-    
+
     /**
-     * Adds the polygon and returns entity.
-     * @param polygon The polygon to add.
-     * @return The Triangle.
+     * Adds the point and returns a point entity. Adding may involve expanding
+     * the universe Axis Aligned BoundingBox so it includes all entities.
+     *
+     * @param p The point to add.
+     * @return The point entity.
      */
-    public PolygonNoInternalHoles_d addPolygonNoInternalHoles(
-            V3D_PolygonNoInternalHoles_d polygon){
-        PolygonNoInternalHoles_d p = new PolygonNoInternalHoles_d(polygon,
-                getNextID());
-        pnih.add(p);
-        aabb = aabb.union(polygon.getAABB());
-        return p;
+    public Point_d addPoint(V3D_Point_d p) {
+        Point_d e = new Point_d(p);
+        points.add(e);
+        aabb = aabb.union(p.getAABB());
+        return e;
+    }
+
+    /**
+     * Adds the line and returns a line entity. Adding may involve expanding
+     * the universe Axis Aligned BoundingBox so it includes all entities.
+     *
+     * @param l The line to add.
+     * @param baseColor The line colour.
+     * @return The line entity.
+     */
+    public Line_d addLine(V3D_LineSegment_d l, Color baseColor) {
+        Line_d e = new Line_d(l, baseColor);
+        lines.add(e);
+        aabb = aabb.union(l.getAABB());
+        return e;
+    }
+
+    /**
+     * Adds an area and returns an area entity. Adding may involve expanding the
+     * universe Axis Aligned BoundingBox so it includes all entities.
+     *
+     * @param a The area to add.
+     * @param baseColor The line colour.
+     * @return The area entity.
+     */
+    public Area_d addArea(V3D_Area_d a, Color baseColor) {
+        Area_d e = new Area_d(a, baseColor);
+        areas.add(e);
+        aabb = aabb.union(a.getAABB());
+        return e;
     }
 }

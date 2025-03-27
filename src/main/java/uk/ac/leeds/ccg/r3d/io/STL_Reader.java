@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import uk.ac.leeds.ccg.generic.util.Generic_Collections;
-import uk.ac.leeds.ccg.r3d.entities.Triangle;
+import uk.ac.leeds.ccg.r3d.entities.Area;
 import uk.ac.leeds.ccg.v3d.core.V3D_Environment;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
@@ -53,7 +53,7 @@ public class STL_Reader {
     /**
      * The set of triangles.
      */
-    public ArrayList<Triangle> triangles;
+    public ArrayList<Area> triangles;
 
     /**
      * A switch set to true if topology is to be assessed.
@@ -242,7 +242,7 @@ public class STL_Reader {
         if (n.isZero()) {
             n = vt.getNormal().getUnitVector(oom, rm);
         }
-        Triangle t = new Triangle(new V3D_Triangle(env, offset, vt), n,
+        Area t = new Area(new V3D_Triangle(env, offset, vt), n,
                 attribute);
         triangles.add(t);
         if (assessTopology) {

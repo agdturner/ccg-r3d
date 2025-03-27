@@ -42,10 +42,10 @@ public class LineDouble extends Entity {
 
     /**
      * @param l What {@link #l} is set to. 
-     * @param baseColor What {@link #baseColor} is set to. 
+     * @param color What {@link #color} is set to. 
      */
-    public LineDouble(V3D_LineSegmentDouble l, Color baseColor) {
+    public LineDouble(V3D_LineSegmentDouble l, Color color) {
         this.l = l;
-        this.baseColor = baseColor;
+        this.color = color;
     }
 }

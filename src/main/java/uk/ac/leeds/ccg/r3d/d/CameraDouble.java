@@ -474,14 +474,14 @@ public class CameraDouble extends V3D_PointDouble {
         if (V3D_LineDouble.isCollinear(epsilon, l.l.l, this)) {
             // If the line segment is collinear with this, then render as a point.
             // Not sure which end is closer, so render both.
-            renderPoint(epsilon, mind2s, new PointDouble(l.l.l.getP(), l.baseColor), pix);
-            renderPoint(epsilon, mind2s, new PointDouble(l.l.l.getQ(), l.baseColor), pix);
+            renderPoint(epsilon, mind2s, new PointDouble(l.l.l.getP(), l.color), pix);
+            renderPoint(epsilon, mind2s, new PointDouble(l.l.l.getQ(), l.color), pix);
         } else {
             V3D_TriangleDouble t = new V3D_TriangleDouble(l.l, this);
             V3D_FiniteGeometryDouble ti = screen.getIntersection(t, epsilon);
             if (ti != null) {
                 if (ti instanceof V3D_PointDouble tip) {
-                    renderPoint(epsilon, mind2s, new PointDouble(tip, l.baseColor), pix);
+                    renderPoint(epsilon, mind2s, new PointDouble(tip, l.color), pix);
                 } else {
                     V3D_LineSegmentDouble til = (V3D_LineSegmentDouble) ti;
                     // Calculate the row and column bounds.
@@ -523,11 +523,11 @@ public class CameraDouble extends V3D_PointDouble {
                                     Double d2p = mind2s.get(id);
                                     if (d2p == null) {
                                         mind2s.put(id, d2); // So closest things are at the front.
-                                        render(pix, r, c, l.baseColor);
+                                        render(pix, r, c, l.color);
                                     } else {
                                         if (d2 <= d2p + epsilon) {
                                             mind2s.put(id, d2); // So closest things are at the front.
-                                            render(pix, r, c, l.baseColor);
+                                            render(pix, r, c, l.color);
                                         }
                                     }
                                 }
@@ -561,11 +561,11 @@ public class CameraDouble extends V3D_PointDouble {
                 Double d2p = mind2s.get(id);
                 if (d2p == null) {
                     mind2s.put(id, d2);
-                    render(pix, r, c, p.baseColor);
+                    render(pix, r, c, p.color);
                 } else {
                     if (d2 <= d2p + epsilon) {
                         mind2s.put(id, d2);
-                        render(pix, r, c, p.baseColor);
+                        render(pix, r, c, p.color);
                     }
                 }
             }

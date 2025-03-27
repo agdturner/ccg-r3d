@@ -58,8 +58,8 @@ public class RenderImage {
         this.universe = universe;
         //CameraOld c = new CameraOld(pt, universe.aabb, size.width, size.height, oom, rm);
         //Camera c = new Camera(pt, universe.aabb, size, zoomFactor, oom, rm);
-        Camera1 c = new Camera1(pt, universe.aabb, size.width, size.height, oom, rm);
-        this.universe.setCamera(c);
+        //Camera1 c = new Camera1(pt, universe.aabb, size.width, size.height, oom, rm);
+        //this.universe.setCamera(c);
     }
 
     public static void main(String[] args) {
@@ -473,7 +473,8 @@ public class RenderImage {
      */
     public void run(Dimension size, V3D_Vector lighting, BigRational ambientLight,
             boolean castShadow, int oom, RoundingMode rm) throws Exception {
-        int[] pix = universe.camera.render(this.universe, lighting, ambientLight, castShadow, oom, rm);
+        int[] pix = null;
+        //int[] pix = universe.camera.render(this.universe, lighting, ambientLight, castShadow, oom, rm);
         /**
          * Convert pix to an image and write to a file.
          */

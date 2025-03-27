@@ -41,10 +41,10 @@ public class Point extends Entity {
 
     /**
      * @param p What {@link #p} is set to. 
-     * @param baseColor What {@link #baseColor} is set to. 
+     * @param color What {@link #color} is set to. 
      */
-    public Point(V3D_Point p, Color baseColor) {
+    public Point(V3D_Point p, Color color) {
         this.p = p;
-        this.baseColor = baseColor;
+        this.color = color;
     }
 }

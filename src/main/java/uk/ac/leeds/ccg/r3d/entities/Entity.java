@@ -17,7 +17,6 @@ package uk.ac.leeds.ccg.r3d.entities;
 
 import java.awt.Color;
 import java.io.Serializable;
-import uk.ac.leeds.ccg.data.id.Data_ID_long;
 
 /**
  * For representing spatial entities in the universe.
@@ -29,61 +28,33 @@ public class Entity implements Serializable {
     private static final long serialVersionUID = 1L;
     
     /**
-     * The id.
+     * The base colour.
      */
-    public Data_ID_long id;
-    
-    /**
-     * Create a new instance.
-     */
-    public Entity(){}
-    
-    /**
-     * The base colour of the triangle.
-     */
-    public Color baseColor;
+    public Color color;
 
     /**
-     * The colour of the triangle given some lighting conditions.
+     * The colour given some lighting conditions.
      */
     public Color lightingColor;
 
     /**
-     * The colour of in ambient light.
+     * The colour in ambient light.
      */
     public Color ambientColor;
     
     /**
-     * The edge colour.
+     * Create a new instance with {@link #color} {@code Color.gray}.
      */
-    public Color colorEdge;
-    
-    /**
-     * Create a new instance.
-     * @param id What {@link #id} is set to.
-     */
-    public Entity(Data_ID_long id){
-        this(id, Color.lightGray, Color.gray);
+    public Entity() {
+        this(Color.gray);
     }
     
     /**
      * Create a new instance.
-     * @param id What {@link #id} is set to.
-     * @param color What {@link #color} and {@link #colorEdge} are set to.
-     */
-    public Entity(Data_ID_long id, Color color){
-        this(id, color, color);
-    }
-    
-    /**
-     * Create a new instance.
-     * @param id What {@link #id} is set to.
+     * 
      * @param color What {@link #color} is set to.
-     * @param colorEdge What {@link #colorEdge} is set to.
      */
-    public Entity(Data_ID_long id, Color color, Color colorEdge){
-        this.id = id;
-        this.baseColor = color;
-        this.colorEdge = colorEdge;
+    public Entity(Color color){
+        this.color = color;
     }
 }
