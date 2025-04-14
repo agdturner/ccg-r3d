@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.leeds.ccg.r3d.d;
+package uk.ac.leeds.ccg.r3d;
 
+import ch.obermuhlner.math.big.BigRational;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,25 +26,24 @@ import java.util.Set;
 import java.util.TreeMap;
 import uk.ac.leeds.ccg.generic.util.Generic_Collections;
 import uk.ac.leeds.ccg.grids.d2.Grids_2D_ID_int;
-import uk.ac.leeds.ccg.r3d.d.entities.Area_d;
-import uk.ac.leeds.ccg.r3d.d.entities.Line_d;
-import uk.ac.leeds.ccg.r3d.d.entities.Point_d;
-import uk.ac.leeds.ccg.r3d.d.entities.Triangle_d;
-import uk.ac.leeds.ccg.v3d.core.d.V3D_Environment_d;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Geometry_d;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Point_d;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Rectangle_d;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Triangle_d;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Vector_d;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_AABB_d;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Area_d;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_FiniteGeometry_d;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Line_d;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineSegment_d;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Plane_d;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Ray_d;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Frustum_d;
-import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Tetrahedron_d;
+import uk.ac.leeds.ccg.r3d.entities.Area;
+import uk.ac.leeds.ccg.r3d.entities.Line;
+import uk.ac.leeds.ccg.r3d.entities.Point;
+import uk.ac.leeds.ccg.v3d.core.V3D_Environment;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Geometry;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Rectangle;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_AABB;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Area;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_FiniteGeometry;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Line;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_LineSegment;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Plane;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Ray;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Frustum;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Tetrahedron;
 
 /**
  * Camera instances are situated in the 3D Universe. They are a frustum with
@@ -68,7 +69,7 @@ import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Tetrahedron_d;
  *
  * @author Andy Turner
  */
-public class Camera_d extends V3D_Frustum_d {
+public class Camera extends V3D_Frustum {
 
     private static final long serialVersionUID = 1L;
 
@@ -85,12 +86,12 @@ public class Camera_d extends V3D_Frustum_d {
     /**
      * For storing rays from the camera focal point through each pixel centre.
      */
-    public final HashMap<Grids_2D_ID_int, V3D_Ray_d> rays;
+    public final HashMap<Grids_2D_ID_int, V3D_Ray> rays;
 
     /**
      * For storing the length/width of a pixel.
      */
-    public double pixelSize;
+    public BigRational pixelSize;
 
     /**
      * Create a new instance.
@@ -100,11 +101,13 @@ public class Camera_d extends V3D_Frustum_d {
      * @param dim The nrows and ncolumns of pixels on rect.
      * @param width The width of rect.
      */
-    public Camera_d(V3D_Environment_d env, V3D_Vector_d offset,
-            V3D_Point_d focus, V3D_Vector_d direction, V3D_Vector_d horizontal,
-            double distance, double pixelSize, Dimension dim) {
+    public Camera(V3D_Environment env, V3D_Vector offset,
+            V3D_Point focus, V3D_Vector direction, V3D_Vector horizontal,
+            BigRational distance, BigRational pixelSize, Dimension dim,
+            int oom, RoundingMode rm) {
         super(env, offset, focus, direction, horizontal, distance,
-                dim.width * pixelSize, dim.height * pixelSize);
+                BigRational.valueOf(dim.width).multiply(pixelSize),
+                BigRational.valueOf(dim.height).multiply(pixelSize), oom, rm);
         this.pixelSize = pixelSize;
         this.nrows = dim.height;
         this.ncols = dim.width;
@@ -117,12 +120,14 @@ public class Camera_d extends V3D_Frustum_d {
      * @param focus The camera focus.
      * @param distance The distance from the focus to the centre of rect.
      * @param rect The frustum near rectangle.
-     * @param dim The nrows and ncolumns of pixels on rect.
+     * @param dim The nrows and ncols of pixels on rect.
      */
-    public Camera_d(V3D_Environment_d env, V3D_Vector_d offset,
-            V3D_Point_d focus, V3D_Rectangle_d rect, Dimension dim) {
-        super(env, offset, focus, rect);
-        this.pixelSize = rect.getPQR().getPQ().getLength() / (double) dim.height;
+    public Camera(V3D_Environment env, V3D_Vector offset,
+            V3D_Point focus, V3D_Rectangle rect, Dimension dim,
+            int oom, RoundingMode rm) {
+        super(env, offset, focus, rect, oom, rm);
+        this.pixelSize = rect.getPQR().getPQ(oom, rm).getLength(oom, rm).getSqrt(oom, rm)
+                .divide(dim.height);
         this.nrows = dim.height;
         this.ncols = dim.width;
         this.rays = new HashMap<>();
@@ -142,96 +147,96 @@ public class Camera_d extends V3D_Frustum_d {
      * @return An image map.
      * @throws Exception
      */
-    int[] render(Universe_d universe, V3D_Vector_d lighting,
-            double ambientLight, boolean castShadow, boolean addGraticules,
-            double epsilon)
-            throws Exception {
+    int[] render(Universe universe, V3D_Vector lighting,
+            BigRational ambientLight, boolean castShadow, boolean addGraticules,
+            int oom, RoundingMode rm) throws Exception {
         int n = ncols * nrows;
         int[] pix = new int[n];
-        HashMap<Grids_2D_ID_int, Double> mind2s = new HashMap<>();
+        HashMap<Grids_2D_ID_int, BigRational> mind2s = new HashMap<>();
         // Add axes
         if (addGraticules) {
             System.out.println("Add Graticules");
-            double xmin = universe.aabb.getXMin();
-            double xmax = universe.aabb.getXMax();
-            double ymin = universe.aabb.getYMin();
-            double ymax = universe.aabb.getYMax();
-            double zmin = universe.aabb.getZMin();
-            double zmax = universe.aabb.getZMax();
-            double scale = 10d;
+            BigRational xmin = universe.aabb.getXMin(oom);
+            BigRational xmax = universe.aabb.getXMax(oom);
+            BigRational ymin = universe.aabb.getYMin(oom);
+            BigRational ymax = universe.aabb.getYMax(oom);
+            BigRational zmin = universe.aabb.getZMin(oom);
+            BigRational zmax = universe.aabb.getZMax(oom);
+            BigRational scale = BigRational.TEN;
             //double scale = rect.getPQR().getPQ().getLength() / 10.d;
-            V3D_Point_d origin = new V3D_Point_d(env, V3D_Vector_d.ZERO);
-            V3D_Point_d p = new V3D_Point_d(rect.getP());
-            p.translate(new V3D_Vector_d(-scale, -scale, -scale));
-            V3D_Vector_d tr = new V3D_Vector_d(origin, p);
-            tr = tr.add(new V3D_Vector_d(
-                    (xmax - xmin) / scale,
-                    (ymax - ymin) / scale,
-                    (zmax - zmin) / scale));
+            V3D_Point origin = new V3D_Point(env, V3D_Vector.ZERO);
+            V3D_Point p = new V3D_Point(rect.getP(oom, rm));
+            BigRational scaleNeg = scale.negate();
+            p.translate(new V3D_Vector(scaleNeg, scaleNeg, scaleNeg), oom, rm);
+            V3D_Vector tr = new V3D_Vector(origin, p, oom, rm);
+            tr = tr.add(new V3D_Vector(
+                    (xmax.subtract(xmin)).divide(scale),
+                    (ymax.subtract(ymin)).divide(scale),
+                    (zmax.subtract(zmin)).divide(scale)), oom, rm);
             System.out.println("tr=" + tr.toString());
             // Render axes
             // x axis
-            V3D_Point_d x_min = new V3D_Point_d(env, new V3D_Vector_d(xmin / scale, 0d, 0d));
-            V3D_Point_d x_max = new V3D_Point_d(env, new V3D_Vector_d(xmax / scale, 0d, 0d));
-            V3D_LineSegment_d x_axis = new V3D_LineSegment_d(x_min, x_max);
-            x_axis.translate(tr);
+            V3D_Point x_min = new V3D_Point(env, new V3D_Vector(xmin.divide(scale), BigRational.ZERO, BigRational.ZERO));
+            V3D_Point x_max = new V3D_Point(env, new V3D_Vector(xmax.divide(scale), BigRational.ZERO, BigRational.ZERO));
+            V3D_LineSegment x_axis = new V3D_LineSegment(x_min, x_max, oom, rm);
+            x_axis.translate(tr, oom, rm);
             System.out.println("X graticule " + x_axis.toString());
-            Line_d xAxis = new Line_d(x_axis, Color.BLUE);
-            V3D_Point_d xpoi = xAxis.l.l.getPointOfIntersect(focus, epsilon);
-            V3D_Vector_d xpoin = new V3D_Vector_d(xpoi, focus);
-            if (xpoin.isZero(epsilon)) {
-                renderPoint(epsilon, mind2s, new Point_d(xAxis.l.l.getP(), xAxis.color), pix);
-                renderPoint(epsilon, mind2s, new Point_d(xAxis.l.l.getQ(), xAxis.color), pix);
+            Line xAxis = new Line(x_axis, Color.BLUE);
+            V3D_Point xpoi = xAxis.l.l.getPointOfIntersect(focus, oom, rm);
+            V3D_Vector xpoin = new V3D_Vector(xpoi, focus, oom, rm);
+            if (xpoin.isZero(oom, rm)) {
+                renderPoint(oom, rm, mind2s, new Point(xAxis.l.l.getP(), xAxis.color), pix);
+                renderPoint(oom, rm, mind2s, new Point(xAxis.l.l.getQ(oom, rm), xAxis.color), pix);
             } else {
-                V3D_Plane_d xpoinpl = new V3D_Plane_d(xpoi, xpoin);
-                renderLine(epsilon, mind2s, xAxis, xpoinpl, pix);
+                V3D_Plane xpoinpl = new V3D_Plane(xpoi, xpoin);
+                renderLine(oom, rm, mind2s, xAxis, xpoinpl, pix);
             }
             // y axis                
-            V3D_Point_d y_min = new V3D_Point_d(env, new V3D_Vector_d(0d, ymin / scale, 0d));
-            V3D_Point_d y_max = new V3D_Point_d(env, new V3D_Vector_d(0d, ymax / scale, 0d));
-            V3D_LineSegment_d y_axis = new V3D_LineSegment_d(y_min, y_max);
-            y_axis.translate(tr);
+            V3D_Point y_min = new V3D_Point(env, new V3D_Vector(BigRational.ZERO, ymin.divide(scale), BigRational.ZERO));
+            V3D_Point y_max = new V3D_Point(env, new V3D_Vector(BigRational.ZERO, ymax.divide(scale), BigRational.ZERO));
+            V3D_LineSegment y_axis = new V3D_LineSegment(y_min, y_max, oom, rm);
+            y_axis.translate(tr, oom, rm);
             System.out.println("Y graticule " + y_axis.toString());
-            Line_d yAxis = new Line_d(y_axis, Color.RED);
-            V3D_Point_d ypoi = yAxis.l.l.getPointOfIntersect(focus, epsilon);
-            V3D_Vector_d ypoin = new V3D_Vector_d(ypoi, focus);
-            if (ypoin.isZero(epsilon)) {
-                renderPoint(epsilon, mind2s, new Point_d(yAxis.l.l.getP(), yAxis.color), pix);
-                renderPoint(epsilon, mind2s, new Point_d(yAxis.l.l.getQ(), yAxis.color), pix);
+            Line yAxis = new Line(y_axis, Color.RED);
+            V3D_Point ypoi = yAxis.l.l.getPointOfIntersect(focus, oom, rm);
+            V3D_Vector ypoin = new V3D_Vector(ypoi, focus, oom, rm);
+            if (ypoin.isZero(oom, rm)) {
+                renderPoint(oom, rm, mind2s, new Point(yAxis.l.l.getP(), yAxis.color), pix);
+                renderPoint(oom, rm, mind2s, new Point(yAxis.l.l.getQ(oom, rm), yAxis.color), pix);
             } else {
-                V3D_Plane_d ypoinpl = new V3D_Plane_d(ypoi, ypoin);
-                renderLine(epsilon, mind2s, yAxis, ypoinpl, pix);
+                V3D_Plane ypoinpl = new V3D_Plane(ypoi, ypoin);
+                renderLine(oom, rm, mind2s, yAxis, ypoinpl, pix);
             }
             // z axis
-            V3D_Point_d z_min = new V3D_Point_d(env, new V3D_Vector_d(0d, 0d, zmin / scale));
-            V3D_Point_d z_max = new V3D_Point_d(env, new V3D_Vector_d(0d, 0d, zmax / scale));
-            V3D_LineSegment_d z_axis = new V3D_LineSegment_d(z_min, z_max);
-            z_axis.translate(tr);
+            V3D_Point z_min = new V3D_Point(env, new V3D_Vector(BigRational.ZERO, BigRational.ZERO, zmin.divide(scale)));
+            V3D_Point z_max = new V3D_Point(env, new V3D_Vector(BigRational.ZERO, BigRational.ZERO, zmax.divide(scale)));
+            V3D_LineSegment z_axis = new V3D_LineSegment(z_min, z_max, oom, rm);
+            z_axis.translate(tr, oom, rm);
             System.out.println("Z graticule " + z_axis.toString());
-            Line_d zAxis = new Line_d(z_axis, Color.GREEN);
-            V3D_Point_d zpoi = zAxis.l.l.getPointOfIntersect(focus, epsilon);
-            V3D_Vector_d zpoin = new V3D_Vector_d(zpoi, focus);
-            if (zpoin.isZero(epsilon)) {
-                renderPoint(epsilon, mind2s, new Point_d(zAxis.l.l.getP(), zAxis.color), pix);
-                renderPoint(epsilon, mind2s, new Point_d(zAxis.l.l.getQ(), zAxis.color), pix);
+            Line zAxis = new Line(z_axis, Color.GREEN);
+            V3D_Point zpoi = zAxis.l.l.getPointOfIntersect(focus, oom, rm);
+            V3D_Vector zpoin = new V3D_Vector(zpoi, focus, oom, rm);
+            if (zpoin.isZero(oom, rm)) {
+                renderPoint(oom, rm, mind2s, new Point(zAxis.l.l.getP(), zAxis.color), pix);
+                renderPoint(oom, rm, mind2s, new Point(zAxis.l.l.getQ(oom, rm), zAxis.color), pix);
             } else {
-                V3D_Plane_d zpoinpl = new V3D_Plane_d(zpoi, zpoin);
-                renderLine(epsilon, mind2s, zAxis, zpoinpl, pix);
+                V3D_Plane zpoinpl = new V3D_Plane(zpoi, zpoin);
+                renderLine(oom, rm, mind2s, zAxis, zpoinpl, pix);
             }
         }
         // Render Lines
         int nlines = universe.lines.size();
         universe.lines.forEach(x
                 -> {
-            if (x.l.l.v.isScalarMultiple(rect.getPQR().getPQV())) {
-                renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getQRV()), pix);
+            if (x.l.l.v.isScalarMultiple(rect.getPQR().getPQV(oom, rm), oom, rm)) {
+                renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getQRV(oom, rm), oom, rm), pix);
             } else {
-                renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getPQV()), pix);
+                renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getPQV(oom, rm), oom, rm), pix);
             }
         });
         // Render Areas
         int nAreas = universe.areas.size();
-        V3D_Point_d centroid = universe.aabb.getCentroid();
+        V3D_Point centroid = universe.aabb.getCentroid(oom, rm);
         if (nAreas > 0) {
             /**
              * Find the closest area intersects for a ray and colour the pixel
@@ -240,15 +245,15 @@ public class Camera_d extends V3D_Frustum_d {
             System.out.println("Calculate the minimum distance between each"
                     + " area and the camera focal point. Order the areas by"
                     + " the distance, and set the lighting.");
-            TreeMap<Double, Set<Integer>> mindOrderedAreas = new TreeMap<>();
+            TreeMap<BigRational, Set<Integer>> mindOrderedAreas = new TreeMap<>();
             /**
              * mind2st is the minimum distance of each each area to the camera
-             * point for those parts of the area in view of the camera i.e.
-             * through the frustum.
+             * focus point for those parts of the area in view of the camera
+             * i.e. through the frustum.
              */
-            double[] mind2st = new double[nAreas];
+            BigRational[] mind2st = new BigRational[nAreas];
             process(centroid, 0, universe.areas, lighting, ambientLight,
-                    mindOrderedAreas, mind2st, epsilon);
+                    mindOrderedAreas, mind2st, oom, rm);
             int nAP = (nAreas / 100);
             if (nAP < 1) {
                 nAP = 1;
@@ -258,7 +263,7 @@ public class Camera_d extends V3D_Frustum_d {
                     System.out.println("Area " + i + " out of " + nAreas);
                 }
                 process(centroid, i, universe.areas, lighting, ambientLight,
-                        mindOrderedAreas, mind2st, epsilon);
+                        mindOrderedAreas, mind2st, oom, rm);
             }
             System.out.println("Minimum distance squared between any area and"
                     + " the camera focal point = "
@@ -267,17 +272,17 @@ public class Camera_d extends V3D_Frustum_d {
                     + "the furthest.");
             // Process areas.
             /**
-             * idPoint is used to store the point of intersection for the
-             * triangle closest to the camera. This is later used to see if that
-             * point on the area is in shadow
+             * idPoint is used to store the point of intersection. This could be
+             * used later for example to identify if that point on the area is
+             * in a shadow...
              */
             HashMap<Grids_2D_ID_int, Integer> closestIndex = new HashMap<>();
-            HashMap<Grids_2D_ID_int, V3D_Point_d> idPoint = new HashMap<>();
-            for (double mind2 : mindOrderedAreas.keySet()) {
+            HashMap<Grids_2D_ID_int, V3D_Point> idPoint = new HashMap<>();
+            for (BigRational mind2 : mindOrderedAreas.keySet()) {
                 Set<Integer> triangleIndexes = mindOrderedAreas.get(mind2);
                 for (var i : triangleIndexes) {
                     processArea(i, universe.areas.get(i).area, mind2st,
-                            mind2s, closestIndex, idPoint, epsilon);
+                            mind2s, closestIndex, idPoint, oom, rm);
                 }
             }
             // Render pixels
@@ -294,7 +299,7 @@ public class Camera_d extends V3D_Frustum_d {
                 }
                 pixel++;
                 int ci = closestIndex.get(x);
-                Area_d a = universe.areas.get(ci);
+                Area a = universe.areas.get(ci);
                 render(pix, x.getRow(), x.getCol(), a.lightingColor);
             }
         }
@@ -302,57 +307,54 @@ public class Camera_d extends V3D_Frustum_d {
     }
 
     /**
-     * For rendering a line on the image. Lines may be obscured by triangles and
-     * each other. This will render the closest one.
+     * For rendering a line on the image.Lines may be obscured by areas and each
+     * other.
      *
-     * @param epsilon The tolerance for intersection.
+     * @param oom The Order of Magnitude for the precision.
+     * @param rm The RoundingMode for any rounding.
      * @param l The line to render.
+     * @param mind2s
      * @param plane A plane on which l.l is located.
      * @param pix The image.
      */
-    public void renderLine(double epsilon,
-            HashMap<Grids_2D_ID_int, Double> mind2s, Line_d l,
-            V3D_Plane_d plane, int[] pix) {
-        if (V3D_Line_d.isCollinear(epsilon, l.l.l, this.focus)) {
+    public void renderLine(int oom, RoundingMode rm,
+            HashMap<Grids_2D_ID_int, BigRational> mind2s, Line l,
+            V3D_Plane plane, int[] pix) {
+        if (V3D_Line.isCollinear(oom, rm, l.l.l, this.focus)) {
             // If the line segment is collinear with this, then render as a point.
             // Not sure which end is closer, so render both.
-            renderPoint(epsilon, mind2s, new Point_d(l.l.l.getP(), l.color), pix);
-            renderPoint(epsilon, mind2s, new Point_d(l.l.l.getQ(), l.color), pix);
+            renderPoint(oom, rm, mind2s, new Point(l.l.l.getP(), l.color), pix);
+            renderPoint(oom, rm, mind2s, new Point(l.l.l.getQ(oom, rm), l.color), pix);
         } else {
-            V3D_Triangle_d t = new V3D_Triangle_d(l.l, this.focus);
-            V3D_LineSegment_d rp = t.getRP();
-            V3D_LineSegment_d qr = t.getQR();
-            V3D_Point_d rpi = rect.pl.getIntersect0(rp, epsilon);
-            //V3D_FiniteGeometry_d ti = rect.getIntersect0(t, epsilon);
+            V3D_Triangle t = new V3D_Triangle(l.l, this.focus, oom, rm);
+            V3D_LineSegment rp = t.getRP(oom, rm);
+            V3D_LineSegment qr = t.getQR(oom, rm);
+            V3D_Plane rectpl = rect.getPl(oom, rm);
+            V3D_Point rpi = rectpl.getIntersect0(rp, oom, rm);
+            //V3D_FiniteGeometry ti = rect.getIntersect(t, oom, rm);
             if (rpi != null) {
                 // Calculate the row and column bounds.
-                int rrpi = getScreenRow(rpi, epsilon);
-                int crpi = getScreenCol(rpi, epsilon);
-                V3D_Point_d qri = rect.pl.getIntersect0(qr, epsilon);
+                int rrpi = getScreenRow(rpi, oom, rm);
+                int crpi = getScreenCol(rpi, oom, rm);
+                V3D_Point qri = rectpl.getIntersect0(qr, oom, rm);
                 if (qri != null) {
-                    int rqri = getScreenRow(qri, epsilon);
-                    int cqri = getScreenCol(qri, epsilon);
+                    int rqri = getScreenRow(qri, oom, rm);
+                    int cqri = getScreenCol(qri, oom, rm);
                     int minri;
                     int minci;
                     int maxri;
                     int maxci;
-                    boolean pbq;
                     if (rrpi < rqri) {
-                        pbq = true;
                         minri = rrpi;
                         maxri = rqri;
                     } else {
-                        pbq = false;
                         minri = rqri;
                         maxri = rrpi;
                     }
-                    boolean plq;
                     if (crpi < cqri) {
-                        plq = true;
                         minci = crpi;
                         maxci = cqri;
                     } else {
-                        plq = false;
                         minci = cqri;
                         maxci = crpi;
                     }
@@ -378,32 +380,31 @@ public class Camera_d extends V3D_Frustum_d {
                         maxci = ncols - 1;
                     }
                     // Calculate/store the screen projected line segment.
-                    V3D_Line_d sl = new V3D_Line_d(
-                            getPoint(rrpi, crpi, epsilon),
-                            getPoint(rqri, cqri, epsilon));
-                    double lw = pixelSize * 3;
+                    V3D_Line sl = new V3D_Line(
+                            getPoint(rrpi, crpi, oom, rm),
+                            getPoint(rqri, cqri, oom, rm), oom, rm);
+                    BigRational lw = pixelSize.multiply(3);
                     for (int row = minri; row <= maxri; row++) {
                         for (int col = minci; col <= maxci; col++) {
                             // Calculate the pixel distance from the screen 
-                            V3D_Point_d sp = getPoint(row, col, epsilon);
-                            double d = sl.getDistance(sp, epsilon);
-                            if (d < lw) {
-                                V3D_Rectangle_d pixel = getPixel(row, col);
+                            V3D_Point sp = getPoint(row, col, oom, rm);
+                            BigRational d = sl.getDistance(sp, oom, rm);
+                            if (d.compareTo(lw) == -1) {
+                                V3D_Rectangle pixel = getPixel(row, col, oom, rm);
                                 //System.out.println("" + r + ", "
-//                            V3D_FiniteGeometry_d pit = pixel.getIntersect0(t, epsilon);
-//                            if (pit != null) {
-                                if (pixel.intersects0(t, epsilon)) {
+                                if (pixel.intersects0(t, oom, rm)) {
                                     Grids_2D_ID_int id = new Grids_2D_ID_int(row, col);
-                                    V3D_Ray_d ray = getRay(id);
-                                    V3D_Point_d ri = ray.getIntersect0(plane, epsilon);
-                                    double d2;
-                                    d2 = ri.getDistanceSquared(this.focus);
-                                    Double d2p = mind2s.get(id);
+                                    V3D_Ray ray = getRay(id, oom, rm);
+                                    V3D_Point ri = ray.getIntersect0(plane, oom, rm);
+                                    BigRational d2;
+                                    d2 = ri.getDistanceSquared(this.focus, oom, rm);
+                                    BigRational d2p = mind2s.get(id);
                                     if (d2p == null) {
                                         mind2s.put(id, d2); // So closest things are at the front.
                                         render(pix, row, col, l.color);
                                     } else {
-                                        if (d2 <= d2p + epsilon) {
+                                        //if (d2 <= d2p + epsilon) {
+                                        if (d2.compareTo(d2p) == -1) {
                                             mind2s.put(id, d2); // So closest things are at the front.
                                             render(pix, row, col, l.color);
                                         } else {
@@ -423,29 +424,29 @@ public class Camera_d extends V3D_Frustum_d {
     /**
      * For rendering a point on the image.
      *
-     * @param epsilon The tolerance for intersection.
+     * @param oom
+     * @param rm The tolerance for intersection.
      * @param p The point to render.
-     * @param pl The plane of the point to render. The normal is the vector to
-     * this.
+     * @param mind2s
      * @param pix The image.
-     * @return pix
      */
-    public void renderPoint(double epsilon,
-            HashMap<Grids_2D_ID_int, Double> mind2s, Point_d p, int[] pix) {
-        if (!focus.equals(p.p, epsilon)) {
-            V3D_Ray_d ray = new V3D_Ray_d(focus, p.p);
-            V3D_Point_d pt = (V3D_Point_d) rect.getIntersect(ray, epsilon);
+    public void renderPoint(int oom, RoundingMode rm,
+            HashMap<Grids_2D_ID_int, BigRational> mind2s, Point p, int[] pix) {
+        if (!focus.equals(p.p, oom, rm)) {
+            V3D_Ray ray = new V3D_Ray(focus, p.p, oom, rm);
+            V3D_Point pt = (V3D_Point) rect.getIntersect(ray, oom, rm);
             if (pt != null) {
-                int r = getScreenRow(pt, epsilon);
-                int c = getScreenCol(pt, epsilon);
+                int r = getScreenRow(pt, oom, rm);
+                int c = getScreenCol(pt, oom, rm);
                 Grids_2D_ID_int id = new Grids_2D_ID_int(r, c);
-                double d2 = p.p.getDistanceSquared(focus);
-                Double d2p = mind2s.get(id);
+                BigRational d2 = p.p.getDistanceSquared(focus, oom, rm);
+                BigRational d2p = mind2s.get(id);
                 if (d2p == null) {
                     mind2s.put(id, d2);
                     render(pix, r, c, p.color);
                 } else {
-                    if (d2 <= d2p + epsilon) {
+                    //if (d2 <= d2p + epsilon) {
+                    if (d2.compareTo(d2p) == -1) {
                         mind2s.put(id, d2);
                         render(pix, r, c, p.color);
                     }
@@ -477,15 +478,15 @@ public class Camera_d extends V3D_Frustum_d {
      * @param ambientLight
      * @param mindOrderedTriangles
      * @param mind2t
-     * @param epsilon
+     * @param oom, rm
      */
-    private void process(V3D_Point_d centroid, int index,
-            ArrayList<Area_d> areas, V3D_Vector_d lighting, double ambientLight,
-            TreeMap<Double, Set<Integer>> mindOrderedTriangles,
-            double[] mind2t, double epsilon) {
-        Area_d area = areas.get(index);
-        area.setLighting(centroid, lighting, ambientLight, epsilon);
-        V3D_Area_d a = area.area;
+    private void process(V3D_Point centroid, int index,
+            ArrayList<Area> areas, V3D_Vector lighting, BigRational ambientLight,
+            TreeMap<BigRational, Set<Integer>> mindOrderedTriangles,
+            BigRational[] mind2t, int oom, RoundingMode rm) {
+        Area area = areas.get(index);
+        area.setLighting(centroid, lighting, ambientLight, oom, rm);
+        V3D_Area a = area.area;
         /**
          * Algorithm:
          *
@@ -502,15 +503,15 @@ public class Camera_d extends V3D_Frustum_d {
          * 4. Calculate the distance from this to the points of intersection and
          * store the minimum of these distances
          */
-        V3D_Point_d[] pts = a.getPointsArray();
-        V3D_Plane_d tpl = a.pl;
-        double mind2 = Double.MAX_VALUE;
+        V3D_Point[] pts = a.getPointsArray(oom, rm);
+        V3D_Plane tpl = a.getPl(oom, rm);
+        BigRational mind2 = BigRational.valueOf(Double.MAX_VALUE);
         for (var pt : pts) {
-            if (!pt.equals(focus, epsilon)) {
-                V3D_Ray_d ray = new V3D_Ray_d(focus, pt);
-                if (rect.intersects(ray, epsilon)) {
-                    double d2 = pt.getDistanceSquared(focus);
-                    mind2 = Math.min(d2, mind2);
+            if (!pt.equals(focus, oom, rm)) {
+                V3D_Ray ray = new V3D_Ray(focus, pt, oom, rm);
+                if (rect.intersects(ray, oom, rm)) {
+                    BigRational d2 = pt.getDistanceSquared(focus, oom, rm);
+                    mind2 = BigRational.min(d2, mind2);
                 }
             }
         }
@@ -531,30 +532,29 @@ public class Camera_d extends V3D_Frustum_d {
      * pixel.
      * @param idPoint The point of intersection on the closest triangle through
      * each pixel.
-     * @param epsilon The tolerance within which two vectors are equal.
+     * @param oom The Order of Magnitude for the precision.
+     * @param rm The RoundingMode for any rounding.
      */
-    protected void processArea(int tIndex, V3D_Area_d a,
-            double[] mind2t, HashMap<Grids_2D_ID_int, Double> mind2s,
+    protected void processArea(int tIndex, V3D_Area a,
+            BigRational[] mind2t, HashMap<Grids_2D_ID_int, BigRational> mind2s,
             HashMap<Grids_2D_ID_int, Integer> closestIndex,
-            HashMap<Grids_2D_ID_int, V3D_Point_d> idPoint,
-            double epsilon) {
+            HashMap<Grids_2D_ID_int, V3D_Point> idPoint,
+            int oom, RoundingMode rm) {
         /**
          * Loop over the extent, and where necessary, calculate the intersection
-         * to determine if the area is in the pixel and if the distance is a
-         * minimum distance. The bounding box or convex hull of an area can be
-         * used to find the min and max row and column rather than looking
-         * everywhere.
+         * to determine if the triangle is in the pixel and if the distance is a
+         * minimum distance.
          */
         for (int row = 0; row < nrows; row++) {
             for (int col = 0; col < ncols; col++) {
                 Grids_2D_ID_int id = new Grids_2D_ID_int(row, col);
-                Double mind2 = mind2s.get(id);
+                BigRational mind2 = mind2s.get(id);
                 if (mind2 == null) {
                     try {
-                        V3D_Ray_d ray = getRay(id);
-                        V3D_Point_d ti = a.getIntersect0(ray, epsilon);
+                        V3D_Ray ray = getRay(id, oom, rm);
+                        V3D_Point ti = ray.getIntersect0(a.getPl(oom, rm), oom, rm);
                         if (ti != null) {
-                            double d2 = ti.getDistanceSquared(focus);
+                            BigRational d2 = ti.getDistanceSquared(focus, oom, rm);
                             mind2s.put(id, d2);
                             closestIndex.put(id, tIndex);
                             idPoint.put(id, ti);
@@ -564,14 +564,16 @@ public class Camera_d extends V3D_Frustum_d {
                                 + "triangle: " + a.toString());
                     }
                 } else {
-                    if (mind2t[tIndex] < mind2) {
+                    //if (mind2t[tIndex] < mind2) {
+                    if (mind2t[tIndex].compareTo(mind2) == -1) {
                         try {
-                            V3D_Ray_d ray = getRay(id);
-                            V3D_Point_d ti = a.getIntersect0(ray, epsilon);
+                            V3D_Ray ray = getRay(id, oom, rm);
+                            V3D_Point ti = a.getIntersect0(ray, oom, rm);
                             if (ti != null) {
-                                // Only render areas that intersect the ray at a point and that are beyond the camera rect.
-                                double d2 = ti.getDistanceSquared(focus);
-                                if (d2 < mind2) {
+                                // Only render triangles that intersect the ray at a point and that are beyond the camera rect.
+                                BigRational d2 = ti.getDistanceSquared(focus, oom, rm);
+                                //if (d2 < mind2) {
+                                if (d2.compareTo(mind2) == -1) {
                                     mind2s.put(id, d2);
                                     closestIndex.put(id, tIndex);
                                     idPoint.put(id, ti);
@@ -592,17 +594,19 @@ public class Camera_d extends V3D_Frustum_d {
      * screen pixel with ID id.
      *
      * @param id The ID of the screen pixel.
+     * @param oom The Order of Magnitude for the precision.
+     * @param rm The RoundingMode for any rounding.
      * @return The ray from the camera focal point through the centre of the
      * screen pixel.
      */
-    protected V3D_Ray_d getRay(Grids_2D_ID_int id) {
-        V3D_Ray_d r = rays.get(id);
+    protected V3D_Ray getRay(Grids_2D_ID_int id, int oom, RoundingMode rm) {
+        V3D_Ray r = rays.get(id);
         if (r == null) {
-            V3D_Vector_d rv = verticalUV.multiply(id.getRow());
-            V3D_Vector_d cv = horizontalUV.multiply(id.getCol());
-            V3D_Point_d rcpt = new V3D_Point_d(rect.getP());
-            rcpt.translate(rv.add(cv));
-            r = new V3D_Ray_d(focus, rcpt);
+            V3D_Vector rv = verticalUV.multiply(id.getRow(), oom, rm);
+            V3D_Vector cv = horizontalUV.multiply(id.getCol(), oom, rm);
+            V3D_Point rcpt = new V3D_Point(rect.getP(oom, rm));
+            rcpt.translate(rv.add(cv, oom, rm), oom, rm);
+            r = new V3D_Ray(focus, rcpt, oom, rm);
             rays.put(id, r);
         }
         return r;
@@ -612,24 +616,26 @@ public class Camera_d extends V3D_Frustum_d {
      * Get the pixel that the ray intersects.
      *
      * @param p A point in the universe.
+     * @param oom The Order of Magnitude for the precision.
+     * @param rm The RoundingMode for any rounding.
      * @return The ID of the rect cell that intersects a ray from this to focus,
      * or {@code null}.
      */
-    protected Grids_2D_ID_int getRC(V3D_Point_d p, double epsilon) {
-        if (focus.equals(p, epsilon)) {
+    protected Grids_2D_ID_int getRC(V3D_Point p, int oom, RoundingMode rm) {
+        if (focus.equals(p, oom, rm)) {
             return new Grids_2D_ID_int(
-                    getScreenRow(p, epsilon),
-                    getScreenCol(p, epsilon));
+                    getScreenRow(p, oom, rm),
+                    getScreenCol(p, oom, rm));
         }
-        V3D_Ray_d ray = new V3D_Ray_d(focus, p);
-        //V3D_Point_d px = (V3D_Point_d) rect.getIntersect(ray, epsilon);
-        V3D_Point_d px = (V3D_Point_d) ray.getIntersect(rect.getPl(), epsilon);
+        V3D_Ray ray = new V3D_Ray(focus, p, oom, rm);
+        //V3D_Point px = (V3D_Point) rect.getIntersect(ray, oom, rm);
+        V3D_Point px = (V3D_Point) ray.getIntersect(rect.getPl(oom, rm), oom, rm);
         if (px == null) {
             return null;
         } else {
             return new Grids_2D_ID_int(
-                    getScreenRow(px, epsilon),
-                    getScreenCol(px, epsilon));
+                    getScreenRow(px, oom, rm),
+                    getScreenCol(px, oom, rm));
         }
     }
 
@@ -637,23 +643,26 @@ public class Camera_d extends V3D_Frustum_d {
      * Calculate and return the row index of {@code p}.
      *
      * @param p A point on the screen.
-     * @param qr The line segment that is the bottom of the rect.
+     * @param oom The Order of Magnitude for the precision.
+     * @param rm The RoundingMode for any rounding.
      * @return The row index of {@code p}.
      */
-    protected int getScreenRow(V3D_Point_d p, double epsilon) {
-        double d = rect.getPQR().getQR().getDistance(p, epsilon);
-        return nrows - (int) (d / pixelSize);
+    protected int getScreenRow(V3D_Point p, int oom, RoundingMode rm) {
+        BigRational d = rect.getPQR().getQR(oom, rm).getDistance(p, oom, rm);
+        return nrows - (d.divide(pixelSize)).intValue();
     }
 
     /**
      * Calculate and return the column index of {@code p}.
      *
      * @param p A point on the screen.
+     * @param oom The Order of Magnitude for the precision.
+     * @param rm The RoundingMode for any rounding.
      * @return The column index of {@code p}.
      */
-    protected int getScreenCol(V3D_Point_d p, double epsilon) {
-        double d = rect.getPQR().getPQ().getDistance(p, epsilon);
-        return (int) (d / pixelSize);
+    protected int getScreenCol(V3D_Point p, int oom, RoundingMode rm) {
+        BigRational d = rect.getPQR().getPQ(oom, rm).getDistance(p, oom, rm);
+        return (d.divide(pixelSize)).intValue();
     }
 
     /**
@@ -661,13 +670,20 @@ public class Camera_d extends V3D_Frustum_d {
      *
      * @param row The row index for the pixel returned.
      * @param col The column index for the pixel returned.
+     * @param oom The Order of Magnitude for the precision.
+     * @param rm The RoundingMode for any rounding.
      * @return The centroid point of the pixel indexed by {@code row} and
-     * {@code col}..
+     * {@code col}.
      */
-    protected V3D_Point_d getPoint(int row, int col, double epsilon) {
-        V3D_Point_d p = rect.getP();
-        V3D_Point_d pP = new V3D_Point_d(p);
-        pP.translate(verticalUV.multiply(row + 0.5d).add(horizontalUV.multiply(col + 0.5d)));
+    protected V3D_Point getPoint(int row, int col, int oom, RoundingMode rm) {
+        V3D_Point p = rect.getP(oom, rm);
+        V3D_Point pP = new V3D_Point(p);
+        pP.translate(
+                verticalUV.multiply(
+                        BigRational.valueOf(row + 0.5d), oom, rm).add(
+                        horizontalUV.multiply(
+                                BigRational.valueOf(col + 0.5d),
+                                oom, rm), oom, rm), oom, rm);
         return pP;
     }
 
@@ -677,22 +693,32 @@ public class Camera_d extends V3D_Frustum_d {
      *
      * @param row The row index for the pixel returned.
      * @param col The column index for the pixel returned.
+     * @param oom The Order of Magnitude for the precision.
+     * @param rm The RoundingMode for any rounding.
      * @return The pixel rectangle indexed by {@code row} and {@code col}.
      */
-    public V3D_Rectangle_d getPixel(int row, int col) {
+    public V3D_Rectangle getPixel(int row, int col, int oom, RoundingMode rm) {
         // Get bottom left point (row=0, col=0).
-        V3D_Point_d p = rect.getP();
-        V3D_Point_d pP = new V3D_Point_d(p);
-        pP.translate(verticalUV.multiply(row).add(horizontalUV.multiply(col)));
+        V3D_Point p = rect.getP(oom, rm);
+        V3D_Point pP = new V3D_Point(p);
+        pP.translate(
+                verticalUV.multiply(row, oom, rm).add(
+                        horizontalUV.multiply(col, oom, rm), oom, rm), oom, rm);
         // q
-        V3D_Point_d pQ = new V3D_Point_d(p);
-        pQ.translate(verticalUV.multiply(row + 1).add(horizontalUV.multiply(col)));
+        V3D_Point pQ = new V3D_Point(p);
+        pQ.translate(
+                verticalUV.multiply(row + 1, oom, rm).add(
+                        horizontalUV.multiply(col, oom, rm), oom, rm), oom, rm);
         // r
-        V3D_Point_d pR = new V3D_Point_d(p);
-        pR.translate(verticalUV.multiply(row + 1).add(horizontalUV.multiply(col + 1)));
+        V3D_Point pR = new V3D_Point(p);
+        pR.translate(
+                verticalUV.multiply(row + 1, oom, rm).add(
+                        horizontalUV.multiply(col + 1, oom, rm), oom, rm), oom, rm);
         // s
-        V3D_Point_d pS = new V3D_Point_d(p);
-        pS.translate(verticalUV.multiply(row).add(horizontalUV.multiply(col + 1)));
-        return new V3D_Rectangle_d(pP, pQ, pR, pS);
+        V3D_Point pS = new V3D_Point(p);
+        pS.translate(
+                verticalUV.multiply(row, oom, rm).add(
+                        horizontalUV.multiply(col + 1, oom, rm), oom, rm), oom, rm);
+        return new V3D_Rectangle(pP, pQ, pR, pS, oom, rm);
     }
 }

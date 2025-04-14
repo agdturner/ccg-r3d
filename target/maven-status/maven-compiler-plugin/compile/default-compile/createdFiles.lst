@@ -1,6 +1,7 @@
 uk\ac\leeds\ccg\r3d\d\UniverseDouble.class
 uk\ac\leeds\ccg\r3d\d\entities\Tetrahedron_d.class
 uk\ac\leeds\ccg\r3d\io\d\STL_ReaderDouble.class
+uk\ac\leeds\ccg\r3d\Camera.class
 uk\ac\leeds\ccg\r3d\d\entities\Line_d.class
 uk\ac\leeds\ccg\r3d\RenderImage.class
 uk\ac\leeds\ccg\r3d\entities\Line.class

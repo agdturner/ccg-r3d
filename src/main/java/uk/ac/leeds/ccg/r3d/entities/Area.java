@@ -106,14 +106,14 @@ public class Area extends Entity {
         if (dot.compareTo(BigRational.ZERO) == -1) {
             dot2 = dot2.negate();
         }
-        dot2 = (dot2.add(BigRational.ONE)).divide(
-                BigRational.TWO.multiply(
-                        BigRational.ONE.subtract(ambientLight)));
-        double lightRatio = Math.min(1.0d, Math.max(0.0d,
+        dot2 = (dot2.add(BigRational.ONE)).divide((
+                BigRational.TWO.multiply((
+                        BigRational.ONE.subtract(ambientLight)))));
+        double lr = Math.min(1d, Math.max(0d,
                 ambientLight.add(dot2).doubleValue()));
-        int red = (int) (color.getRed() * lightRatio);
-        int green = (int) (color.getGreen() * lightRatio);
-        int blue = (int) (color.getBlue() * lightRatio);
+        int red = (int) (color.getRed() * lr);
+        int green = (int) (color.getGreen() * lr);
+        int blue = (int) (color.getBlue() * lr);
         lightingColor = new Color(red, green, blue);
         initAmbientLightColour(ambientLight.doubleValue());
     }

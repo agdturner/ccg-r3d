@@ -108,12 +108,13 @@ public class Area_d extends Entity {
                 n = new V3D_Vector_d(normal);
             }
         }
-        double dot = Math.abs(n.getDotProduct(lightVector));
-        double lr = Math.pow(dot, 3d); 
-//        double lr = dot * dot;
-         lr = (lr + 1d) / (2d * (1d - ambientLight));
-        lr = Math.min(1.0d, Math.max(0.0d,
-                ambientLight + lr));
+        double dot = n.getDotProduct(lightVector);
+        double dot2 = dot * dot;
+        if (dot < 0d) {
+            dot2 = -dot2;
+        }
+        dot2 = (dot2 + 1) / (2d * (1d - ambientLight));
+        double lr = Math.min(1d, Math.max(0d, ambientLight + dot2));
         int red = (int) (color.getRed() * lr);
         int green = (int) (color.getGreen() * lr);
         int blue = (int) (color.getBlue() * lr);

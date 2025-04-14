@@ -29,6 +29,7 @@ import uk.ac.leeds.ccg.v3d.geometry.d.V3D_LineSegment_d;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Plane_d;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Point_d;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PolygonNoInternalHoles_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Ray_d;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Rectangle_d;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Vector_d;
 
@@ -48,6 +49,7 @@ public class RenderImage_d {
      * Create a new instance.
      *
      * @param universe The universe.
+     * @param offset The offset.
      * @param focus The camera focal point.
      * @param dim The width and height in pixels.
      * @param screen The rect of the frustum.
@@ -91,21 +93,23 @@ public class RenderImage_d {
             V3D_Vector_d offset = V3D_Vector_d.ZERO;
 
             Path inDataDir = Paths.get("data", "input");
-            Path outDataDir = Paths.get("data", "output");
+            Path outDataDir = Paths.get("data", "output", "d");
 
             if (run00) {
                 // Visualise Axes in 3D
                 double epsilon = 1d / 1000000d;
                 int nrows = 200;
                 int ncols = 200;
+                //int nrows = 20;
+                //int ncols = 20;
                 // Init universe
                 Universe_d universe = new Universe_d(env, offset, epsilon);
-                addPoints0(universe, epsilon);
-                addAxes(universe, epsilon);
+                //addPoints0(universe, epsilon);
                 //addTriangle0(universe, epsilon);
                 //addRectangles0(universe, epsilon);
                 addLines0(universe, epsilon);
-                addPolygons0(universe, epsilon);
+                //addPolygons0(universe, epsilon);
+                addAxes(universe, epsilon);
 
                 // Detail the camera
                 Dimension dim = new Dimension(ncols, nrows);
@@ -113,6 +117,7 @@ public class RenderImage_d {
                 double radius = universe.aabb.getPointsArray()[0].getDistance(centroid);
                 String name = "axes";
                 boolean addGraticules = true;
+                //boolean addGraticules = false;
                 int i = 0;
                 int j = 0;
                 int k = -1;
@@ -120,7 +125,8 @@ public class RenderImage_d {
                 V3D_Vector_d direction = new V3D_Vector_d(i, j, k).getUnitVector();
                 V3D_Point_d focus = getCameraPt(centroid, direction, radius * 2d);
                 // Render the image
-                //V3D_Rectangle_d rect = universe.aabb.getViewport3(focus, direction.reverse(), zoomFactor, epsilon);
+//                double zoomFactor = 2d;
+//                V3D_Rectangle_d rect = universe.aabb.getViewport3(focus, V3D_Vector_d.I, zoomFactor, epsilon);
                 V3D_Rectangle_d rect = new V3D_Rectangle_d(
                         new V3D_Point_d(env, -100d, -100d, -radius),
                         new V3D_Point_d(env, -100d, 100d, -radius),
@@ -136,8 +142,37 @@ public class RenderImage_d {
                  */
                 double ambientLight = 1d / 20d;
                 V3D_Vector_d lighting = new V3D_Vector_d(-1, -2, -3).getUnitVector();
-                r.run(dim, lighting, ambientLight, false, true, epsilon);
+                r.run(dim, lighting, ambientLight, false, addGraticules, epsilon);
 
+                //i = -1;
+                //j = 0;
+                //k = -1;
+                //System.out.println("i=" + i + ", j=" + j + ", k=" + k);
+                //direction = new V3D_Vector_d(i, j, k).getUnitVector();
+                //focus = getCameraPt(centroid, direction, radius * 2d);
+                V3D_Ray_d xRay = new V3D_Ray_d(new V3D_Point_d(universe.env, 0, 0, 0), 
+                        new V3D_Point_d(universe.env, 1, 0, 0));
+                V3D_Vector_d xuv = xRay.l.v.getUnitVector();
+                V3D_Ray_d yRay = new V3D_Ray_d(new V3D_Point_d(universe.env, 0, 0, 0), 
+                        new V3D_Point_d(universe.env, 0, 1, 0));
+                V3D_Vector_d yuv = yRay.l.v.getUnitVector();
+                V3D_Ray_d zRay = new V3D_Ray_d(new V3D_Point_d(universe.env, 0, 0, 0), 
+                        new V3D_Point_d(universe.env, 0, 0, 1));
+                V3D_Vector_d zuv = zRay.l.v.getUnitVector();
+                //double angle = Math.PI;
+                //double angle = Math.PI/4d;
+                double angle = Math.PI/8d;
+                rect = rect.rotate(yRay, yuv, angle, epsilon);
+                focus = focus.rotate(yRay, yuv, angle, epsilon);
+                rect = rect.rotate(xRay, xuv, angle, epsilon);
+                focus = focus.rotate(xRay, xuv, angle, epsilon);
+                rect = rect.rotate(zRay, zuv, angle, epsilon);
+                focus = focus.rotate(zRay, zuv, angle, epsilon);
+                r = new RenderImage_d(universe, offset, focus, dim, rect, epsilon);
+                dir = Paths.get(outDataDir.toString(), "test", name + "r");
+                r.output = Paths.get(dir.toString(),
+                        "test.png");
+                r.run(dim, lighting, ambientLight, false, addGraticules, epsilon);
             }
 
             if (run0) {
@@ -950,6 +985,7 @@ public class RenderImage_d {
         V3D_Point_d rta = new V3D_Point_d(universe.env, new V3D_Vector_d(1 * scale, 1 * scale, 1 * scale));
         // Lines
         universe.addLine(new V3D_LineSegment_d(lbf, lba), Color.WHITE);
+        //universe.addLine(new V3D_LineSegment_d(lbf, lba), Color.PINK);
         universe.addLine(new V3D_LineSegment_d(lbf, ltf), Color.WHITE);
         universe.addLine(new V3D_LineSegment_d(lbf, rbf), Color.WHITE);
         universe.addLine(new V3D_LineSegment_d(lba, lta), Color.WHITE);
@@ -1018,19 +1054,30 @@ public class RenderImage_d {
      * @return The ids of the original triangles that are intersected.
      */
     public static void addPolygons0(Universe_d universe, double epsilon) {
-        double scale = 1d;
+        double scale = 10d;
         V3D_Point_d[] pts = new V3D_Point_d[8];
-        pts[0] = new V3D_Point_d(universe.env, -30d * scale, -30d * scale, 0d * scale);
-        pts[1] = new V3D_Point_d(universe.env, -20d * scale, 0d * scale, 0d * scale);
-        pts[2] = new V3D_Point_d(universe.env, -30d * scale, 30d * scale, 0d * scale);
-        pts[3] = new V3D_Point_d(universe.env, 0d * scale, 20d * scale, 0d * scale);
-        pts[4] = new V3D_Point_d(universe.env, 30d * scale, 30d * scale, 0d * scale);
-        pts[5] = new V3D_Point_d(universe.env, 20d * scale, 0d * scale, 0d * scale);
-        pts[6] = new V3D_Point_d(universe.env, 30d * scale, -30d * scale, 0d * scale);
-        pts[7] = new V3D_Point_d(universe.env, 0d * scale, -20d * scale, 0d * scale);
+        pts[0] = new V3D_Point_d(universe.env, -6d * scale, -6d * scale, 0d * scale);
+        pts[1] = new V3D_Point_d(universe.env, -4d * scale, 0d * scale, 0d * scale);
+        pts[2] = new V3D_Point_d(universe.env, -6d * scale, 6d * scale, 0d * scale);
+        pts[3] = new V3D_Point_d(universe.env, 0d * scale, 4d * scale, 0d * scale);
+        pts[4] = new V3D_Point_d(universe.env, 6d * scale, 6d * scale, 0d * scale);
+        pts[5] = new V3D_Point_d(universe.env, 4d * scale, 0d * scale, 0d * scale);
+        pts[6] = new V3D_Point_d(universe.env, 6d * scale, -6d * scale, 0d * scale);
+        pts[7] = new V3D_Point_d(universe.env, 0d * scale, -4d * scale, 0d * scale);
         V3D_PolygonNoInternalHoles_d polygon = new V3D_PolygonNoInternalHoles_d(
                 pts, V3D_Plane_d.Z0.getN(), epsilon);
         universe.addArea(polygon, Color.GRAY);
+        // Edges
+        polygon.getEdges().values().forEach(x 
+            -> universe.addLine(x, Color.DARK_GRAY)
+        );
+        //System.out.println("Polygon");
+        //System.out.println(polygon.toString());
+        //System.out.println("External holes");
+        //polygon.externalHoles.values().forEach(x -> 
+        //    System.out.println(x.toString())
+        //);
+        //System.out.println("External holes");
     }
 
     private static V3D_Rectangle_d getRect(V3D_Point_d focus,

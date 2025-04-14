@@ -23,9 +23,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import uk.ac.leeds.ccg.r3d.entities.Volume;
 import uk.ac.leeds.ccg.r3d.entities.Area;
+import uk.ac.leeds.ccg.r3d.entities.Line;
+import uk.ac.leeds.ccg.r3d.entities.Point;
 import uk.ac.leeds.ccg.r3d.io.STL_Reader;
 import uk.ac.leeds.ccg.v3d.core.V3D_Environment;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_AABB;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_Area;
+import uk.ac.leeds.ccg.v3d.geometry.V3D_LineSegment;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Tetrahedron;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
@@ -39,12 +43,27 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 public class Universe {
 
     /**
-     * AABB
+     * Environment
      */
-    V3D_AABB aabb;
+    public final V3D_Environment env;
+    
+    /**
+     * The aabb of all finite geometries.
+     */
+    public V3D_AABB aabb;
 
     /**
-     * The areas to render.
+     * The points.
+     */
+    public ArrayList<Point> points;
+
+    /**
+     * The lines.
+     */
+    public ArrayList<Line> lines;
+
+    /**
+     * The areas.
      */
     public ArrayList<Area> areas;
 
@@ -52,13 +71,15 @@ public class Universe {
      * The volumes to render.
      */
 //    public ArrayList<Volume> volumes;
-
-    /**
+/**
      * A single camera.
      */
-    //public CameraOld camera;
-    //public Camera camera;
-   // public Camera1 camera;
+    public Camera camera;
+
+    /**
+     * long
+     */
+    long nextID;
 
     /**
      * Create a new instance.
@@ -67,8 +88,11 @@ public class Universe {
      * @param oom The Order of Magnitude for the precision.
      * @param rm The RoundingMode for any rounding.
      */
-    public Universe(V3D_Vector offset, int oom, RoundingMode rm, 
-        V3D_Environment env) {
+    public Universe(V3D_Environment env, V3D_Vector offset, 
+            int oom, RoundingMode rm) {
+        this.env = env;
+        points = new ArrayList<>();
+        lines = new ArrayList<>();
         areas = new ArrayList<>();
         //volumes = new ArrayList<>();
         /**
@@ -87,7 +111,7 @@ public class Universe {
         V3D_Point rta = new V3D_Point(env, offset, new V3D_Vector(1 * m, 1 * m, 1 * m));
         //createCubeFrom5Tetrahedra(oom, rm, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
         //createCubeFrom6Tetrahedra(oom, rm, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
-        createCubeSurfaceFromTriangles(oom, rm, env,  lbf, lba, ltf, lta, rbf, rba, rtf, rta);
+        //createCubeSurfaceFromTriangles(oom, rm, env,  lbf, lba, ltf, lta, rbf, rba, rtf, rta);
         points[0] = lbf;
         points[1] = lba;
         points[2] = ltf;
@@ -194,6 +218,7 @@ public class Universe {
     public Universe(Path path, V3D_Vector offset, Color color,
             boolean assessTopology, int oom, RoundingMode rm, 
         V3D_Environment env) throws IOException {
+        this.env = env;
         areas = new ArrayList<>();
         //volumes = new ArrayList<>();
         STL_Reader data = new STL_Reader(assessTopology);
@@ -230,14 +255,58 @@ public class Universe {
      * @param camera What {@link #camera} is set to.
      */
     //public void setCamera(CameraOld camera) {
-    //public void setCamera(Camera camera) {
     //public void setCamera(Camera1 camera) {
-    //    this.camera = camera;
-    //}
+    public void setCamera(Camera camera) {
+        this.camera = camera;
+    }
 
     /**
      * This will be for updating the universe from one time to the next.
      */
     public void update() {
+    }
+    
+    /**
+     * Adds the point and returns a point entity. Adding may involve expanding
+     * the universe Axis Aligned BoundingBox so it includes all entities.
+     *
+     * @param p The point to add.
+     * @return The point entity.
+     */
+    public Point addPoint(V3D_Point p, int oom, RoundingMode rm) {
+        Point e = new Point(p);
+        points.add(e);
+        aabb = aabb.union(p.getAABB(oom, rm), oom);
+        return e;
+    }
+
+    /**
+     * Adds the line and returns a line entity. Adding may involve expanding
+     * the universe Axis Aligned BoundingBox so it includes all entities.
+     *
+     * @param l The line to add.
+     * @param baseColor The line colour.
+     * @return The line entity.
+     */
+    public Line addLine(V3D_LineSegment l, Color baseColor, int oom, RoundingMode rm) {
+        Line e = new Line(l, baseColor);
+        lines.add(e);
+        aabb = aabb.union(l.getAABB(oom, rm), oom);
+        return e;
+    }
+
+    /**
+     * Adds an area and returns an area entity. Adding may involve expanding the
+     * universe Axis Aligned BoundingBox so it includes all entities.
+     *
+     * @param a The area to add.
+     * @param baseColor The line colour.
+     * @return The area entity.
+     */
+    public Area addArea(V3D_Area a, Color baseColor, int oom, RoundingMode rm) {
+        Area e = new Area(a, baseColor);
+        areas.add(e);
+        aabb = aabb.union(a.getAABB(oom, rm), oom);
+        return e;
     }
 }
