@@ -10,6 +10,11 @@ The focus is not on realistic rendering, but rendering geometry.
 * Supporting the development and integration of Environmental Digital Twins. The UK National Oceanography Centre have published [An Information Management Framework for Environmental Digital Twins (IMFe) Report](https://noc.ac.uk/files/documents/about/NOC%20IMFe%20Summary%20Report2.pdf) that explains what an Environmental Digital Twin is - basically it is a model of a region that provided feedback to the sensing and surveying of that region in order to more accurately and usefully represent it.
 
 ## Hello World!
+
+Render of a grey polygon with no internal holes in a cube box for which white edges are rendered as lines. This is looking down the Z axis with the axes coloured (X blue, Y red, Z green):
+
+<img alt="A polygon with no internal holes in a box." src="data/output/test/axes/test.png" />
+
 Rendering of [Utah Teapot](https://en.wikipedia.org/wiki/Utah_teapot) using [Utah_teapot_(solid).stl](data/Utah_teapot_(solid).stl) with 9438 triangles (resolution 500x375, [Order of Magnitude](https://en.wikipedia.org/wiki/Order_of_magnitude) of precision -10), there is no shadow, there is effectively a low ambient light and a vector for a general light:
 
 <img alt="A yellow scale rendering of the Utah Teapot" src="data/outputold/Utah_teapot_(solid)/oom=-10/lighting(i=0.2673_j=0.5345_k=0.8018)/Utah_teapot_(solid)_500x500_pt(i=-12.3089_j=13.0269_k=17.2189)_lighting(i=0.2673_j=0.5345_k=0.8018)_oom=-10.png" />
