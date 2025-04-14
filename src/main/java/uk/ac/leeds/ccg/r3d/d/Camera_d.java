@@ -381,7 +381,7 @@ public class Camera_d extends V3D_Frustum_d {
                     V3D_Line_d sl = new V3D_Line_d(
                             getPoint(rrpi, crpi, epsilon),
                             getPoint(rqri, cqri, epsilon));
-                    double lw = pixelSize * 3;
+                    double lw = pixelSize * 2d;
                     for (int row = minri; row <= maxri; row++) {
                         for (int col = minci; col <= maxci; col++) {
                             // Calculate the pixel distance from the screen 
