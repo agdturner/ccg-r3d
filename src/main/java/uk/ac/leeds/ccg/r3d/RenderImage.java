@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 import uk.ac.leeds.ccg.math.arithmetic.Math_BigDecimal;
 import uk.ac.leeds.ccg.math.arithmetic.Math_BigInteger;
 import uk.ac.leeds.ccg.math.arithmetic.Math_BigRational;
+import uk.ac.leeds.ccg.r3d.d.RenderImage_d;
 import uk.ac.leeds.ccg.r3d.io.IO;
 import uk.ac.leeds.ccg.v3d.core.V3D_Environment;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_AABB;
@@ -109,7 +110,7 @@ public class RenderImage {
                 //addTriangle0(universe, oom, rm);
                 //addRectangles0(universe, oom, rm);
                 addLines0(universe, oom, rm);
-                //addPolygons0(universe, oom, rm);
+                addPolygons0(universe, oom, rm);
                 addAxes(universe, oom, rm);
 
                 // Detail the camera
@@ -117,8 +118,8 @@ public class RenderImage {
                 V3D_Point centroid = universe.aabb.getCentroid(oom, rm);
                 BigRational radius = universe.aabb.getPointsArray()[0].getDistance(centroid, oom, rm);
                 String name = "axes";
-                boolean addGraticules = true;
-                //boolean addGraticules = false;
+                //boolean addGraticules = true;
+                boolean addGraticules = false;
                 int i = 0;
                 int j = 0;
                 int k = -1;
@@ -165,20 +166,39 @@ public class RenderImage {
                 V3D_Vector zuv = zRay.l.v.getUnitVector(oom, rm);
                 Math_BigDecimal bd = new Math_BigDecimal();
                 BigRational pi = BigRational.valueOf(bd.getPi(oom - 2, rm));
-//                BigRational angle = pi;
-//                BigRational angle = pi.divide(4);
-                BigRational angle = pi.divide(8);
-                rect = rect.rotate(yRay, yuv, bd, angle, oom, rm);
-                focus = focus.rotate(yRay, yuv, bd, angle, oom, rm);
-                rect = rect.rotate(xRay, xuv, bd, angle, oom, rm);
-                focus = focus.rotate(xRay, xuv, bd, angle, oom, rm);
-                rect = rect.rotate(zRay, zuv, bd, angle, oom, rm);
-                focus = focus.rotate(zRay, zuv, bd, angle, oom, rm);
-                r = new RenderImage(universe, offset, focus, dim, rect, oom, rm);
-                dir = Paths.get(outDataDir.toString(), "test", name + "r");
-                r.output = Paths.get(dir.toString(),
-                        "test.png");
-                r.run(dim, lighting, ambientLight, false, addGraticules, oom, rm);
+                //int anglei = 4;
+                int anglei = 8;
+                //int anglei = 16;
+                int anglei2 = anglei * 2;
+                BigRational angle = pi.divide(anglei);
+                
+                V3D_Rectangle rectr;
+                V3D_Point focusr;
+                
+                for (j = 0; j < anglei2; j++) {
+                    //rect = rect.rotate(yRay, yuv, angle, epsilon);
+                    //focus = focus.rotate(yRay, yuv, angle, epsilon);
+                    for (i = 0; i < anglei2; i++) {
+                        //rect = rect.rotate(xRay, xuv, angle, epsilon);
+                        //focus = focus.rotate(xRay, xuv, angle, epsilon);
+                        k = 6;
+                        //for (k = 0; k < anglei2; k++) {
+                            //rect = rect.rotate(zRay, zuv, angle, epsilon);
+                            //focus = focus.rotate(zRay, zuv, angle, epsilon);
+                            rectr = rect.rotate(zRay, zuv, bd, angle.multiply(k), oom, rm);
+                            focusr = focus.rotate(zRay, zuv, bd, angle.multiply(k), oom, rm);
+                            rectr = rectr.rotate(xRay, xuv, bd, angle.multiply(i), oom, rm);
+                            focusr = focusr.rotate(xRay, xuv, bd, angle.multiply(i), oom, rm);
+                            rectr = rectr.rotate(yRay, yuv, bd, angle.multiply(j), oom, rm);
+                            focusr = focusr.rotate(yRay, yuv, bd, angle.multiply(j), oom, rm);
+                            r = new RenderImage(universe, offset, focusr, dim, rectr, oom, rm);
+                            dir = Paths.get(outDataDir.toString(), "test", name + "r");
+                            r.output = Paths.get(dir.toString(),
+                                    "test_i" + i + "_j" + j + "_k" + k + ".png");
+                            r.run(dim, lighting, ambientLight, false, addGraticules, oom, rm);
+                        //}
+                    }
+                }
             }
 
             if (run0) {
@@ -738,20 +758,24 @@ public class RenderImage {
     public static void addPolygons0(Universe universe, int oom, RoundingMode rm) {
         double scale = 10d;
         V3D_Point[] pts = new V3D_Point[8];
-        pts[0] = new V3D_Point(universe.env, -6d * scale, -6d * scale, 0d * scale);
+        pts[0] = new V3D_Point(universe.env, -8d * scale, -8d * scale, 0d * scale);
         pts[1] = new V3D_Point(universe.env, -4d * scale, 0d * scale, 0d * scale);
-        pts[2] = new V3D_Point(universe.env, -6d * scale, 6d * scale, 0d * scale);
+        pts[2] = new V3D_Point(universe.env, -8d * scale, 8d * scale, 0d * scale);
         pts[3] = new V3D_Point(universe.env, 0d * scale, 4d * scale, 0d * scale);
-        pts[4] = new V3D_Point(universe.env, 6d * scale, 6d * scale, 0d * scale);
+        pts[4] = new V3D_Point(universe.env, 8d * scale, 8d * scale, 0d * scale);
         pts[5] = new V3D_Point(universe.env, 4d * scale, 0d * scale, 0d * scale);
-        pts[6] = new V3D_Point(universe.env, 6d * scale, -6d * scale, 0d * scale);
+        pts[6] = new V3D_Point(universe.env, 8d * scale, -8d * scale, 0d * scale);
         pts[7] = new V3D_Point(universe.env, 0d * scale, -4d * scale, 0d * scale);
         V3D_PolygonNoInternalHoles polygon = new V3D_PolygonNoInternalHoles(
                 pts, V3D_Plane.Z0.getN(), oom, rm);
-        universe.addArea(polygon, Color.GRAY, oom, rm);        
+        //Color c = Color.GRAY;
+        Color c = Color.WHITE;
+        universe.addArea(polygon, c, oom, rm);        
         // Edges
+        //Color ec = Color.DARK_GRAY;
+        Color ec = Color.PINK;
         polygon.getEdges(oom, rm).values().forEach(x 
-            -> universe.addLine(x, Color.DARK_GRAY, oom, rm)
+            -> universe.addLine(x, ec, oom, rm)
         );
         //System.out.println("Polygon");
         //System.out.println(polygon.toString());

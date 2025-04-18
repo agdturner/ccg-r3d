@@ -139,6 +139,8 @@ public class Camera_d extends V3D_Frustum_d {
      *
      * @param universe
      * @param lighting The lighting vector.
+     * @param epsilon The tolerance within which vector components are regarded
+     * as equal.
      * @return An image map.
      * @throws Exception
      */
@@ -223,7 +225,7 @@ public class Camera_d extends V3D_Frustum_d {
         int nlines = universe.lines.size();
         universe.lines.forEach(x
                 -> {
-            if (x.l.l.v.isScalarMultiple(rect.getPQR().getPQV())) {
+            if (x.l.l.v.isScalarMultiple(rect.getPQR().getPQV(), epsilon)) {
                 renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getQRV()), pix);
             } else {
                 renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getPQV()), pix);
@@ -305,7 +307,8 @@ public class Camera_d extends V3D_Frustum_d {
      * For rendering a line on the image. Lines may be obscured by triangles and
      * each other. This will render the closest one.
      *
-     * @param epsilon The tolerance for intersection.
+     * @param epsilon The tolerance within which vector components are regarded
+     * as equal.
      * @param l The line to render.
      * @param plane A plane on which l.l is located.
      * @param pix The image.
@@ -322,13 +325,14 @@ public class Camera_d extends V3D_Frustum_d {
             V3D_Triangle_d t = new V3D_Triangle_d(l.l, this.focus);
             V3D_LineSegment_d rp = t.getRP();
             V3D_LineSegment_d qr = t.getQR();
-            V3D_Point_d rpi = rect.pl.getIntersect0(rp, epsilon);
-            //V3D_FiniteGeometry_d ti = rect.getIntersect0(t, epsilon);
+            V3D_Plane_d rectpl = rect.getPl();
+            V3D_Point_d rpi = rectpl.getIntersectNonParallel(rp, epsilon);
+            //V3D_FiniteGeometry_d ti = rect.getIntersectNonCoplanar(t, epsilon);
             if (rpi != null) {
                 // Calculate the row and column bounds.
                 int rrpi = getScreenRow(rpi, epsilon);
                 int crpi = getScreenCol(rpi, epsilon);
-                V3D_Point_d qri = rect.pl.getIntersect0(qr, epsilon);
+                V3D_Point_d qri = rectpl.getIntersectNonParallel(qr, epsilon);
                 if (qri != null) {
                     int rqri = getScreenRow(qri, epsilon);
                     int cqri = getScreenCol(qri, epsilon);
@@ -377,38 +381,41 @@ public class Camera_d extends V3D_Frustum_d {
                     if (maxci >= ncols) {
                         maxci = ncols - 1;
                     }
-                    // Calculate/store the screen projected line segment.
-                    V3D_Line_d sl = new V3D_Line_d(
-                            getPoint(rrpi, crpi, epsilon),
-                            getPoint(rqri, cqri, epsilon));
-                    double lw = pixelSize * 2d;
-                    for (int row = minri; row <= maxri; row++) {
-                        for (int col = minci; col <= maxci; col++) {
-                            // Calculate the pixel distance from the screen 
-                            V3D_Point_d sp = getPoint(row, col, epsilon);
-                            double d = sl.getDistance(sp, epsilon);
-                            if (d < lw) {
-                                V3D_Rectangle_d pixel = getPixel(row, col);
-                                //System.out.println("" + r + ", "
-//                            V3D_FiniteGeometry_d pit = pixel.getIntersect0(t, epsilon);
-//                            if (pit != null) {
-                                if (pixel.intersects0(t, epsilon)) {
-                                    Grids_2D_ID_int id = new Grids_2D_ID_int(row, col);
-                                    V3D_Ray_d ray = getRay(id);
-                                    V3D_Point_d ri = ray.getIntersect0(plane, epsilon);
-                                    double d2;
-                                    d2 = ri.getDistanceSquared(this.focus);
-                                    Double d2p = mind2s.get(id);
-                                    if (d2p == null) {
-                                        mind2s.put(id, d2); // So closest things are at the front.
-                                        render(pix, row, col, l.color);
-                                    } else {
-                                        if (d2 <= d2p + epsilon) {
-                                            mind2s.put(id, d2); // So closest things are at the front.
-                                            render(pix, row, col, l.color);
-                                        } else {
-                                            // There is a closer line already rendered for the pixel.
-                                            int debug = 1;
+                    V3D_Point_d sr = getPoint(rrpi, crpi, epsilon);
+                    V3D_Point_d sq = getPoint(rqri, cqri, epsilon);
+                    if (sr.equals(sq, epsilon)) {
+                        renderPoint(epsilon, mind2s, new Point_d(rpi, l.color), pix);
+                    } else {
+                        // Calculate/store the screen projected line segment.
+                        V3D_Line_d sl = new V3D_Line_d(sr, sq);
+                        double lw = pixelSize * 2d;
+                        for (int row = minri; row <= maxri; row++) {
+                            for (int col = minci; col <= maxci; col++) {
+                                // Calculate the pixel distance from the screen projected line segment.
+                                V3D_Point_d sp = getPoint(row, col, epsilon);
+                                double d = sl.getDistance(sp, epsilon);
+                                if (d < lw) {
+                                    V3D_Rectangle_d pixel = getPixel(row, col);
+                                    if (pixel.intersects0(t, epsilon)) {
+                                        Grids_2D_ID_int id = new Grids_2D_ID_int(row, col);
+                                        V3D_Ray_d ray = getRay(id);
+                                        V3D_Point_d ri = ray.getIntersect0(plane, epsilon);
+                                        if (ri != null) {
+                                            double d2;
+                                            d2 = ri.getDistanceSquared(this.focus);
+                                            Double d2p = mind2s.get(id);
+                                            if (d2p == null) {
+                                                mind2s.put(id, d2); // So closest things are at the front.
+                                                render(pix, row, col, l.color);
+                                            } else {
+                                                if (d2 <= d2p + epsilon) {
+                                                    mind2s.put(id, d2); // So closest things are at the front.
+                                                    render(pix, row, col, l.color);
+                                                } else {
+                                                    // There is a closer line already rendered for the pixel.
+                                                    int debug = 1;
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -423,10 +430,9 @@ public class Camera_d extends V3D_Frustum_d {
     /**
      * For rendering a point on the image.
      *
-     * @param epsilon The tolerance for intersection.
+     * @param epsilon The tolerance within which vector components are regarded
+     * as equal.
      * @param p The point to render.
-     * @param pl The plane of the point to render. The normal is the vector to
-     * this.
      * @param pix The image.
      * @return pix
      */
@@ -477,7 +483,8 @@ public class Camera_d extends V3D_Frustum_d {
      * @param ambientLight
      * @param mindOrderedTriangles
      * @param mind2t
-     * @param epsilon
+     * @param epsilon The tolerance within which vector components are regarded
+     * as equal.
      */
     private void process(V3D_Point_d centroid, int index,
             ArrayList<Area_d> areas, V3D_Vector_d lighting, double ambientLight,
@@ -531,7 +538,8 @@ public class Camera_d extends V3D_Frustum_d {
      * pixel.
      * @param idPoint The point of intersection on the closest triangle through
      * each pixel.
-     * @param epsilon The tolerance within which two vectors are equal.
+     * @param epsilon The tolerance within which vector components are regarded
+     * as equal.
      */
     protected void processArea(int tIndex, V3D_Area_d a,
             double[] mind2t, HashMap<Grids_2D_ID_int, Double> mind2s,
@@ -552,7 +560,7 @@ public class Camera_d extends V3D_Frustum_d {
                 if (mind2 == null) {
                     try {
                         V3D_Ray_d ray = getRay(id);
-                        V3D_Point_d ti = a.getIntersect0(ray, epsilon);
+                        V3D_Point_d ti = a.getIntersectNonCoplanar(ray, epsilon);
                         if (ti != null) {
                             double d2 = ti.getDistanceSquared(focus);
                             mind2s.put(id, d2);
@@ -567,7 +575,7 @@ public class Camera_d extends V3D_Frustum_d {
                     if (mind2t[tIndex] < mind2) {
                         try {
                             V3D_Ray_d ray = getRay(id);
-                            V3D_Point_d ti = a.getIntersect0(ray, epsilon);
+                            V3D_Point_d ti = a.getIntersectNonCoplanar(ray, epsilon);
                             if (ti != null) {
                                 // Only render areas that intersect the ray at a point and that are beyond the camera rect.
                                 double d2 = ti.getDistanceSquared(focus);
@@ -612,6 +620,8 @@ public class Camera_d extends V3D_Frustum_d {
      * Get the pixel that the ray intersects.
      *
      * @param p A point in the universe.
+     * @param epsilon The tolerance within which vector components are regarded
+     * as equal.
      * @return The ID of the rect cell that intersects a ray from this to focus,
      * or {@code null}.
      */
@@ -637,7 +647,8 @@ public class Camera_d extends V3D_Frustum_d {
      * Calculate and return the row index of {@code p}.
      *
      * @param p A point on the screen.
-     * @param qr The line segment that is the bottom of the rect.
+     * @param epsilon The tolerance within which vector components are regarded
+     * as equal.
      * @return The row index of {@code p}.
      */
     protected int getScreenRow(V3D_Point_d p, double epsilon) {
@@ -649,6 +660,8 @@ public class Camera_d extends V3D_Frustum_d {
      * Calculate and return the column index of {@code p}.
      *
      * @param p A point on the screen.
+     * @param epsilon The tolerance within which vector components are regarded
+     * as equal.
      * @return The column index of {@code p}.
      */
     protected int getScreenCol(V3D_Point_d p, double epsilon) {
@@ -661,13 +674,16 @@ public class Camera_d extends V3D_Frustum_d {
      *
      * @param row The row index for the pixel returned.
      * @param col The column index for the pixel returned.
+     * @param epsilon The tolerance within which vector components are regarded
+     * as equal.
      * @return The centroid point of the pixel indexed by {@code row} and
      * {@code col}..
      */
     protected V3D_Point_d getPoint(int row, int col, double epsilon) {
         V3D_Point_d p = rect.getP();
         V3D_Point_d pP = new V3D_Point_d(p);
-        pP.translate(verticalUV.multiply(row + 0.5d).add(horizontalUV.multiply(col + 0.5d)));
+        pP.translate(verticalUV.multiply(row + 0.5d).add(
+                horizontalUV.multiply(col + 0.5d)));
         return pP;
     }
 

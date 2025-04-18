@@ -330,13 +330,13 @@ public class Camera extends V3D_Frustum {
             V3D_LineSegment rp = t.getRP(oom, rm);
             V3D_LineSegment qr = t.getQR(oom, rm);
             V3D_Plane rectpl = rect.getPl(oom, rm);
-            V3D_Point rpi = rectpl.getIntersect0(rp, oom, rm);
+            V3D_Point rpi = rectpl.getIntersectNonParallel(rp, oom, rm);
             //V3D_FiniteGeometry ti = rect.getIntersect(t, oom, rm);
             if (rpi != null) {
                 // Calculate the row and column bounds.
                 int rrpi = getScreenRow(rpi, oom, rm);
                 int crpi = getScreenCol(rpi, oom, rm);
-                V3D_Point qri = rectpl.getIntersect0(qr, oom, rm);
+                V3D_Point qri = rectpl.getIntersectNonParallel(qr, oom, rm);
                 if (qri != null) {
                     int rqri = getScreenRow(qri, oom, rm);
                     int cqri = getScreenCol(qri, oom, rm);
@@ -379,37 +379,42 @@ public class Camera extends V3D_Frustum {
                     if (maxci >= ncols) {
                         maxci = ncols - 1;
                     }
-                    // Calculate/store the screen projected line segment.
-                    V3D_Line sl = new V3D_Line(
-                            getPoint(rrpi, crpi, oom, rm),
-                            getPoint(rqri, cqri, oom, rm), oom, rm);
-                    BigRational lw = pixelSize.multiply(3);
-                    for (int row = minri; row <= maxri; row++) {
-                        for (int col = minci; col <= maxci; col++) {
-                            // Calculate the pixel distance from the screen 
-                            V3D_Point sp = getPoint(row, col, oom, rm);
-                            BigRational d = sl.getDistance(sp, oom, rm);
-                            if (d.compareTo(lw) == -1) {
-                                V3D_Rectangle pixel = getPixel(row, col, oom, rm);
-                                //System.out.println("" + r + ", "
-                                if (pixel.intersects0(t, oom, rm)) {
-                                    Grids_2D_ID_int id = new Grids_2D_ID_int(row, col);
-                                    V3D_Ray ray = getRay(id, oom, rm);
-                                    V3D_Point ri = ray.getIntersect0(plane, oom, rm);
-                                    BigRational d2;
-                                    d2 = ri.getDistanceSquared(this.focus, oom, rm);
-                                    BigRational d2p = mind2s.get(id);
-                                    if (d2p == null) {
-                                        mind2s.put(id, d2); // So closest things are at the front.
-                                        render(pix, row, col, l.color);
-                                    } else {
-                                        //if (d2 <= d2p + epsilon) {
-                                        if (d2.compareTo(d2p) == -1) {
-                                            mind2s.put(id, d2); // So closest things are at the front.
-                                            render(pix, row, col, l.color);
-                                        } else {
-                                            // There is a closer line already rendered for the pixel.
-                                            int debug = 1;
+                    V3D_Point sr = getPoint(rrpi, crpi, oom, rm);
+                    V3D_Point sq = getPoint(rqri, cqri, oom, rm);
+                    if (sr.equals(sq, oom, rm)) {
+                        renderPoint(oom, rm, mind2s, new Point(rpi, l.color), pix);
+                    } else {
+                        // Calculate/store the screen projected line segment.
+                        V3D_Line sl = new V3D_Line(sr, sq, oom, rm);
+                        BigRational lw = pixelSize.multiply(2);
+                        for (int row = minri; row <= maxri; row++) {
+                            for (int col = minci; col <= maxci; col++) {
+                                // Calculate the pixel distance from the screen projected line segment.
+                                V3D_Point sp = getPoint(row, col, oom, rm);
+                                BigRational d = sl.getDistance(sp, oom, rm);
+                                if (d.compareTo(lw) == -1) {
+                                    V3D_Rectangle pixel = getPixel(row, col, oom, rm);
+                                    if (pixel.intersects0(t, oom, rm)) {
+                                        Grids_2D_ID_int id = new Grids_2D_ID_int(row, col);
+                                        V3D_Ray ray = getRay(id, oom, rm);
+                                        V3D_Point ri = ray.getIntersectNonCoplanar(plane, oom, rm);
+                                        if (ri != null) {
+                                            BigRational d2;
+                                            d2 = ri.getDistanceSquared(this.focus, oom, rm);
+                                            BigRational d2p = mind2s.get(id);
+                                            if (d2p == null) {
+                                                mind2s.put(id, d2); // So closest things are at the front.
+                                                render(pix, row, col, l.color);
+                                            } else {
+                                                //if (d2 <= d2p + epsilon) {
+                                                if (d2.compareTo(d2p) == -1) {
+                                                    mind2s.put(id, d2); // So closest things are at the front.
+                                                    render(pix, row, col, l.color);
+                                                } else {
+                                                    // There is a closer line already rendered for the pixel.
+                                                    int debug = 1;
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -552,7 +557,7 @@ public class Camera extends V3D_Frustum {
                 if (mind2 == null) {
                     try {
                         V3D_Ray ray = getRay(id, oom, rm);
-                        V3D_Point ti = ray.getIntersect0(a.getPl(oom, rm), oom, rm);
+                        V3D_Point ti = a.getIntersectNonCoplanar(ray, oom, rm);
                         if (ti != null) {
                             BigRational d2 = ti.getDistanceSquared(focus, oom, rm);
                             mind2s.put(id, d2);
@@ -568,7 +573,7 @@ public class Camera extends V3D_Frustum {
                     if (mind2t[tIndex].compareTo(mind2) == -1) {
                         try {
                             V3D_Ray ray = getRay(id, oom, rm);
-                            V3D_Point ti = a.getIntersect0(ray, oom, rm);
+                            V3D_Point ti = a.getIntersectNonCoplanar(ray, oom, rm);
                             if (ti != null) {
                                 // Only render triangles that intersect the ray at a point and that are beyond the camera rect.
                                 BigRational d2 = ti.getDistanceSquared(focus, oom, rm);
