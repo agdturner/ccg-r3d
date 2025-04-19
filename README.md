@@ -18,7 +18,7 @@ The following image is a render of an area (a polygon with no internal holes) co
 
 The camera can be pointed at the geometry from anywhere. The  following image is a rendering after rotating the camera Pi/8 radians around the X axis, 13*Pi/8 radians around the Y axis and 10*Pi/8 radians around the Z axis:
 
-<img alt="A polygon with no internal holes in a box." src="data/output/d/test/axesr/test_i1_j13_k10.png.png" />
+<img alt="A polygon with no internal holes in a box." src="data/output/d/test/axesr/test_i1_j13_k10.png" />
 
 Renderings have been produced for geometries defined by coordinates and calculation done with double precision floating point and [https://github.com/agdturner/ccg-math/blob/master/src/main/java/uk/ac/leeds/ccg/math/number/Math_BigRationalSqrt.java](Math_BigRationalSqrt). These are thought to produce identical results, but this could do with being checked...   
 
