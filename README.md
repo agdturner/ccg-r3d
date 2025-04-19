@@ -3,21 +3,35 @@ A Java library for rendering 3D spatial data based on [ccg-v3d]((https://github.
 
 The aim is to support visualisation of models with [6 degrees of freedom](https://en.wikipedia.org/wiki/Six_degrees_of_freedom).
 
-The focus is not on realistic rendering, but rendering geometry.
+The focus is on rendering geometry and data attributed to geometries. The current focus is with points, straight line segments between two points, flat areas with connected line segments that form edges, and area faced volumes.
 
 ## Uses
 * Helping explain and develop [ccg-v3d](https://github.com/agdturner/ccg-v3d) - the underlying 3D Euclidean geometry library.
-* Supporting the development and integration of Environmental Digital Twins. The UK National Oceanography Centre have published [An Information Management Framework for Environmental Digital Twins (IMFe) Report](https://noc.ac.uk/files/documents/about/NOC%20IMFe%20Summary%20Report2.pdf) that explains what an Environmental Digital Twin is - basically it is a model of a region that provided feedback to the sensing and surveying of that region in order to more accurately and usefully represent it.
+* Visualising 3D data.
+* Supporting the development and integration of Environmental Digital Twins. The UK National Oceanography Centre have published [An Information Management Framework for Environmental Digital Twins (IMFe) Report](https://noc.ac.uk/files/documents/about/NOC%20IMFe%20Summary%20Report2.pdf) that explains what an Environmental Digital Twin is - a model of a region that provides feedback to the sensing and surveying of that region in order to more accurately and usefully represent it.
 
-## Hello World!
+## Axes
 
-Render of a grey polygon with no internal holes in a cube box for which white edges are rendered as lines. This is looking down the Z axis with the axes coloured (X blue, Y red, Z green):
+The following image is a render of an area (a polygon with no internal holes) coloured gray, with a pink edge in a clear cube for which white edges are rendered as lines. This is looking down the Z axis with the axes coloured (X blue, Y red, Z green). The camera has a screen as wide as the cube which is positioned at a distance of the radius of the cube (distance from the centre to a corner) with a focus in line with the centre of the screen and at twice the radius of the cube:
 
 <img alt="A polygon with no internal holes in a box." src="data/output/test/axes/test.png" />
+
+The camera can be pointed at the geometry from anywhere. The  following image is a rendering after rotating the camera Pi/8 radians around the X axis, 13*Pi/8 radians around the Y axis and 10*Pi/8 radians around the Z axis:
+
+<img alt="A polygon with no internal holes in a box." src="data/output/d/test/axesr/test_i1_j13_k10.png.png" />
+
+Renderings have been produced for geometries defined by coordinates and calculation done with double precision floating point and [https://github.com/agdturner/ccg-math/blob/master/src/main/java/uk/ac/leeds/ccg/math/number/Math_BigRationalSqrt.java](Math_BigRationalSqrt). These are thought to produce identical results, but this could do with being checked...   
+
+
+
+NB: Other renderings had been produced, but the code was completely changed and these are in the process of being remade.
+
+## Hello World
 
 Rendering of [Utah Teapot](https://en.wikipedia.org/wiki/Utah_teapot) using [Utah_teapot_(solid).stl](data/Utah_teapot_(solid).stl) with 9438 triangles (resolution 500x375, [Order of Magnitude](https://en.wikipedia.org/wiki/Order_of_magnitude) of precision -10), there is no shadow, there is effectively a low ambient light and a vector for a general light:
 
 <img alt="A yellow scale rendering of the Utah Teapot" src="data/outputold/Utah_teapot_(solid)/oom=-10/lighting(i=0.2673_j=0.5345_k=0.8018)/Utah_teapot_(solid)_500x500_pt(i=-12.3089_j=13.0269_k=17.2189)_lighting(i=0.2673_j=0.5345_k=0.8018)_oom=-10.png" />
+
 
 Rendering of the asteroid [Geographos](https://en.wikipedia.org/wiki/1620_Geographos) using a [Geographos 3D Model provided by NASA](https://nasa3d.arc.nasa.gov/detail/geographos) with 16380 triangles (resolution 500x375, [Order of Magnitude](https://en.wikipedia.org/wiki/Order_of_magnitude) of precision -8):
 
