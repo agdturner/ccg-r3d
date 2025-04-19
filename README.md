@@ -24,7 +24,7 @@ Renderings have been produced for geometries defined by coordinates and calculat
 
 
 
-NB: Other renderings had been produced, but the code was completely changed and these are in the process of being remade.
+# NB: Other renderings had been produced, but the code was completely changed and these are in the process of being remade.
 
 ## Hello World
 
