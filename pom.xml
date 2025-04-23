@@ -8,7 +8,7 @@
     
     <name>ccg-r3d</name>
     <url>https://github.com/agdturner/ccg-r3d</url>
-    <description>A Java Library for Rendering 3D spatial vector data.</description>
+    <description>A Java library for rendering 3D spatial data.</description>
     <scm>
         <url>git@github.com:agdturner/ccg-r3d.git</url>
         <connection>scm:git:git@github.com:agdturner/ccg-r3d.git</connection>
@@ -37,11 +37,15 @@
             </roles>
         </developer>
     </developers>
-    
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>22</maven.compiler.source>
+        <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
+        <maven.compiler.release>${maven.compiler.target}</maven.compiler.release>
+        <maven.compiler.testSource>${maven.compiler.source}</maven.compiler.testSource>
+        <maven.compiler.testTarget>${maven.compiler.testSource}</maven.compiler.testTarget>
+        <maven.compiler.testRelease>${maven.compiler.testTarget}</maven.compiler.testRelease>
     </properties>
     
     <dependencies>
