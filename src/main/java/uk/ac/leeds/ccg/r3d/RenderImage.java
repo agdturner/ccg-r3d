@@ -146,7 +146,7 @@ public class RenderImage {
                  */
                 BigRational ambientLight = BigRational.valueOf(1, 20);
                 V3D_Vector lighting = new V3D_Vector(-1, -2, -3).getUnitVector(oom, rm);
-                r.run(dim, lighting, ambientLight, false, addGraticules, oom, rm);
+                //r.run(dim, lighting, ambientLight, false, addGraticules, oom, rm);
 
 //                i = -1;
 //                j = 0;
@@ -175,12 +175,15 @@ public class RenderImage {
                 V3D_Rectangle rectr;
                 V3D_Point focusr;
                 
-                for (j = 2; j < anglei2; j++) {
+                //j = Integer.valueOf(args[0]);
+                for (j = 0; j < anglei2; j++) {
                     //rect = rect.rotate(yRay, yuv, angle, epsilon);
                     //focus = focus.rotate(yRay, yuv, angle, epsilon);
-                    for (i = 5; i < anglei2; i++) {
+                    //i = 15;
+                    for (i = 0; i < anglei2; i++) {
                         //rect = rect.rotate(xRay, xuv, angle, epsilon);
                         //focus = focus.rotate(xRay, xuv, angle, epsilon);
+                        //k = 3;
                         for (k = 0; k < anglei2; k++) {
                             //rect = rect.rotate(zRay, zuv, angle, epsilon);
                             //focus = focus.rotate(zRay, zuv, angle, epsilon);
@@ -196,7 +199,7 @@ public class RenderImage {
                                     "test_i" + i + "_j" + j + "_k" + k + ".png");
                             r.run(dim, lighting, ambientLight, false, addGraticules, oom, rm);
                         }
-                    }
+                   }
                 }
             }
 

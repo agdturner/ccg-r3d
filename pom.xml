@@ -46,6 +46,7 @@
         <maven.compiler.testSource>${maven.compiler.source}</maven.compiler.testSource>
         <maven.compiler.testTarget>${maven.compiler.testSource}</maven.compiler.testTarget>
         <maven.compiler.testRelease>${maven.compiler.testTarget}</maven.compiler.testRelease>
+        <mainClass>uk.ac.leeds.ccg.r3d.RenderImage</mainClass>
     </properties>
     
     <dependencies>
@@ -92,30 +93,6 @@
             <version>5.10.2</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.9.3</version>
-            <scope>test</scope>
-        </dependency>
-        -->
-        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.9.3</version>
-            <scope>test</scope>
-        </dependency>
-        -->
-        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-params
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
-            <version>5.9.3</version>
-            <scope>test</scope>
-        </dependency>
-        -->
     </dependencies>
     
     <build>
@@ -186,19 +163,28 @@
                 <plugins>
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.7.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                        </configuration>
+                        <!--
                         <artifactId>nexus-staging-maven-plugin</artifactId>
                         <version>1.6.13</version>
+                        <version>1.7.0</version>
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>ossrh</serverId>
                             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                             <autoReleaseAfterClose>true</autoReleaseAfterClose>
                         </configuration>
-                    </plugin>          
+                        -->
+                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.11.0</version>
+                        <version>3.13.0</version>
                         <configuration>
                             <compilerArgs>
                                 <arg>-verbose</arg>
@@ -209,20 +195,17 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.2.2</version>
-                        <configuration>
-                            <argLine>-Xms256m -Xmx512m -XX:MaxPermSize=512m</argLine>
-                        </configuration>
+                        <version>3.2.5</version>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>3.1.2</version>
+                        <version>3.2.5</version>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>3.2.1</version>
+                        <version>3.3.1</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -235,7 +218,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.5.0</version>
+                        <version>3.7.0</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -248,13 +231,35 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.1.0</version>
+                        <version>3.2.4</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
                                 <phase>verify</phase>
                                 <goals>
                                     <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>${mainClass}</mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                                <phase>package</phase> <!-- bind to the packaging phase -->
+                                <goals>
+                                    <goal>single</goal>
                                 </goals>
                             </execution>
                         </executions>

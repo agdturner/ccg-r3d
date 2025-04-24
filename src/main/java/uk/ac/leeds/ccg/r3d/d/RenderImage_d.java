@@ -66,14 +66,14 @@ public class RenderImage_d {
 
     public static void main(String[] args) {
         try {
-            boolean run00 = true;
-            //boolean run00 = false;
+            //boolean run00 = true;
+            boolean run00 = false;
             //boolean run0 = true;
             boolean run0 = false;
             //boolean run1 = true;
             boolean run1 = false;
-            //boolean runUtah = true;
-            boolean runUtah = false;
+            boolean runUtah = true;
+            //boolean runUtah = false;
             //boolean runGeographos = true;
             boolean runGeographos = false;
             //boolean runKatrina = true;
@@ -423,68 +423,81 @@ public class RenderImage_d {
 //                    }
 //                }
 //            }
-//
-//            if (runUtah) {
-//                double epsilon = 1d / 10000000d;
-//                int n = 1;
-//                n = 5;
-//                int w = 100 * n;
-//                int h = 75 * n;
-//                boolean assessTopology = false;
-//                boolean castShadow = false;
-//                double zoomFactor = 1.0d;
-//                double distance = 2.0d;
-//                /**
-//                 * AmbientLight makes non black surfaces non black even if they
-//                 * are orientated opposite to the lighting vector.
-//                 */
-//                double ambientLight = 1d / 20d;
-//                String name = "Utah_teapot_(solid)";
-//                Color color = Color.YELLOW;
-//                Path input = Paths.get(inDataDir.toString(), name, name + ".stl");
-//                // Init universe
-//                Universe_d universe = new Universe_d(env, input,
-//                        V3D_Vector_d.ZERO, color, assessTopology, epsilon,
-//                        false);
-//                // Detail the camera
-//                Dimension size = new Dimension(w, h);
-//                V3D_Point_d centroid = universe.aabb.getCentroid();
-//                double radius = universe.aabb.getPointsArray()[0]
-//                        .getDistance(centroid);
-//                for (int i = -1; i <= 1; i++) {
-//                    for (int j = -1; j <= 1; j++) {
-//                        for (int k = -1; k <= 1; k++) {
-//                            if (!(i == 0 && j == 0 && k == 0)) {
-//                                V3D_Vector_d direction = new V3D_Vector_d(i, j, k).getUnitVector();
-//                                //V3D_Vector_d direction = new V3D_Vector_d(-1, 1, 1).getUnitVector();
-//                                V3D_Point_d pt = getCameraPt(centroid, direction,
-//                                        radius * distance);
-//                                // Render the image
-//                                RenderImage_d r = new RenderImage_d(universe, pt, size, zoomFactor, null, epsilon);
-//                                //V3D_Vector_d lighting = new V3D_Vector_d(-1, -2, -3).getUnitVector();
-//                                V3D_Vector_d lighting = new V3D_Vector_d(1, 2, 3).getUnitVector();
-//                                String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
-//                                        + "_j=" + String.format("%,.2f", lighting.dy)
-//                                        + "_k=" + String.format("%,.2f", lighting.dz)
-//                                        + ")_ambientLight(" + ambientLight + ")";
-//                                Path dir = Paths.get(outDataDir.toString(), name, "epsilon=" + epsilon, ls,
-//                                        "zoomFactor=" + zoomFactor, "distance=" + distance);
-//                                if (castShadow) {
-//                                    dir = Paths.get(dir.toString(), "shadow");
-//                                }
-//                                r.output = Paths.get(dir.toString(),
-//                                        name
-//                                        + "_" + size.width + "x" + size.height
-//                                        + "_pt(i=" + String.format("%,.2f", pt.getX())
-//                                        + "_j=" + String.format("%,.2f", pt.getY())
-//                                        + "_k=" + String.format("%,.2f", pt.getZ())
-//                                        + ")_" + ls + "_epsilon=" + epsilon + ".png");
-//                                r.run(size, lighting, ambientLight, castShadow, epsilon);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
+
+            if (runUtah) {
+                double epsilon = 1d / 10000000d;
+                int n = 1;
+                //n = 2;
+                int w = 20 * n; //500
+                int h = 20 * n;  //375 187.5
+                boolean assessTopology = false;
+                boolean castShadow = false;
+                double zoomFactor = 1.0d;
+                double distance = 2.0d;
+                /**
+                 * AmbientLight makes non black surfaces non black even if they
+                 * are orientated opposite to the lighting vector.
+                 */
+                double ambientLight = 1d / 20d;
+                String name = "Utah_teapot_(solid)";
+                Color color = Color.YELLOW;
+                Path input = Paths.get(inDataDir.toString(), name, name + ".stl");
+                // Init universe
+                Universe_d universe = new Universe_d(env, input,
+                        V3D_Vector_d.ZERO, color, assessTopology, epsilon,
+                        false);
+                // Detail the camera
+                Dimension dim = new Dimension(w, h);
+                V3D_Point_d centroid = universe.aabb.getCentroid();
+                double radius = universe.aabb.getPointsArray()[0].getDistance(centroid);
+                V3D_Point_d focus = new V3D_Point_d(env, 0d, 0d, -20);
+                double x = 10;
+                V3D_Rectangle_d rect = new V3D_Rectangle_d(
+                        new V3D_Point_d(env, -x, -x, -x),
+                        new V3D_Point_d(env, -x, x, -x),
+                        new V3D_Point_d(env, x, x, -x),
+                        new V3D_Point_d(env, x, -x, -x));
+                //for (int i = -1; i <= 1; i++) {
+                //    for (int j = -1; j <= 1; j++) {
+                //        for (int k = -1; k <= 1; k++) {
+                //            if (!(i == 0 && j == 0 && k == 0)) {
+                //                V3D_Vector_d direction = new V3D_Vector_d(i, j, k).getUnitVector();
+                                //V3D_Vector_d direction = new V3D_Vector_d(1, 0, 0).getUnitVector();
+                                //V3D_Point_d pt = getCameraPt(centroid, direction, radius * distance);
+                                //V3D_Rectangle_d rect = universe.aabb.getViewport3(pt, V3D_Vector_d.I, zoomFactor, epsilon);
+                                //V3D_Rectangle_d rect = new V3D_Rectangle_d(
+                                //    new V3D_Point_d(env, -100d, -100d, -radius),
+                                //    new V3D_Point_d(env, -100d, 100d, -radius),
+                                //    new V3D_Point_d(env, 100d, 100d, -radius),
+                                //    new V3D_Point_d(env, 100d, -100d, -radius));
+                                // Render the image
+                                RenderImage_d r = new RenderImage_d(universe, offset, focus, dim, rect, epsilon);
+                            
+                                //V3D_Vector_d lighting = new V3D_Vector_d(-1, -2, -3).getUnitVector();
+                                V3D_Vector_d lighting = new V3D_Vector_d(1, 2, 3).getUnitVector();
+                                String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
+                                        + "_j=" + String.format("%,.2f", lighting.dy)
+                                        + "_k=" + String.format("%,.2f", lighting.dz)
+                                        + ")_ambientLight(" + ambientLight + ")";
+                                Path dir = Paths.get(outDataDir.toString(), name, "epsilon=" + epsilon, ls,
+                                        "zoomFactor=" + zoomFactor, "distance=" + distance);
+                                if (castShadow) {
+                                    dir = Paths.get(dir.toString(), "shadow");
+                                }
+                                r.output = Paths.get(dir.toString(), "test.png");
+                                        //name
+                                        //+ "_" + size.width + "x" + size.height
+                                        //+ "_pt(i=" + String.format("%,.2f", pt.getX())
+                                        //+ "_j=" + String.format("%,.2f", pt.getY())
+                                        //+ "_k=" + String.format("%,.2f", pt.getZ())
+                                        //+ ")_" + ls + "_epsilon=" + epsilon + ".png");
+                                r.run(dim, lighting, ambientLight, castShadow, epsilon);
+                                //r.run(dim, lighting, ambientLight, castShadow, epsilon);
+                //            }
+                //        }
+                //    }
+                //}
+            }
 //
 //            if (runGeographos) {
 //                double epsilon = 1d / 10000000d;

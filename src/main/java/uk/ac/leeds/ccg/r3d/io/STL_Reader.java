@@ -35,10 +35,10 @@ import uk.ac.leeds.ccg.v3d.geometry.light.V3D_VLine;
 import uk.ac.leeds.ccg.v3d.geometry.light.V3D_VTriangle;
 
 /**
- * For reading STL Files. An STL file is effectively a file of triangles. The
- * triangles can have a short attribute and a normal vector. They may not have
- * either. The normal can be computed by the right hand rule when it is not
- * supplied.
+ * For reading STL Files (https://en.wikipedia.org/wiki/STL_(file_format). An
+ * STL file is effectively a file of triangles. The triangles can have a short
+ * attribute and a normal vector. They may not have either. The normal can be
+ * computed by the right hand rule when it is not supplied.
  *
  * If the points of the triangles representing a closed surface are not given in
  * the right order, then the computed normal direction can be opposite to what
@@ -142,8 +142,8 @@ public class STL_Reader {
      * @return An ArrayList of triangles read from the file.
      * @throws IOException
      */
-    public void readBinary(Path p, V3D_Vector offset, int oom, RoundingMode rm, 
-        V3D_Environment env)
+    public void readBinary(Path p, V3D_Vector offset, int oom, RoundingMode rm,
+            V3D_Environment env)
             throws IOException {
         DataInputStream dis = new DataInputStream(new FileInputStream(
                 p.toFile()));
@@ -242,8 +242,7 @@ public class STL_Reader {
         if (n.isZero()) {
             n = vt.getNormal().getUnitVector(oom, rm);
         }
-        Area t = new Area(new V3D_Triangle(env, offset, vt), n,
-                attribute);
+        Area t = new Area(new V3D_Triangle(env, offset, vt), n, attribute);
         triangles.add(t);
         if (assessTopology) {
 //        Generic_Collections.addToMap(points, pv, t);

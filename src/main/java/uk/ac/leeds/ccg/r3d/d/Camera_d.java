@@ -225,10 +225,26 @@ public class Camera_d extends V3D_Frustum_d {
         int nlines = universe.lines.size();
         universe.lines.forEach(x
                 -> {
+//            if (x.l.l.v.isScalarMultiple(rect.getPQR().getPQV(), epsilon)) {
+//                renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getQRV()), pix);
+//            } else {
+//                renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getPQV()), pix);
+//            }
             if (x.l.l.v.isScalarMultiple(rect.getPQR().getPQV(), epsilon)) {
-                renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getQRV()), pix);
+                if (x.l.l.v.getDotProduct(rect.getPQR().getPQV()) == 0d) {
+                    renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getPQV()), pix);
+                } else {
+                    renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getQRV()), pix);
+                }
             } else {
-                renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getPQV()), pix);
+                if (x.l.l.v.getDotProduct(rect.getPQR().getPQV()) == 0d) {
+                //if (x.l.l.v.getDotProduct(rect.getPQR().getQRV()) == 0d) {
+                    //renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getQRV()), pix);
+                    renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getPQV()), pix);
+                } else {
+                    //renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getPQV()), pix);
+                    renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getQRV()), pix);
+                }
             }
         });
         // Render Areas
@@ -389,8 +405,8 @@ public class Camera_d extends V3D_Frustum_d {
                         // Calculate/store the screen projected line segment.
                         V3D_Line_d sl = new V3D_Line_d(sr, sq);
                         double lw = pixelSize * 2d;
-                        for (int row = minri; row <= maxri; row++) {
-                            for (int col = minci; col <= maxci; col++) {
+                        for (int row = minri; row < maxri + 1; row++) {
+                            for (int col = minci; col < maxci + 1; col++) {
                                 // Calculate the pixel distance from the screen projected line segment.
                                 V3D_Point_d sp = getPoint(row, col, epsilon);
                                 double d = sl.getDistance(sp, epsilon);
@@ -570,6 +586,15 @@ public class Camera_d extends V3D_Frustum_d {
                     } catch (RuntimeException ex) {
                         System.out.println("Resolution too coarse to render "
                                 + "triangle: " + a.toString());
+                        
+                        V3D_Ray_d ray = getRay(id);
+                        V3D_Point_d ti = a.getIntersectNonCoplanar(ray, epsilon);
+                        if (ti != null) {
+                            double d2 = ti.getDistanceSquared(focus);
+                            mind2s.put(id, d2);
+                            closestIndex.put(id, tIndex);
+                            idPoint.put(id, ti);
+                        }
                     }
                 } else {
                     if (mind2t[tIndex] < mind2) {
@@ -588,6 +613,18 @@ public class Camera_d extends V3D_Frustum_d {
                         } catch (RuntimeException ex) {
                             System.out.println("Resolution too coarse to render "
                                     + "triangle: " + a.toString());
+                            
+                            V3D_Ray_d ray = getRay(id);
+                            V3D_Point_d ti = a.getIntersectNonCoplanar(ray, epsilon);
+                            if (ti != null) {
+                                // Only render areas that intersect the ray at a point and that are beyond the camera rect.
+                                double d2 = ti.getDistanceSquared(focus);
+                                if (d2 < mind2) {
+                                    mind2s.put(id, d2);
+                                    closestIndex.put(id, tIndex);
+                                    idPoint.put(id, ti);
+                                }
+                            }
                         }
                     }
                 }

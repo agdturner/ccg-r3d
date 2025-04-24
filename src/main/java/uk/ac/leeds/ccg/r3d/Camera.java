@@ -228,10 +228,26 @@ public class Camera extends V3D_Frustum {
         int nlines = universe.lines.size();
         universe.lines.forEach(x
                 -> {
+//            if (x.l.l.v.isScalarMultiple(rect.getPQR().getPQV(oom, rm), oom, rm)) {
+//                renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getQRV(oom, rm), oom, rm), pix);
+//            } else {
+//                renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getPQV(oom, rm), oom, rm), pix);
+//            }    
             if (x.l.l.v.isScalarMultiple(rect.getPQR().getPQV(oom, rm), oom, rm)) {
-                renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getQRV(oom, rm), oom, rm), pix);
+                if (x.l.l.v.getDotProduct(rect.getPQR().getPQV(oom, rm), oom, rm).compareTo(BigRational.ZERO) == 0) {
+                    renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getPQV(oom, rm), oom, rm), pix);
+                } else {
+                    renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getQRV(oom, rm), oom, rm), pix);
+                }            
             } else {
-                renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getPQV(oom, rm), oom, rm), pix);
+                if (x.l.l.v.getDotProduct(rect.getPQR().getPQV(oom, rm), oom, rm).compareTo(BigRational.ZERO) == 0) {
+                //if (x.l.l.v.getDotProduct(rect.getPQR().getQRV(oom, rm), oom, rm).compareTo(BigRational.ZERO) == 0) {
+                    //renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getQRV(oom, rm), oom, rm), pix);
+                    renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getPQV(oom, rm), oom, rm), pix);
+                } else {
+                    //renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getPQV(oom, rm), oom, rm), pix);
+                    renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getQRV(oom, rm), oom, rm), pix);
+                }
             }
         });
         // Render Areas
@@ -387,8 +403,8 @@ public class Camera extends V3D_Frustum {
                         // Calculate/store the screen projected line segment.
                         V3D_Line sl = new V3D_Line(sr, sq, oom, rm);
                         BigRational lw = pixelSize.multiply(2);
-                        for (int row = minri; row <= maxri; row++) {
-                            for (int col = minci; col <= maxci; col++) {
+                        for (int row = minri; row < maxri + 1; row++) {
+                            for (int col = minci; col < maxci + 1; col++) {
                                 // Calculate the pixel distance from the screen projected line segment.
                                 V3D_Point sp = getPoint(row, col, oom, rm);
                                 BigRational d = sl.getDistance(sp, oom, rm);
@@ -408,6 +424,7 @@ public class Camera extends V3D_Frustum {
                                             } else {
                                                 //if (d2 <= d2p + epsilon) {
                                                 if (d2.compareTo(d2p) == -1) {
+                                                //if (d2.compareTo(d2p) != 1) {
                                                     mind2s.put(id, d2); // So closest things are at the front.
                                                     render(pix, row, col, l.color);
                                                 } else {

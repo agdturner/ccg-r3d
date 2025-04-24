@@ -163,6 +163,7 @@ public class Universe_d {
                 zmin = Math.min(zmin, z);
                 zmax = Math.max(zmax, z);
             }
+            break;
         }
         aabb = new V3D_AABB_d(env, xmin, xmax, ymin, ymax, zmin, zmax);
         System.out.println(aabb.toString());
