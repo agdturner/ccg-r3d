@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import uk.ac.leeds.ccg.generic.util.Generic_Collections;
 import uk.ac.leeds.ccg.grids.d2.Grids_2D_ID_int;
+import uk.ac.leeds.ccg.math.arithmetic.Math_Double;
 import uk.ac.leeds.ccg.r3d.d.entities.Area_d;
 import uk.ac.leeds.ccg.r3d.d.entities.Line_d;
 import uk.ac.leeds.ccg.r3d.d.entities.Point_d;
@@ -230,22 +231,35 @@ public class Camera_d extends V3D_Frustum_d {
 //            } else {
 //                renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getPQV()), pix);
 //            }
-            if (x.l.l.v.isScalarMultiple(rect.getPQR().getPQV(), epsilon)) {
-                if (x.l.l.v.getDotProduct(rect.getPQR().getPQV()) == 0d) {
-                    renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getPQV()), pix);
-                } else {
-                    renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getQRV()), pix);
-                }
-            } else {
-                if (x.l.l.v.getDotProduct(rect.getPQR().getPQV()) == 0d) {
-                //if (x.l.l.v.getDotProduct(rect.getPQR().getQRV()) == 0d) {
-                    //renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getQRV()), pix);
-                    renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getPQV()), pix);
-                } else {
-                    //renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getPQV()), pix);
-                    renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getQRV()), pix);
-                }
-            }
+            //if (x.l.l.v.isScalarMultiple(rect.getPQR().getPQV(), epsilon)) {
+            //    if (Math_Double.equals(x.l.l.v.getDotProduct(rect.getPQR().getPQV()), 0d, epsilon)) {
+                    if (Math_Double.equals(x.l.l.v.getDotProduct(rect.getPQR().getQRV()), 0d, epsilon)) {
+                        renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getQRV()), pix);
+                    } else {
+                        renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getPQV()), pix);
+                    }
+//                } else {
+//                    if (Math_Double.equals(x.l.l.v.getDotProduct(rect.getPQR().getQRV()), 0d, epsilon)) {
+//                        renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getQRV()), pix);
+//                    } else {
+//                        renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getPQV()), pix);
+//                    }
+//                }
+//            } else {
+//                if (Math_Double.equals(x.l.l.v.getDotProduct(rect.getPQR().getPQV()), 0d, epsilon)) {
+//                    if (Math_Double.equals(x.l.l.v.getDotProduct(rect.getPQR().getQRV()), 0d, epsilon)) {
+//                        renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getQRV()), pix);
+//                    } else {
+//                        renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getPQV()), pix);
+//                    }
+//                } else {
+//                    if (Math_Double.equals(x.l.l.v.getDotProduct(rect.getPQR().getQRV()), 0d, epsilon)) {
+//                        renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getQRV()), pix);
+//                    } else {
+//                        renderLine(epsilon, mind2s, x, new V3D_Plane_d(x.l, rect.getPQR().getPQV()), pix);
+//                    }
+//                }
+//            }
         });
         // Render Areas
         int nAreas = universe.areas.size();
@@ -271,7 +285,7 @@ public class Camera_d extends V3D_Frustum_d {
             if (nAP < 1) {
                 nAP = 1;
             }
-            for (int i = 1; i < nAreas; i++) {
+            for (int i = 0; i < nAreas; i++) {
                 if (i % nAP == 0) {
                     System.out.println("Area " + i + " out of " + nAreas);
                 }
@@ -602,7 +616,6 @@ public class Camera_d extends V3D_Frustum_d {
                             V3D_Ray_d ray = getRay(id);
                             V3D_Point_d ti = a.getIntersectNonCoplanar(ray, epsilon);
                             if (ti != null) {
-                                // Only render areas that intersect the ray at a point and that are beyond the camera rect.
                                 double d2 = ti.getDistanceSquared(focus);
                                 if (d2 < mind2) {
                                     mind2s.put(id, d2);

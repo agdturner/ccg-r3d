@@ -95,34 +95,7 @@ public class Universe_d {
         points = new ArrayList<>();
         lines = new ArrayList<>();
         areas = new ArrayList<>();
-        /**
-         * Create a AABB centred at 0,0,0
-         */
-        V3D_Point_d[] points = new V3D_Point_d[8];
-        // multiplication factor
-        long m = 3;
-        V3D_Point_d lbf = new V3D_Point_d(env, offset, new V3D_Vector_d(-1 * m, -1 * m, -1 * m));
-        V3D_Point_d lba = new V3D_Point_d(env, offset, new V3D_Vector_d(-1 * m, -1 * m, 1 * m));
-        V3D_Point_d ltf = new V3D_Point_d(env, offset, new V3D_Vector_d(-1 * m, 1 * m, -1 * m));
-        V3D_Point_d lta = new V3D_Point_d(env, offset, new V3D_Vector_d(-1 * m, 1 * m, 1 * m));
-        V3D_Point_d rbf = new V3D_Point_d(env, offset, new V3D_Vector_d(1 * m, -1 * m, -1 * m));
-        V3D_Point_d rba = new V3D_Point_d(env, offset, new V3D_Vector_d(1 * m, -1 * m, 1 * m));
-        V3D_Point_d rtf = new V3D_Point_d(env, offset, new V3D_Vector_d(1 * m, 1 * m, -1 * m));
-        V3D_Point_d rta = new V3D_Point_d(env, offset, new V3D_Vector_d(1 * m, 1 * m, 1 * m));
-        //createCubeFrom5Tetrahedra(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
-        //createCubeFrom6Tetrahedra(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
-        //createCubeSurfaceFromTriangles(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
-        //createAxes(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
-        //createTriangle(epsilon, lbf, lba, ltf, lta, rbf, rba, rtf, rta);
-        points[0] = lbf;
-        points[1] = lba;
-        points[2] = ltf;
-        points[3] = lta;
-        points[4] = rbf;
-        points[5] = rba;
-        points[6] = rtf;
-        points[7] = rta;
-        this.aabb = new V3D_AABB_d(points);
+        aabb = new V3D_AABB_d(env, 0d, 0d, 0d);
     }
 
     /**
@@ -176,24 +149,6 @@ public class Universe_d {
         Data_ID_long id = new Data_ID_long(nextID);
         nextID++;
         return id;
-    }
-
-    /**
-     *
-     */
-    public void createTriangle(double epsilon,
-            V3D_Point_d lbf, V3D_Point_d lba, V3D_Point_d ltf, V3D_Point_d lta,
-            V3D_Point_d rbf, V3D_Point_d rba, V3D_Point_d rtf, V3D_Point_d rta) {
-        V3D_AABB_d e = new V3D_AABB_d(lbf, lba, ltf, lta,
-                rbf, rba, rtf, rta);
-        // Create x axis
-        //V3D_Point_d p = new V3D_Point_d(e.getXMin(), 0d, -1d);
-        V3D_Point_d p = new V3D_Point_d(env, e.getXMin(), 0d, e.getZMin());
-        //V3D_Point_d q = new V3D_Point_d(e.getXMax(), e.getYMax(), -1d);
-        V3D_Point_d q = new V3D_Point_d(env, e.getXMax(), e.getYMax(), e.getZMin());
-        //V3D_Point_d r = new V3D_Point_d(e.getXMax(), 0d, -1d);
-        V3D_Point_d r = new V3D_Point_d(env, e.getXMax(), 0d, e.getZMin());
-        areas.add(new Area_d(new V3D_Triangle_d(p, q, r), Color.PINK));
     }
 
     /**
@@ -269,37 +224,7 @@ public class Universe_d {
 //        System.out.println("t6 volume=" + t6.getVolume());
 //    }
 //
-//    public void createCubeSurfaceFromTriangles(double epsilon,
-//            V3D_Point_d lbf, V3D_Point_d lba, V3D_Point_d ltf, V3D_Point_d lta,
-//            V3D_Point_d rbf, V3D_Point_d rba, V3D_Point_d rtf, V3D_Point_d rta) {
-    ////        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, ltf, rtf), Color.WHITE));
-////        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, rbf, rtf), Color.WHITE));
-////        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, ltf, lta), Color.WHITE));
-////        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, lba, lta), Color.WHITE));
-////        triangles.add(new Triangle_d(new V3D_Triangle_d(lba, lta, rta), Color.WHITE));
-////        triangles.add(new Triangle_d(new V3D_Triangle_d(lba, rba, rta), Color.WHITE));
-////        triangles.add(new Triangle_d(new V3D_Triangle_d(rbf, rtf, rta), Color.WHITE));
-////        triangles.add(new Triangle_d(new V3D_Triangle_d(rbf, rta, rba), Color.WHITE));
-////        triangles.add(new Triangle_d(new V3D_Triangle_d(ltf, lta, rta), Color.WHITE));
-////        triangles.add(new Triangle_d(new V3D_Triangle_d(rtf, ltf, rta), Color.WHITE));
-////        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, rbf, rba), Color.WHITE));
-////        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, lba, rba), Color.WHITE));
-//        // Coloured triangles
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, ltf, rtf), Color.BLUE));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, rbf, rtf), Color.BLUE));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, ltf, lta), Color.RED));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, lba, lta), Color.RED));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lba, lta, rta), Color.YELLOW));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lba, rba, rta), Color.YELLOW));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(rbf, rtf, rta), Color.GREEN));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(rbf, rta, rba), Color.GREEN));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(ltf, lta, rta), Color.ORANGE));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(rtf, ltf, rta), Color.ORANGE));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, rbf, rba), Color.PINK));
-//        triangles.add(new Triangle_d(new V3D_Triangle_d(lbf, lba, rba), Color.PINK));
-//
-//    }
-
+//    
     /**
      * Set the camera.
      *

@@ -56,57 +56,16 @@ public class STL_Reader {
     public ArrayList<Area> triangles;
 
     /**
-     * A switch set to true if topology is to be assessed.
-     */
-    public boolean assessTopology;
-
-    /**
-     * Topology. (What triangles have shared points)
-     */
-    //public HashMap<V3D_V, Set<Triangle>> points;
-    /**
-     * Count of triangles with shared points.
-     */
-    public HashMap<V3D_V, Integer> pointCounts;
-
-    /**
-     * Topology. (What triangles have shared edges). For simple closed surfaces,
-     * ones that bound volumes, each triangle edge of the surface must be
-     * matched with exactly one other triangle edge. If there are triangles with
-     * an edge not shared with any other triangles, then this triangle is at the
-     * edge of an unclosed surface. If more than two triangles share an edge,
-     * then either a surface is self intersecting or is folded. Surfaces may
-     * meet along several edges and indeed along (parts of) faces of triangles.
-     * Where surfaces are folded and meet along faces there may not be any
-     * shared points or edges.
-     */
-    //public HashMap<V3D_VLine, Set<Triangle>> edges;
-    /**
-     * Count of triangles with shared edges.
-     */
-    public HashMap<V3D_VLine, Integer> edgeCounts;
-
-    /**
      * Stats
      */
     public Stats stats;
 
     /**
      * Create a new instance.
-     *
-     * @param assessTopology If this is set to true, then {@link #points},
-     * {@link #pointCounts}, {@link #edge} and {@link #edgeCounts} are
-     * initialised and topology will be assessed.
+     * 
      */
-    public STL_Reader(boolean assessTopology) {
+    public STL_Reader() {
         triangles = new ArrayList<>();
-        this.assessTopology = assessTopology;
-        if (assessTopology) {
-            //points = new HashMap<>();
-            pointCounts = new HashMap<>();
-            //edges = new HashMap<>();
-            edgeCounts = new HashMap<>();
-        }
     }
 
     public static void main(String[] args) {
@@ -115,7 +74,7 @@ public class STL_Reader {
         RoundingMode rm = RoundingMode.HALF_UP;
         V3D_Environment env = new V3D_Environment(oom, rm);
         try {
-            STL_Reader s = new STL_Reader(true);
+            STL_Reader s = new STL_Reader();
             s.readBinary(p, V3D_Vector.ZERO, oom, rm, env);
             //System.out.println(ts.get(0));
             System.out.println("minx=" + s.stats.minx);
@@ -132,14 +91,14 @@ public class STL_Reader {
     /**
      * Read the binary STL file at the given Path following the available file
      * specification: https://en.wikipedia.org/wiki/STL_(file_format)#Binary_STL
-     * Everything is assumed to be little endian. Report the min and max of the
-     * x, y, and z values.
+     * Everything is assumed to be little endian.Report the min and max of the
+ x, y, and z values.
      *
      * @param p The file to read.
      * @param offset The common offset.
      * @param oom
      * @param rm
-     * @return An ArrayList of triangles read from the file.
+     * @param env
      * @throws IOException
      */
     public void readBinary(Path p, V3D_Vector offset, int oom, RoundingMode rm,
@@ -206,33 +165,33 @@ public class STL_Reader {
             process(offset, pv, qv, rv, pq, qr, rp, n, attribute, oom, rm, env);
             i++;
         }
-        if (assessTopology) {
-            // Topology checks and reporting.
-            System.out.println(pointCounts.size() + " unique points.");
-            System.out.println(edgeCounts.size() + " unique edges.");
-            int pmax = 0;
-            int pmin = pointCounts.entrySet().iterator().next().getValue();
-            for (var pc : pointCounts.keySet()) {
-                pmax = Math.max(pmax, pointCounts.get(pc));
-                pmin = Math.min(pmin, pointCounts.get(pc));
-            }
-            System.out.println(pmax + " = maximum number of triangles containing any unique point.");
-            System.out.println(pmin + " = minimum number of triangles containing any unique point.");
-            int emax = 0;
-            int emin = edgeCounts.entrySet().iterator().next().getValue();
-            for (var ec : edgeCounts.keySet()) {
-                emax = Math.max(emax, edgeCounts.get(ec));
-                emin = Math.min(emin, edgeCounts.get(ec));
-            }
-            System.out.println(emax + " = maximum number of triangles sharing any edge.");
-            System.out.println(emin + " = minimum number of triangles sharing any edge.");
-            if (emax == 2 && emin == 2) {
-                System.out.println("Each edge is only shared between two triangles.");
-                if (edgeCounts.size() == pointCounts.size() * 2 + 2) {
-                    System.out.println("There is a single unfolded closed surface.");
-                }
-            }
-        }
+//        if (assessTopology) {
+//            // Topology checks and reporting.
+//            System.out.println(pointCounts.size() + " unique points.");
+//            System.out.println(edgeCounts.size() + " unique edges.");
+//            int pmax = 0;
+//            int pmin = pointCounts.entrySet().iterator().next().getValue();
+//            for (var pc : pointCounts.keySet()) {
+//                pmax = Math.max(pmax, pointCounts.get(pc));
+//                pmin = Math.min(pmin, pointCounts.get(pc));
+//            }
+//            System.out.println(pmax + " = maximum number of triangles containing any unique point.");
+//            System.out.println(pmin + " = minimum number of triangles containing any unique point.");
+//            int emax = 0;
+//            int emin = edgeCounts.entrySet().iterator().next().getValue();
+//            for (var ec : edgeCounts.keySet()) {
+//                emax = Math.max(emax, edgeCounts.get(ec));
+//                emin = Math.min(emin, edgeCounts.get(ec));
+//            }
+//            System.out.println(emax + " = maximum number of triangles sharing any edge.");
+//            System.out.println(emin + " = minimum number of triangles sharing any edge.");
+//            if (emax == 2 && emin == 2) {
+//                System.out.println("Each edge is only shared between two triangles.");
+//                if (edgeCounts.size() == pointCounts.size() * 2 + 2) {
+//                    System.out.println("There is a single unfolded closed surface.");
+//                }
+//            }
+//        }
     }
 
     private void process(V3D_Vector offset, V3D_V pv, V3D_V qv, V3D_V rv,
@@ -244,20 +203,20 @@ public class STL_Reader {
         }
         Area t = new Area(new V3D_Triangle(env, offset, vt), n, attribute);
         triangles.add(t);
-        if (assessTopology) {
-//        Generic_Collections.addToMap(points, pv, t);
-//        Generic_Collections.addToMap(points, qv, t);
-//        Generic_Collections.addToMap(points, rv, t);
-            Generic_Collections.addToCount(pointCounts, pv, 1);
-            Generic_Collections.addToCount(pointCounts, qv, 1);
-            Generic_Collections.addToCount(pointCounts, rv, 1);
-//        Generic_Collections.addToMap(edges, pq, t);
-//        Generic_Collections.addToMap(edges, qr, t);
-//        Generic_Collections.addToMap(edges, rp, t);
-            Generic_Collections.addToCount(edgeCounts, pq, 1);
-            Generic_Collections.addToCount(edgeCounts, qr, 1);
-            Generic_Collections.addToCount(edgeCounts, rp, 1);
-        }
+//        if (assessTopology) {
+////        Generic_Collections.addToMap(points, pv, t);
+////        Generic_Collections.addToMap(points, qv, t);
+////        Generic_Collections.addToMap(points, rv, t);
+//            Generic_Collections.addToCount(pointCounts, pv, 1);
+//            Generic_Collections.addToCount(pointCounts, qv, 1);
+//            Generic_Collections.addToCount(pointCounts, rv, 1);
+////        Generic_Collections.addToMap(edges, pq, t);
+////        Generic_Collections.addToMap(edges, qr, t);
+////        Generic_Collections.addToMap(edges, rp, t);
+//            Generic_Collections.addToCount(edgeCounts, pq, 1);
+//            Generic_Collections.addToCount(edgeCounts, qr, 1);
+//            Generic_Collections.addToCount(edgeCounts, rp, 1);
+//        }
     }
 
     float readFloat(DataInputStream dis) throws IOException {

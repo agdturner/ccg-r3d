@@ -31,6 +31,7 @@ import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Point_d;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_PolygonNoInternalHoles_d;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Ray_d;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Rectangle_d;
+import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Triangle_d;
 import uk.ac.leeds.ccg.v3d.geometry.d.V3D_Vector_d;
 
 public class RenderImage_d {
@@ -96,7 +97,9 @@ public class RenderImage_d {
             Path outDataDir = Paths.get("data", "output", "d");
 
             if (run00) {
-                // Visualise Axes in 3D
+                /**
+                 * Renders axes and a flat shape in the edges of a cube aligned with the axes.
+                 */
                 double epsilon = 1d / 1000000d;
                 int nrows = 200;
                 int ncols = 200;
@@ -108,7 +111,7 @@ public class RenderImage_d {
                 //addTriangle0(universe, epsilon);
                 //addRectangles0(universe, epsilon);
                 addLines0(universe, epsilon);
-                addPolygons0(universe, epsilon);
+                addPolygons00(universe, epsilon);
                 addAxes(universe, epsilon);
 
                 // Detail the camera
@@ -172,12 +175,12 @@ public class RenderImage_d {
                 V3D_Rectangle_d rectr;
                 V3D_Point_d focusr;
 
-                for (j = 0; j < anglei2; j++) {
-                    //rect = rect.rotate(yRay, yuv, angle, epsilon);
-                    //focus = focus.rotate(yRay, yuv, angle, epsilon);
-                    for (i = 0; i < anglei2; i++) {
-                        //rect = rect.rotate(xRay, xuv, angle, epsilon);
-                        //focus = focus.rotate(xRay, xuv, angle, epsilon);
+                for (i = 0; i < anglei2; i++) {
+                    //rect = rect.rotate(xRay, xuv, angle, epsilon);
+                    //focus = focus.rotate(xRay, xuv, angle, epsilon);
+                    for (j = 0; j < anglei2; j++) {
+                        //rect = rect.rotate(yRay, yuv, angle, epsilon);
+                        //focus = focus.rotate(yRay, yuv, angle, epsilon);
                         for (k = 0; k < anglei2; k++) {
                             //rect = rect.rotate(zRay, zuv, angle, epsilon);
                             //focus = focus.rotate(zRay, zuv, angle, epsilon);
@@ -202,60 +205,101 @@ public class RenderImage_d {
                 //double epsilon = 1d / 100000000000d;
                 double epsilon = 1d / 10000d;
                 //double epsilon = 0d;
-                int nrows = 150;
-                int ncols = 150;
+                int nrows = 200;
+                int ncols = 200;
                 // Init universe
-                Universe_d universe = new Universe_d(env, V3D_Vector_d.ZERO, epsilon);
+                Universe_d universe = new Universe_d(env, offset, epsilon);
+                //addPoints0(universe, epsilon);
+                //addTriangle0(universe, epsilon);
+                //addRectangles0(universe, epsilon);
+                //addLines0(universe, epsilon);
+                addPolygons0(universe, epsilon);
+                addAxes(universe, epsilon);
+
                 // Detail the camera
                 Dimension dim = new Dimension(ncols, nrows);
                 V3D_Point_d centroid = universe.aabb.getCentroid();
-                double radius = universe.aabb.getPointsArray()[0]
-                        .getDistance(centroid);
-                //String name = "tetras6";
-                //String name = "tetras5";
+                double radius = universe.aabb.getPointsArray()[0].getDistance(centroid);
                 String name = "triangles";
-                boolean castShadow = false;
-                double zoomFactor = 1.0d;
-                double distance = 2.0d;
-                boolean addGraticules = true;
-                //boolean addGraticules = false;
+                //boolean addGraticules = true;
+                boolean addGraticules = false;
+                int i = 0;
+                int j = 0;
+                int k = -1;
+                System.out.println("i=" + i + ", j=" + j + ", k=" + k);
+                V3D_Vector_d direction = new V3D_Vector_d(i, j, k).getUnitVector();
+                V3D_Point_d focus = getCameraPt(centroid, direction, radius * 2d);
+                // Render the image
+//                double zoomFactor = 2d;
+//                V3D_Rectangle_d rect = universe.aabb.getViewport3(focus, V3D_Vector_d.I, zoomFactor, epsilon);
+                V3D_Rectangle_d rect = new V3D_Rectangle_d(
+                        new V3D_Point_d(env, -100d, -100d, -radius),
+                        new V3D_Point_d(env, -100d, 100d, -radius),
+                        new V3D_Point_d(env, 100d, 100d, -radius),
+                        new V3D_Point_d(env, 100d, -100d, -radius));
+                RenderImage_d r = new RenderImage_d(universe, offset, focus, dim, rect, epsilon);
+                Path dir = Paths.get(outDataDir.toString(), "test", name);
+                r.output = Paths.get(dir.toString(),
+                        "test.png");
                 /**
                  * AmbientLight makes dark surfaces lighter even if they are
                  * orientated opposite to the lighting vector.
                  */
                 double ambientLight = 1d / 20d;
-                for (int i = -1; i <= 1; i++) {
-                    for (int j = -1; j <= 1; j++) {
-                        for (int k = -1; k <= 1; k++) {
-                            if (!(i == 0 && j == 0 && k == 0)) {
-//                                int i = 0;
-//                                int j = 0;
-//                                int k = 1;
-                                System.out.println("i=" + i + ", j=" + j + ", k=" + k);
-                                V3D_Vector_d direction = new V3D_Vector_d(i, j, k).getUnitVector();
-                                V3D_Point_d focus = getCameraPt(centroid, direction, radius * distance);
-                                // Render the image
-                                V3D_Rectangle_d rect = getRect(focus, universe.aabb, zoomFactor, epsilon);
-                                RenderImage_d r = new RenderImage_d(universe, offset, focus, dim, rect, epsilon);
-                                V3D_Vector_d lighting = new V3D_Vector_d(-1, -2, -3).getUnitVector();
-                                String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
-                                        + "_j=" + String.format("%,.2f", lighting.dy)
-                                        + "_k=" + String.format("%,.2f", lighting.dz)
-                                        + ")_ambientLight(" + ambientLight + ")";
-                                Path dir = Paths.get(outDataDir.toString(), "test", name, "epsilon=" + epsilon, ls,
-                                        "zoomFactor=" + zoomFactor, "distance=" + distance);
-                                if (castShadow) {
-                                    dir = Paths.get(dir.toString(), "shadow");
-                                }
-                                r.output = Paths.get(dir.toString(),
-                                        "test_" + r.universe.camera.nrows + "x"
-                                        + "_" + dim.width + "x" + dim.height
-                                        + "_pt(i=" + String.format("%,.2f", focus.getX())
-                                        + "_j=" + String.format("%,.2f", focus.getY())
-                                        + "_k=" + String.format("%,.2f", focus.getZ())
-                                        + ")_" + ls + "_epsilon=" + epsilon + ".png");
-                                r.run(dim, lighting, ambientLight, castShadow, addGraticules, epsilon);
-                            }
+                V3D_Vector_d lighting = new V3D_Vector_d(-1, -2, -3).getUnitVector();
+                r.run(dim, lighting, ambientLight, false, addGraticules, epsilon);
+
+                //i = -1;
+                //j = 0;
+                //k = -1;
+                //System.out.println("i=" + i + ", j=" + j + ", k=" + k);
+                //direction = new V3D_Vector_d(i, j, k).getUnitVector();
+                //focus = getCameraPt(centroid, direction, radius * 2d);
+                V3D_Ray_d xRay = new V3D_Ray_d(new V3D_Point_d(universe.env, 0, 0, 0),
+                        new V3D_Point_d(universe.env, 1, 0, 0));
+                V3D_Vector_d xuv = xRay.l.v.getUnitVector();
+                V3D_Ray_d yRay = new V3D_Ray_d(new V3D_Point_d(universe.env, 0, 0, 0),
+                        new V3D_Point_d(universe.env, 0, 1, 0));
+                V3D_Vector_d yuv = yRay.l.v.getUnitVector();
+                V3D_Ray_d zRay = new V3D_Ray_d(new V3D_Point_d(universe.env, 0, 0, 0),
+                        new V3D_Point_d(universe.env, 0, 0, 1));
+                V3D_Vector_d zuv = zRay.l.v.getUnitVector();
+//                double anglei = 1d;
+//                double anglei = 2d;
+//                double anglei = 4d;
+                double anglei = 8d;
+//                double anglei = 16d;
+                double anglei2 = anglei * 2d;
+                //double angle = Math.PI;
+                //double angle = Math.PI/4d;
+                double angle = Math.PI / anglei;
+
+                V3D_Rectangle_d rectr;
+                V3D_Point_d focusr;
+                
+                //i = 1;
+                for (i = 0; i < anglei2; i++) {
+                    //rect = rect.rotate(xRay, xuv, angle, epsilon);
+                    //focus = focus.rotate(xRay, xuv, angle, epsilon);
+                    //j = 1;
+                    for (j = 0; j < anglei2; j++) {
+                        //rect = rect.rotate(yRay, yuv, angle, epsilon);
+                        //focus = focus.rotate(yRay, yuv, angle, epsilon);
+                        //k = 10;
+                        for (k = 0; k < anglei2; k++) {
+                            //rect = rect.rotate(zRay, zuv, angle, epsilon);
+                            //focus = focus.rotate(zRay, zuv, angle, epsilon);
+                            rectr = rect.rotate(zRay, zuv, angle * k, epsilon);
+                            focusr = focus.rotate(zRay, zuv, angle * k, epsilon);
+                            rectr = rectr.rotate(xRay, xuv, angle * i, epsilon);
+                            focusr = focusr.rotate(xRay, xuv, angle * i, epsilon);
+                            rectr = rectr.rotate(yRay, yuv, angle * j, epsilon);
+                            focusr = focusr.rotate(yRay, yuv, angle * j, epsilon);
+                            r = new RenderImage_d(universe, offset, focusr, dim, rectr, epsilon);
+                            dir = Paths.get(outDataDir.toString(), "test", name + "r");
+                            r.output = Paths.get(dir.toString(),
+                                    "test_i" + i + "_j" + j + "_k" + k + ".png");
+                            r.run(dim, lighting, ambientLight, false, addGraticules, epsilon);
                         }
                     }
                 }
@@ -314,7 +358,7 @@ public class RenderImage_d {
 //                double ambientLight = 1d / 20d;
 
             
-         ////                for (int i = -1; i <= 1; i++) {
+            ////                for (int i = -1; i <= 1; i++) {
 ////                    for (int j = -1; j <= 1; j++) {
 ////                        for (int k = -1; k <= 1; k++) {
 ////                            if (!(i == 0 && j == 0 && k == 0)) {
@@ -428,8 +472,8 @@ public class RenderImage_d {
                 double epsilon = 1d / 10000000d;
                 int n = 1;
                 //n = 2;
-                int w = 20 * n; //500
-                int h = 20 * n;  //375 187.5
+                int w = 200 * n; //500
+                int h = 200 * n;  //375 187.5
                 boolean assessTopology = false;
                 boolean castShadow = false;
                 double zoomFactor = 1.0d;
@@ -462,37 +506,37 @@ public class RenderImage_d {
                 //        for (int k = -1; k <= 1; k++) {
                 //            if (!(i == 0 && j == 0 && k == 0)) {
                 //                V3D_Vector_d direction = new V3D_Vector_d(i, j, k).getUnitVector();
-                                //V3D_Vector_d direction = new V3D_Vector_d(1, 0, 0).getUnitVector();
-                                //V3D_Point_d pt = getCameraPt(centroid, direction, radius * distance);
-                                //V3D_Rectangle_d rect = universe.aabb.getViewport3(pt, V3D_Vector_d.I, zoomFactor, epsilon);
-                                //V3D_Rectangle_d rect = new V3D_Rectangle_d(
-                                //    new V3D_Point_d(env, -100d, -100d, -radius),
-                                //    new V3D_Point_d(env, -100d, 100d, -radius),
-                                //    new V3D_Point_d(env, 100d, 100d, -radius),
-                                //    new V3D_Point_d(env, 100d, -100d, -radius));
-                                // Render the image
-                                RenderImage_d r = new RenderImage_d(universe, offset, focus, dim, rect, epsilon);
-                            
-                                //V3D_Vector_d lighting = new V3D_Vector_d(-1, -2, -3).getUnitVector();
-                                V3D_Vector_d lighting = new V3D_Vector_d(1, 2, 3).getUnitVector();
-                                String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
-                                        + "_j=" + String.format("%,.2f", lighting.dy)
-                                        + "_k=" + String.format("%,.2f", lighting.dz)
-                                        + ")_ambientLight(" + ambientLight + ")";
-                                Path dir = Paths.get(outDataDir.toString(), name, "epsilon=" + epsilon, ls,
-                                        "zoomFactor=" + zoomFactor, "distance=" + distance);
-                                if (castShadow) {
-                                    dir = Paths.get(dir.toString(), "shadow");
-                                }
-                                r.output = Paths.get(dir.toString(), "test.png");
-                                        //name
-                                        //+ "_" + size.width + "x" + size.height
-                                        //+ "_pt(i=" + String.format("%,.2f", pt.getX())
-                                        //+ "_j=" + String.format("%,.2f", pt.getY())
-                                        //+ "_k=" + String.format("%,.2f", pt.getZ())
-                                        //+ ")_" + ls + "_epsilon=" + epsilon + ".png");
-                                r.run(dim, lighting, ambientLight, castShadow, epsilon);
-                                //r.run(dim, lighting, ambientLight, castShadow, epsilon);
+                //V3D_Vector_d direction = new V3D_Vector_d(1, 0, 0).getUnitVector();
+                //V3D_Point_d pt = getCameraPt(centroid, direction, radius * distance);
+                //V3D_Rectangle_d rect = universe.aabb.getViewport3(pt, V3D_Vector_d.I, zoomFactor, epsilon);
+                //V3D_Rectangle_d rect = new V3D_Rectangle_d(
+                //    new V3D_Point_d(env, -100d, -100d, -radius),
+                //    new V3D_Point_d(env, -100d, 100d, -radius),
+                //    new V3D_Point_d(env, 100d, 100d, -radius),
+                //    new V3D_Point_d(env, 100d, -100d, -radius));
+                // Render the image
+                RenderImage_d r = new RenderImage_d(universe, offset, focus, dim, rect, epsilon);
+
+                //V3D_Vector_d lighting = new V3D_Vector_d(-1, -2, -3).getUnitVector();
+                V3D_Vector_d lighting = new V3D_Vector_d(1, 2, 3).getUnitVector();
+                String ls = "lighting(i=" + String.format("%,.2f", lighting.dx)
+                        + "_j=" + String.format("%,.2f", lighting.dy)
+                        + "_k=" + String.format("%,.2f", lighting.dz)
+                        + ")_ambientLight(" + ambientLight + ")";
+                Path dir = Paths.get(outDataDir.toString(), name, "epsilon=" + epsilon, ls,
+                        "zoomFactor=" + zoomFactor, "distance=" + distance);
+                if (castShadow) {
+                    dir = Paths.get(dir.toString(), "shadow");
+                }
+                r.output = Paths.get(dir.toString(), "test.png");
+                //name
+                //+ "_" + size.width + "x" + size.height
+                //+ "_pt(i=" + String.format("%,.2f", pt.getX())
+                //+ "_j=" + String.format("%,.2f", pt.getY())
+                //+ "_k=" + String.format("%,.2f", pt.getZ())
+                //+ ")_" + ls + "_epsilon=" + epsilon + ".png");
+                r.run(dim, lighting, ambientLight, castShadow, epsilon);
+                //r.run(dim, lighting, ambientLight, castShadow, epsilon);
                 //            }
                 //        }
                 //    }
@@ -532,7 +576,7 @@ public class RenderImage_d {
 //                        for (int k = -1; k <= 1; k++) {
 //                            if (!(i == 0 && j == 0 && k == 0)) {
 //                                if (!(i == -1 && j == 1 && k == 1)) {
-////                int i = -1;
+         ////                int i = -1;
 ////                int j = 1;
 ////                int k = 1;
 //                                    V3D_Vector_d direction = new V3D_Vector_d(i, j, k).getUnitVector();
@@ -1088,7 +1132,7 @@ public class RenderImage_d {
      * equal.
      * @return The ids of the original triangles that are intersected.
      */
-    public static void addPolygons0(Universe_d universe, double epsilon) {
+    public static void addPolygons00(Universe_d universe, double epsilon) {
         double scale = 10d;
         V3D_Point_d[] pts = new V3D_Point_d[8];
         pts[0] = new V3D_Point_d(universe.env, -8d * scale, -8d * scale, 0d * scale);
@@ -1119,13 +1163,42 @@ public class RenderImage_d {
         //System.out.println("External holes");
     }
 
-    private static V3D_Rectangle_d getRect(V3D_Point_d focus,
-            V3D_AABB_d aabb, double zoomFactor, double epsilon) {
-        // Need something orthoganol to pt and ve centroid
-        V3D_Plane_d pl = new V3D_Plane_d(focus,
-                new V3D_Vector_d(focus, aabb.getCentroid()));
-        V3D_Vector_d pv = pl.getPV(epsilon);
-        //return = ve.getViewport2(pt, pv);
-        return aabb.getViewport3(focus, pv, zoomFactor, epsilon);
+    /**
+     * Cube surface comprised of triangles.
+     *
+     * @param universe
+     * @param epsilon The tolerance within which two vectors are regarded as
+     * equal.
+     * @return The ids of the original triangles that are intersected.
+     */
+    public static void addPolygons0(Universe_d universe, double epsilon) {
+        double scale = 50d;
+        V3D_Vector_d offset = new V3D_Vector_d(0d, 0d, 0d);
+        V3D_Point_d l = new V3D_Point_d(universe.env, offset, new V3D_Vector_d(-2 * scale, 0d, 0d));
+        V3D_Point_d r = new V3D_Point_d(universe.env, offset, new V3D_Vector_d(2 * scale, 0d, 0d));
+        V3D_Point_d b = new V3D_Point_d(universe.env, offset, new V3D_Vector_d(0d, -2 * scale, 0d));
+        V3D_Point_d t = new V3D_Point_d(universe.env, offset, new V3D_Vector_d(0d, 2 * scale, 0d));
+        V3D_Point_d f = new V3D_Point_d(universe.env, offset, new V3D_Vector_d(0d, 0d, 2 * scale));
+        V3D_Point_d a = new V3D_Point_d(universe.env, offset, new V3D_Vector_d(0d, 0d, -2 * scale));
+        V3D_Point_d lbf = new V3D_Point_d(universe.env, offset, new V3D_Vector_d(-scale, -scale, -scale));
+        V3D_Point_d lba = new V3D_Point_d(universe.env, offset, new V3D_Vector_d(-scale, -scale, scale));
+        V3D_Point_d ltf = new V3D_Point_d(universe.env, offset, new V3D_Vector_d(-scale, scale, -scale));
+        V3D_Point_d lta = new V3D_Point_d(universe.env, offset, new V3D_Vector_d(-scale, scale, scale));
+        V3D_Point_d rbf = new V3D_Point_d(universe.env, offset, new V3D_Vector_d(scale, -scale, -scale));
+        V3D_Point_d rba = new V3D_Point_d(universe.env, offset, new V3D_Vector_d(scale, -scale, scale));
+        V3D_Point_d rtf = new V3D_Point_d(universe.env, offset, new V3D_Vector_d(scale, scale, -scale));
+        V3D_Point_d rta = new V3D_Point_d(universe.env, offset, new V3D_Vector_d(scale, scale, scale));
+        universe.addArea(new V3D_Triangle_d(f, lbf, ltf, rtf), Color.BLUE);
+        universe.addArea(new V3D_Triangle_d(f, lbf, rbf, rtf), Color.BLUE);
+        universe.addArea(new V3D_Triangle_d(l, lbf, ltf, lta), Color.RED);
+        universe.addArea(new V3D_Triangle_d(l, lbf, lba, lta), Color.RED);
+        universe.addArea(new V3D_Triangle_d(a, lba, lta, rta), Color.YELLOW);
+        universe.addArea(new V3D_Triangle_d(a, lba, rba, rta), Color.YELLOW);
+        universe.addArea(new V3D_Triangle_d(r, rbf, rtf, rta), Color.GREEN);
+        universe.addArea(new V3D_Triangle_d(r, rbf, rta, rba), Color.GREEN);
+        universe.addArea(new V3D_Triangle_d(t, ltf, lta, rta), Color.ORANGE);
+        universe.addArea(new V3D_Triangle_d(t, rtf, ltf, rta), Color.ORANGE);
+        universe.addArea(new V3D_Triangle_d(b, lbf, rbf, rba), Color.PINK);
+        universe.addArea(new V3D_Triangle_d(b, lbf, lba, rba), Color.PINK);
     }
 }

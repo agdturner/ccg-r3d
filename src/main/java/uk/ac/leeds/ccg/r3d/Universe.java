@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import uk.ac.leeds.ccg.r3d.entities.Volume;
 import uk.ac.leeds.ccg.r3d.entities.Area;
 import uk.ac.leeds.ccg.r3d.entities.Line;
 import uk.ac.leeds.ccg.r3d.entities.Point;
@@ -31,7 +30,6 @@ import uk.ac.leeds.ccg.v3d.geometry.V3D_AABB;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Area;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_LineSegment;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Point;
-import uk.ac.leeds.ccg.v3d.geometry.V3D_Tetrahedron;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Triangle;
 import uk.ac.leeds.ccg.v3d.geometry.V3D_Vector;
 
@@ -70,8 +68,9 @@ public class Universe {
     /**
      * The volumes to render.
      */
-//    public ArrayList<Volume> volumes;
-/**
+    //public ArrayList<Volume> volumes;
+    
+    /**
      * A single camera.
      */
     public Camera camera;
@@ -84,6 +83,7 @@ public class Universe {
     /**
      * Create a new instance.
      *
+     * @param env
      * @param offset The offset for each geometry created.
      * @param oom The Order of Magnitude for the precision.
      * @param rm The RoundingMode for any rounding.
@@ -212,16 +212,19 @@ public class Universe {
      *
      * @param path The path of the STL binary file to be read.
      * @param offset The offset for each geometry created.
+     * @param color
      * @param oom The Order of Magnitude for the precision.
      * @param rm The RoundingMode for any rounding.
+     * @param env
+     * @throws java.io.IOException
      */
     public Universe(Path path, V3D_Vector offset, Color color,
-            boolean assessTopology, int oom, RoundingMode rm, 
+            int oom, RoundingMode rm, 
         V3D_Environment env) throws IOException {
         this.env = env;
         areas = new ArrayList<>();
         //volumes = new ArrayList<>();
-        STL_Reader data = new STL_Reader(assessTopology);
+        STL_Reader data = new STL_Reader();
         data.readBinary(path, offset, oom, rm, env);
         V3D_Point p = data.triangles.get(0).area.getPl(oom, rm).getP();
         BigRational xmin = p.getX(oom, rm);

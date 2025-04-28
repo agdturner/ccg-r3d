@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import uk.ac.leeds.ccg.generic.util.Generic_Collections;
 import uk.ac.leeds.ccg.grids.d2.Grids_2D_ID_int;
+import uk.ac.leeds.ccg.math.arithmetic.Math_BigRational;
 import uk.ac.leeds.ccg.r3d.entities.Area;
 import uk.ac.leeds.ccg.r3d.entities.Line;
 import uk.ac.leeds.ccg.r3d.entities.Point;
@@ -233,22 +234,29 @@ public class Camera extends V3D_Frustum {
 //            } else {
 //                renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getPQV(oom, rm), oom, rm), pix);
 //            }    
-            if (x.l.l.v.isScalarMultiple(rect.getPQR().getPQV(oom, rm), oom, rm)) {
-                if (x.l.l.v.getDotProduct(rect.getPQR().getPQV(oom, rm), oom, rm).compareTo(BigRational.ZERO) == 0) {
-                    renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getPQV(oom, rm), oom, rm), pix);
-                } else {
-                    renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getQRV(oom, rm), oom, rm), pix);
-                }            
-            } else {
-                if (x.l.l.v.getDotProduct(rect.getPQR().getPQV(oom, rm), oom, rm).compareTo(BigRational.ZERO) == 0) {
-                //if (x.l.l.v.getDotProduct(rect.getPQR().getQRV(oom, rm), oom, rm).compareTo(BigRational.ZERO) == 0) {
-                    //renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getQRV(oom, rm), oom, rm), pix);
-                    renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getPQV(oom, rm), oom, rm), pix);
-                } else {
-                    //renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getPQV(oom, rm), oom, rm), pix);
-                    renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getQRV(oom, rm), oom, rm), pix);
-                }
-            }
+//            if (x.l.l.v.isScalarMultiple(rect.getPQR().getPQV(oom, rm), oom, rm)) {
+//                if (Math_BigRational.equals(x.l.l.v.getDotProduct(rect.getPQR().getPQV(oom, rm), oom, rm), BigRational.ZERO, oom)) {
+//                    renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getPQV(oom, rm), oom, rm), pix);
+//                } else {
+                    if (Math_BigRational.equals(x.l.l.v.getDotProduct(rect.getPQR().getQRV(oom, rm), oom, rm), BigRational.ZERO, oom)) {
+                        //renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getPQV(oom, rm), oom, rm), pix);
+                        renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getQRV(oom, rm), oom, rm), pix);
+                    } else {
+         //               renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getQRV(oom, rm), oom, rm), pix);
+                        renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getPQV(oom, rm), oom, rm), pix);
+                    }
+//                }            
+//            } else {
+//                if (Math_BigRational.equals(x.l.l.v.getDotProduct(rect.getPQR().getPQV(oom, rm), oom, rm), BigRational.ZERO, oom)) {
+//                    renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getPQV(oom, rm), oom, rm), pix);
+//                } else {
+//                    if (Math_BigRational.equals(x.l.l.v.getDotProduct(rect.getPQR().getQRV(oom, rm), oom, rm), BigRational.ZERO, oom)) {
+//                        renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getPQV(oom, rm), oom, rm), pix);
+//                    } else {
+//                        renderLine(oom, rm, mind2s, x, new V3D_Plane(x.l, rect.getPQR().getQRV(oom, rm), oom, rm), pix);
+//                    }
+//                }
+//            }
         });
         // Render Areas
         int nAreas = universe.areas.size();
@@ -413,6 +421,7 @@ public class Camera extends V3D_Frustum {
                                     if (pixel.intersects0(t, oom, rm)) {
                                         Grids_2D_ID_int id = new Grids_2D_ID_int(row, col);
                                         V3D_Ray ray = getRay(id, oom, rm);
+                                        //V3D_Point ri = pixel.getIntersectNonCoplanar(ray, oom, rm);
                                         V3D_Point ri = ray.getIntersectNonCoplanar(plane, oom, rm);
                                         if (ri != null) {
                                             BigRational d2;
@@ -546,11 +555,11 @@ public class Camera extends V3D_Frustum {
      *
      * @param tIndex The triangle index.
      * @param a The area.
-     * @param mind2t The minimum distance squared for each triangle and the
+     * @param mind2a The minimum distance squared for each area and the
      * camera point.
-     * @param mind2s The minimum distances squared of all triangles through each
+     * @param mind2s The minimum distances squared of geometries through each
      * pixel.
-     * @param closestIndex The indexes of the closest triangles through each
+     * @param closestIndex The indexes of the closest geometries through each
      * pixel.
      * @param idPoint The point of intersection on the closest triangle through
      * each pixel.
@@ -558,7 +567,8 @@ public class Camera extends V3D_Frustum {
      * @param rm The RoundingMode for any rounding.
      */
     protected void processArea(int tIndex, V3D_Area a,
-            BigRational[] mind2t, HashMap<Grids_2D_ID_int, BigRational> mind2s,
+            BigRational[] mind2a, 
+            HashMap<Grids_2D_ID_int, BigRational> mind2s,
             HashMap<Grids_2D_ID_int, Integer> closestIndex,
             HashMap<Grids_2D_ID_int, V3D_Point> idPoint,
             int oom, RoundingMode rm) {
@@ -587,7 +597,7 @@ public class Camera extends V3D_Frustum {
                     }
                 } else {
                     //if (mind2t[tIndex] < mind2) {
-                    if (mind2t[tIndex].compareTo(mind2) == -1) {
+                    if (mind2a[tIndex].compareTo(mind2) == -1) {
                         try {
                             V3D_Ray ray = getRay(id, oom, rm);
                             V3D_Point ti = a.getIntersectNonCoplanar(ray, oom, rm);
