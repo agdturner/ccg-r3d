@@ -175,17 +175,17 @@ public class RenderImage {
                 V3D_Rectangle rectr;
                 V3D_Point focusr;
 
-                //i = Integer.valueOf(args[0]);
-                i = 0;
-//                for (i = 0; i < anglei2; i++) {
+                i = Integer.valueOf(args[0]);
+                //i = 0;
+                for (i = 0; i < anglei2; i++) {
                     //rect = rect.rotate(xRay, xuv, angle, epsilon);
                     //focus = focus.rotate(xRay, xuv, angle, epsilon);
-                    j = 1;
-//                    for (j = 0; j < anglei2; j++) {
+                    //j = 1;
+                    for (j = 0; j < anglei2; j++) {
                         //rect = rect.rotate(yRay, yuv, angle, epsilon);
                         //focus = focus.rotate(yRay, yuv, angle, epsilon);
-                        k = 8;
-//                        for (k = 0; k < anglei2; k++) {
+                        //k = 8;
+                        for (k = 0; k < anglei2; k++) {
                             //rect = rect.rotate(zRay, zuv, angle, epsilon);
                             //focus = focus.rotate(zRay, zuv, angle, epsilon);
                             rectr = rect.rotate(zRay, zuv, bd, angle.multiply(k), oom, rm);
@@ -200,9 +200,9 @@ public class RenderImage {
                                     "test_i" + i + "_j" + j + "_k" + k + ".png");
                             System.out.println(r.output.toString());
                             r.run(dim, lighting, ambientLight, false, addGraticules, oom, rm);
-//                        }
-//                    }
-//                }
+                        }
+                    }
+                }
             }
 
             if (run0) {
