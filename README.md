@@ -23,7 +23,11 @@ Renderings have been produced for geometries defined by coordinates and calculat
 
 <img alt="A polygon with no internal holes in a box." src="data/output/d/test/axesr/test_i1_j13_k10.png" />
 
-A more detailed comparison of the generated images is wanted...
+Those two images are very similar , possibly identical. Here are two some with more noticeable differences respectively for the 6 decimal place and ddouble precision floating point precision:
+
+<img alt="A polygon with no internal holes in a box." src="data/output/test/axesr/test_i0_j7_k15.png" /> <img alt="A polygon with no internal holes in a box." src="data/output/d/test/axesr/test_i0_j7_k15.png" />
+
+A detailed comparison of the generated images and study of the differences could be interesting...
 
 # NB: Various other renderings had been produced from STL files, but that work wants doing again so the results are reproducible using the latest version of the software...
 
