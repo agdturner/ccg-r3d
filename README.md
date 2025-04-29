@@ -19,8 +19,11 @@ The camera can be pointed at the geometry from anywhere. The  following image is
 
 <img alt="A polygon with no internal holes in a box." src="data/output/test/axesr/test_i1_j13_k10.png" />
 
-Renderings have been produced for geometries defined by coordinates and calculation done with double precision floating point and [https://github.com/agdturner/ccg-math/blob/master/src/main/java/uk/ac/leeds/ccg/math/number/Math_BigRationalSqrt.java](Math_BigRationalSqrt). These are being compared...   
+Renderings have been produced for geometries defined by coordinates and calculation done with double precision floating point and [https://github.com/agdturner/ccg-math/blob/master/src/main/java/uk/ac/leeds/ccg/math/number/Math_BigRationalSqrt.java](Math_BigRationalSqrt). Some of the generated image files appear identical, none are radically different - any differences are subtle. For instance compare the following which was calculated with double precision with the above which was calculated with arbitrary precision to 6 decimal places.
 
+<img alt="A polygon with no internal holes in a box." src="data/output/d/test/axesr/test_i1_j13_k10.png" />
+
+A more detailed comparison of the generated images is wanted...
 
 # NB: Various other renderings had been produced from STL files, but that work wants doing again so the results are reproducible using the latest version of the software...
 
