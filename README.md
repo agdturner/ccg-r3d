@@ -13,14 +13,21 @@ The focus is rendering geometry and data attributed to those geometries. The geo
 ## Axes
 The following image is a render of an area (a polygon with no internal holes) coloured gray, with a pink edge in a clear cube for which white edges are rendered as lines. This is looking down the Z axis with the axes coloured (X blue, Y red, Z green). The camera has a screen as wide as the cube which is positioned at a distance of the radius of the cube (distance from the centre to a corner) with a focus in line with the centre of the screen and at twice the radius of the cube:
 
-<img alt="A polygon with no internal holes in a box." src="data/output/test/axes/test.png" />
+<img alt="A polygon with no internal holes in a box." src="data/output/test/axesr/test_i0_j0_k0.png" />
 
 The camera can be pointed at the geometry from anywhere. The  following image is a rendering after rotating the camera Pi/8 radians around the X axis, 13*Pi/8 radians around the Y axis and 10*Pi/8 radians around the Z axis:
 
+<img alt="A polygon with no internal holes in a box." src="data/output/test/axesr/test_i1_j13_k10.png" />
+
+Renderings have been produced for geometries defined by coordinates and calculation done with double precision floating point and [https://github.com/agdturner/ccg-math/blob/master/src/main/java/uk/ac/leeds/ccg/math/number/Math_BigRationalSqrt.java](Math_BigRationalSqrt). Some of the generated image files appear identical, none are radically different - any differences are subtle. For instance compare the following which was calculated with double precision with the above which was calculated with arbitrary precision to 6 decimal places.
+
 <img alt="A polygon with no internal holes in a box." src="data/output/d/test/axesr/test_i1_j13_k10.png" />
 
-Renderings have been produced for geometries defined by coordinates and calculation done with double precision floating point and [https://github.com/agdturner/ccg-math/blob/master/src/main/java/uk/ac/leeds/ccg/math/number/Math_BigRationalSqrt.java](Math_BigRationalSqrt). These are being compared...   
+Those two images are identical. The following show a difference in some of the box line lengths for the 6 decimal place and double precision floating point precision images respectively:
 
+<img alt="A polygon with no internal holes in a box." src="data/output/test/axesr/test_i0_j7_k15.png" /> <img alt="A polygon with no internal holes in a box." src="data/output/d/test/axesr/test_i0_j7_k15.png" />
+
+A thorough comparison of the generated images and study of the differences could be interesting...
 
 # NB: Various other renderings had been produced from STL files, but that work wants doing again so the results are reproducible using the latest version of the software...
 
