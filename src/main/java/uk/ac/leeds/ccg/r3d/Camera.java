@@ -295,18 +295,20 @@ public class Camera extends V3D_Frustum {
             System.out.println("Process each area working from the closest to "
                     + "the furthest.");
             // Process areas.
+            HashMap<Grids_2D_ID_int, Integer> closestIndex = new HashMap<>();
             /**
              * idPoint is used to store the point of intersection. This could be
              * used later for example to identify if that point on the area is
              * in a shadow...
              */
-            HashMap<Grids_2D_ID_int, Integer> closestIndex = new HashMap<>();
-            HashMap<Grids_2D_ID_int, V3D_Point> idPoint = new HashMap<>();
+            //HashMap<Grids_2D_ID_int, V3D_Point> idPoint = new HashMap<>();
             for (BigRational mind2 : mindOrderedAreas.keySet()) {
+                System.out.println("mind2 = " + mind2);
                 Set<Integer> triangleIndexes = mindOrderedAreas.get(mind2);
                 for (var i : triangleIndexes) {
                     processArea(i, universe.areas.get(i).area, mind2st,
-                            mind2s, closestIndex, idPoint, oom, rm);
+                            mind2s, closestIndex, //idPoint,
+                            oom, rm);
                 }
             }
             // Render pixels
@@ -553,24 +555,24 @@ public class Camera extends V3D_Frustum {
     /**
      * Get the CellIDs of those cells that intersect with area.
      *
-     * @param tIndex The triangle index.
+     * @param index The area index.
      * @param a The area.
      * @param mind2a The minimum distance squared for each area and the
      * camera point.
      * @param mind2s The minimum distances squared of geometries through each
      * pixel.
-     * @param closestIndex The indexes of the closest geometries through each
+     * @param closestIndex The indexes of the closest areas through each
      * pixel.
-     * @param idPoint The point of intersection on the closest triangle through
+     * @param idPoint The point of intersection on the closest area through
      * each pixel.
      * @param oom The Order of Magnitude for the precision.
      * @param rm The RoundingMode for any rounding.
      */
-    protected void processArea(int tIndex, V3D_Area a,
+    protected void processArea(int index, V3D_Area a,
             BigRational[] mind2a, 
             HashMap<Grids_2D_ID_int, BigRational> mind2s,
             HashMap<Grids_2D_ID_int, Integer> closestIndex,
-            HashMap<Grids_2D_ID_int, V3D_Point> idPoint,
+            //HashMap<Grids_2D_ID_int, V3D_Point> idPoint,
             int oom, RoundingMode rm) {
         /**
          * Loop over the extent, and where necessary, calculate the intersection
@@ -588,8 +590,8 @@ public class Camera extends V3D_Frustum {
                         if (ti != null) {
                             BigRational d2 = ti.getDistanceSquared(focus, oom, rm);
                             mind2s.put(id, d2);
-                            closestIndex.put(id, tIndex);
-                            idPoint.put(id, ti);
+                            closestIndex.put(id, index);
+                            //idPoint.put(id, ti);
                         }
                     } catch (RuntimeException ex) {
                         System.out.println("Resolution too coarse to render "
@@ -597,7 +599,7 @@ public class Camera extends V3D_Frustum {
                     }
                 } else {
                     //if (mind2t[tIndex] < mind2) {
-                    if (mind2a[tIndex].compareTo(mind2) == -1) {
+                    if (mind2a[index].compareTo(mind2) == -1) {
                         try {
                             V3D_Ray ray = getRay(id, oom, rm);
                             V3D_Point ti = a.getIntersectNonCoplanar(ray, oom, rm);
@@ -607,8 +609,8 @@ public class Camera extends V3D_Frustum {
                                 //if (d2 < mind2) {
                                 if (d2.compareTo(mind2) == -1) {
                                     mind2s.put(id, d2);
-                                    closestIndex.put(id, tIndex);
-                                    idPoint.put(id, ti);
+                                    closestIndex.put(id, index);
+                                    //idPoint.put(id, ti);
                                 }
                             }
                         } catch (RuntimeException ex) {

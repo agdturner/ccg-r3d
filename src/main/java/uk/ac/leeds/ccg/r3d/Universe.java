@@ -222,6 +222,8 @@ public class Universe {
             int oom, RoundingMode rm, 
         V3D_Environment env) throws IOException {
         this.env = env;
+        points = new ArrayList<>();
+        lines = new ArrayList<>();
         areas = new ArrayList<>();
         //volumes = new ArrayList<>();
         STL_Reader data = new STL_Reader();

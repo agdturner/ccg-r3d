@@ -274,13 +274,13 @@ public class Camera_d extends V3D_Frustum_d {
                     + " the distance, and set the lighting.");
             TreeMap<Double, Set<Integer>> mindOrderedAreas = new TreeMap<>();
             /**
-             * mind2st is the minimum distance of each each area to the camera
+             * mind2sa is the minimum distance of each each area to the camera
              * point for those parts of the area in view of the camera i.e.
              * through the frustum.
              */
-            double[] mind2st = new double[nAreas];
+            double[] mind2sa = new double[nAreas];
             process(centroid, 0, universe.areas, lighting, ambientLight,
-                    mindOrderedAreas, mind2st, epsilon);
+                    mindOrderedAreas, mind2sa, epsilon);
             int nAP = (nAreas / 100);
             if (nAP < 1) {
                 nAP = 1;
@@ -290,7 +290,7 @@ public class Camera_d extends V3D_Frustum_d {
                     System.out.println("Area " + i + " out of " + nAreas);
                 }
                 process(centroid, i, universe.areas, lighting, ambientLight,
-                        mindOrderedAreas, mind2st, epsilon);
+                        mindOrderedAreas, mind2sa, epsilon);
             }
             System.out.println("Minimum distance squared between any area and"
                     + " the camera focal point = "
@@ -298,18 +298,20 @@ public class Camera_d extends V3D_Frustum_d {
             System.out.println("Process each area working from the closest to "
                     + "the furthest.");
             // Process areas.
+            HashMap<Grids_2D_ID_int, Integer> closestIndex = new HashMap<>();
             /**
              * idPoint is used to store the point of intersection for the
-             * triangle closest to the camera. This is later used to see if that
-             * point on the area is in shadow
+             * area closest to the camera. (This may later be used to see if that
+             * point on the area is in shadow.)
              */
-            HashMap<Grids_2D_ID_int, Integer> closestIndex = new HashMap<>();
-            HashMap<Grids_2D_ID_int, V3D_Point_d> idPoint = new HashMap<>();
+            //HashMap<Grids_2D_ID_int, V3D_Point_d> idPoint = new HashMap<>();
             for (double mind2 : mindOrderedAreas.keySet()) {
-                Set<Integer> triangleIndexes = mindOrderedAreas.get(mind2);
-                for (var i : triangleIndexes) {
-                    processArea(i, universe.areas.get(i).area, mind2st,
-                            mind2s, closestIndex, idPoint, epsilon);
+                System.out.println("mind2 = " + mind2);
+                Set<Integer> areaIndexes = mindOrderedAreas.get(mind2);
+                for (var i : areaIndexes) {
+                    processArea(i, universe.areas.get(i).area, mind2sa,
+                            mind2s, closestIndex, //idPoint, 
+                            epsilon);
                 }
             }
             // Render pixels
@@ -556,25 +558,25 @@ public class Camera_d extends V3D_Frustum_d {
     }
 
     /**
-     * Get the CellIDs of those cells that intersect with area.
-     *
-     * @param tIndex The triangle index.
+     * Calculate mind2s.
+     * 
+     * @param index The area index.
      * @param a The area.
-     * @param mind2t The minimum distance squared for each triangle and the
+     * @param mind2sa The minimum distance squared for each area and the
      * camera point.
-     * @param mind2s The minimum distances squared of all triangles through each
+     * @param mind2s The minimum distances squared of geometries through each
      * pixel.
-     * @param closestIndex The indexes of the closest triangles through each
+     * @param closestIndex The indexes of the closest areas through each
      * pixel.
-     * @param idPoint The point of intersection on the closest triangle through
+     * @param idPoint The point of intersection on the closest area through
      * each pixel.
      * @param epsilon The tolerance within which vector components are regarded
      * as equal.
      */
-    protected void processArea(int tIndex, V3D_Area_d a,
-            double[] mind2t, HashMap<Grids_2D_ID_int, Double> mind2s,
+    protected void processArea(int index, V3D_Area_d a,
+            double[] mind2sa, HashMap<Grids_2D_ID_int, Double> mind2s,
             HashMap<Grids_2D_ID_int, Integer> closestIndex,
-            HashMap<Grids_2D_ID_int, V3D_Point_d> idPoint,
+            //HashMap<Grids_2D_ID_int, V3D_Point_d> idPoint,
             double epsilon) {
         /**
          * Loop over the extent, and where necessary, calculate the intersection
@@ -594,8 +596,8 @@ public class Camera_d extends V3D_Frustum_d {
                         if (ti != null) {
                             double d2 = ti.getDistanceSquared(focus);
                             mind2s.put(id, d2);
-                            closestIndex.put(id, tIndex);
-                            idPoint.put(id, ti);
+                            closestIndex.put(id, index);
+                            //idPoint.put(id, ti);
                         }
                     } catch (RuntimeException ex) {
                         System.out.println("Resolution too coarse to render "
@@ -606,12 +608,12 @@ public class Camera_d extends V3D_Frustum_d {
                         if (ti != null) {
                             double d2 = ti.getDistanceSquared(focus);
                             mind2s.put(id, d2);
-                            closestIndex.put(id, tIndex);
-                            idPoint.put(id, ti);
+                            closestIndex.put(id, index);
+                            //idPoint.put(id, ti);
                         }
                     }
                 } else {
-                    if (mind2t[tIndex] < mind2) {
+                    if (mind2sa[index] < mind2) {
                         try {
                             V3D_Ray_d ray = getRay(id);
                             V3D_Point_d ti = a.getIntersectNonCoplanar(ray, epsilon);
@@ -619,8 +621,8 @@ public class Camera_d extends V3D_Frustum_d {
                                 double d2 = ti.getDistanceSquared(focus);
                                 if (d2 < mind2) {
                                     mind2s.put(id, d2);
-                                    closestIndex.put(id, tIndex);
-                                    idPoint.put(id, ti);
+                                    closestIndex.put(id, index);
+                                    //idPoint.put(id, ti);
                                 }
                             }
                         } catch (RuntimeException ex) {
@@ -634,8 +636,8 @@ public class Camera_d extends V3D_Frustum_d {
                                 double d2 = ti.getDistanceSquared(focus);
                                 if (d2 < mind2) {
                                     mind2s.put(id, d2);
-                                    closestIndex.put(id, tIndex);
-                                    idPoint.put(id, ti);
+                                    closestIndex.put(id, index);
+                                    //idPoint.put(id, ti);
                                 }
                             }
                         }

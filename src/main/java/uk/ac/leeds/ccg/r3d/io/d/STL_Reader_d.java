@@ -121,7 +121,7 @@ public class STL_Reader_d {
         try {
             V3D_Environment_d env = new V3D_Environment_d();
             STL_Reader_d s = new STL_Reader_d(env, true);
-            s.readBinary(p, V3D_Vector_d.ZERO, false);
+            s.readBinary(p, V3D_Vector_d.ZERO, 1d, false);
             //System.out.println(ts.get(0));
             System.out.println("minx=" + s.stats.minx);
             System.out.println("maxx=" + s.stats.maxx);
@@ -142,13 +142,14 @@ public class STL_Reader_d {
      *
      * @param p The file to read.
      * @param offset The common offset.
+     * @param scale What numbers are multiplied by.
      * @param initNormal If this is true, then the normal read from the file is 
      * discounted and the normal is calculated from the triangle corner point
      * vectors. 
      * @return An ArrayList of triangles read from the file.
      * @throws IOException
      */
-    public void readBinary(Path p, V3D_Vector_d offset, boolean initNormal)
+    public void readBinary(Path p, V3D_Vector_d offset, double scale, boolean initNormal)
             throws IOException {
         DataInputStream dis = new DataInputStream(new FileInputStream(
                 p.toFile()));
@@ -157,25 +158,25 @@ public class STL_Reader_d {
         int nTriangles = Integer.reverseBytes(dis.readInt());
         System.out.println("Reading " + nTriangles + " triangles.");
         // read triangles
-        float x, y, z;
+        double x, y, z;
         // Read the first triangle
-        x = readFloat(dis);
-        y = readFloat(dis);
-        z = readFloat(dis);
+        x = getValue(scale, dis);
+        y = getValue(scale, dis);
+        z = getValue(scale, dis) -50d;
         V3D_V_d n = new V3D_V_d(x, y, z);
-        x = readFloat(dis);
-        y = readFloat(dis);
-        z = readFloat(dis);
+        x = getValue(scale, dis);
+        y = getValue(scale, dis);
+        z = getValue(scale, dis) -50d;
         stats = new Stats(x, y, z);
         V3D_V_d pv = new V3D_V_d(x, y, z);
-        x = readFloat(dis);
-        y = readFloat(dis);
-        z = readFloat(dis);
+        x = getValue(scale, dis);
+        y = getValue(scale, dis);
+        z = getValue(scale, dis) -50d;
         stats.update(x, y, z);
         V3D_V_d qv = new V3D_V_d(x, y, z);
-        x = readFloat(dis);
-        y = readFloat(dis);
-        z = readFloat(dis);
+        x = getValue(scale, dis);
+        y = getValue(scale, dis);
+        z = getValue(scale, dis) -50d;
         stats.update(x, y, z);
         V3D_V_d rv = new V3D_V_d(x, y, z);
         V3D_VLine_d pq = new V3D_VLine_d(pv, qv);
@@ -193,22 +194,22 @@ public class STL_Reader_d {
             if (i % nTriangles1PC == 0) {
                 System.out.println("Reading " + i + " out of " + nTriangles + " triangles.");
             }
-            n = new V3D_V_d(readFloat(dis), readFloat(dis), readFloat(dis));
+            n = new V3D_V_d(getValue(scale, dis), getValue(scale, dis), getValue(scale, dis));
             // Turn n into a unit normal.
             n = n.getUnitVector();
-            x = readFloat(dis);
-            y = readFloat(dis);
-            z = readFloat(dis);
+            x = getValue(scale, dis);
+            y = getValue(scale, dis);
+            z = getValue(scale, dis) -50d;
             stats.update(x, y, z);
             pv = new V3D_V_d(x, y, z);
-            x = readFloat(dis);
-            y = readFloat(dis);
-            z = readFloat(dis);
+            x = getValue(scale, dis);
+            y = getValue(scale, dis);
+            z = getValue(scale, dis) -50d;
             stats.update(x, y, z);
             qv = new V3D_V_d(x, y, z);
-            x = readFloat(dis);
-            y = readFloat(dis);
-            z = readFloat(dis);
+            x = getValue(scale, dis);
+            y = getValue(scale, dis);
+            z = getValue(scale, dis) -50d;
             rv = new V3D_V_d(x, y, z);
             stats.update(x, y, z);
             attribute = Short.reverseBytes(dis.readShort());
@@ -277,21 +278,32 @@ public class STL_Reader_d {
         }
     }
 
+    /**
+     * @param scale The value that the read float is multiplied by.
+     * @param dis The DataInputStream.
+     * @return The value read as a float from the DataInputStream multiplied by 
+     * scale.
+     * @throws IOException 
+     */
+    double getValue(double scale, DataInputStream dis) throws IOException {
+        return readFloat(dis) * scale;
+    }
+    
     float readFloat(DataInputStream dis) throws IOException {
         return Float.intBitsToFloat(Integer.reverseBytes(dis.readInt()));
     }
 
     public class Stats {
 
-        float minx, maxx, miny, maxy, minz, maxz;
+        double minx, maxx, miny, maxy, minz, maxz;
 
-        Stats(float x, float y, float z) {
+        Stats(double x, double y, double z) {
             minx = maxx = x;
             miny = maxy = y;
             minz = maxz = z;
         }
 
-        void update(float x, float y, float z) {
+        void update(double x, double y, double z) {
             minx = Math.min(x, minx);
             maxx = Math.max(x, maxx);
             miny = Math.min(y, miny);

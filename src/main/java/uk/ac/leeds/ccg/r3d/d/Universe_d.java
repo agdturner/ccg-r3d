@@ -107,13 +107,13 @@ public class Universe_d {
      * @param rm The RoundingMode for any rounding.
      */
     public Universe_d(V3D_Environment_d env, Path path, V3D_Vector_d offset, Color color,
-            boolean assessTopology, double epsilon, boolean initNormal) throws IOException {
+            boolean assessTopology, double epsilon, double scale, boolean initNormal) throws IOException {
         this.env = env;
         points = new ArrayList<>();
         lines = new ArrayList<>();
         areas = new ArrayList<>();
         STL_Reader_d data = new STL_Reader_d(env, assessTopology);
-        data.readBinary(path, offset, initNormal);
+        data.readBinary(path, offset, scale, initNormal);
         V3D_Point_d p = data.triangles.get(0).area.pl.getP();
         double xmin = p.getX();
         double xmax = p.getX();
@@ -121,11 +121,11 @@ public class Universe_d {
         double ymax = p.getY();
         double zmin = p.getZ();
         double zmax = p.getZ();
-        for (Area_d t : data.triangles) {
-            t.color = color;
-            t.lightingColor = color;
-            areas.add(t);
-            for (var pt : t.area.getPoints().values()) {
+        for (Area_d a : data.triangles) {
+            a.color = color;
+            a.lightingColor = color;
+            areas.add(a);
+            for (var pt : a.area.getPoints().values()) {
                 double x = pt.getX();
                 double y = pt.getY();
                 double z = pt.getZ();
@@ -136,7 +136,7 @@ public class Universe_d {
                 zmin = Math.min(zmin, z);
                 zmax = Math.max(zmax, z);
             }
-            break;
+            //break;
         }
         aabb = new V3D_AABB_d(env, xmin, xmax, ymin, ymax, zmin, zmax);
         System.out.println(aabb.toString());
